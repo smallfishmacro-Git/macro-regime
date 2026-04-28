@@ -1,0 +1,3986 @@
+{
+  "meta": {
+    "generated_at": "2026-04-28T10:29:51.085348+00:00",
+    "z_window_years": 10,
+    "direction_lookback_weeks": 8,
+    "sources": {
+      "atlanta_fed": "fetched \u00b7 latest obs 2026-04-21",
+      "fred_wei": "fetched \u00b7 latest obs 2026-04-18",
+      "unctad": "manual \u00b7 latest obs 2026-04-22",
+      "recessionalert": "missing"
+    },
+    "signal_availability": {
+      "coincident": true,
+      "leading": false
+    }
+  },
+  "current": {
+    "regime": {
+      "level": "NORMAL",
+      "direction": "UNKNOWN"
+    },
+    "hedge_ratio": null,
+    "hedge_posture": "Insufficient leading data \u2014 direction unknown",
+    "gdpnow": 1.241,
+    "wei": 2.47,
+    "unctad_world": 2.61,
+    "wla": null,
+    "global_lei_8m": null,
+    "coinc_z": -0.0361,
+    "lead_z": 0.0
+  },
+  "gdpnow_components": [
+    {
+      "date": "2024-07-12",
+      "total": 2.0361,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-07-16",
+      "total": 2.4542,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-07-17",
+      "total": 2.7264,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-07-23",
+      "total": 2.6008,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-07-24",
+      "total": 2.6132,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-07-26",
+      "total": 2.8301,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-08-01",
+      "total": 2.5455,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-08-02",
+      "total": 2.9095,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-08-05",
+      "total": 2.9023,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-08-06",
+      "total": 2.8955,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-08-08",
+      "total": 2.9096,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-08-13",
+      "total": 2.8898,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-08-14",
+      "total": 2.8901,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-08-15",
+      "total": 2.4352,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-08-16",
+      "total": 1.9896,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-08-22",
+      "total": 1.9576,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-08-23",
+      "total": 1.9936,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-08-26",
+      "total": 1.9908,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-08-30",
+      "total": 2.5315,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-09-03",
+      "total": 2.0383,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-09-04",
+      "total": 2.0902,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-09-05",
+      "total": 1.9663,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-09-06",
+      "total": 2.4833,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-09-09",
+      "total": 2.4707,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-09-11",
+      "total": 2.4871,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-09-12",
+      "total": 2.5263,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-09-13",
+      "total": 2.57,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-09-17",
+      "total": 2.9931,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-09-18",
+      "total": 2.9296,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-09-19",
+      "total": 2.8711,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-09-25",
+      "total": 2.8065,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-09-27",
+      "total": 3.0773,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-10-01",
+      "total": 2.5384,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-10-03",
+      "total": 3.0831,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-10-04",
+      "total": 3.2973,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-10-08",
+      "total": 3.2304,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-10-09",
+      "total": 3.2155,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-10-10",
+      "total": 3.2185,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-10-11",
+      "total": 3.2217,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-10-16",
+      "total": 3.2354,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-10-17",
+      "total": 3.4177,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-10-18",
+      "total": 3.4299,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-10-23",
+      "total": 3.4198,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-10-24",
+      "total": 3.4602,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-10-25",
+      "total": 3.313,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-10-29",
+      "total": 2.789,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-10-31",
+      "total": 2.6617,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-11-01",
+      "total": 2.3218,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-11-04",
+      "total": 2.4366,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-11-05",
+      "total": 2.3816,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-11-07",
+      "total": 2.451,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-11-13",
+      "total": 2.4593,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-11-14",
+      "total": 2.4581,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-11-15",
+      "total": 2.53,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-11-19",
+      "total": 2.5797,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-11-21",
+      "total": 2.6031,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-11-26",
+      "total": 2.8043,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-11-27",
+      "total": 2.689,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-12-02",
+      "total": 3.1579,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-12-04",
+      "total": 3.0894,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-12-05",
+      "total": 3.2932,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-12-06",
+      "total": 3.3317,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-12-09",
+      "total": 3.3343,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-12-11",
+      "total": 3.3601,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-12-12",
+      "total": 3.3329,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-12-13",
+      "total": 3.2943,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-12-17",
+      "total": 3.1414,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-12-18",
+      "total": 3.1637,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-12-20",
+      "total": 3.0817,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-12-24",
+      "total": 3.091,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2024-12-27",
+      "total": 2.5431,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-01-02",
+      "total": 2.5865,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-01-03",
+      "total": 2.4492,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-01-06",
+      "total": 2.5584,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-01-07",
+      "total": 2.6802,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-01-09",
+      "total": 2.7256,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-01-10",
+      "total": 2.7217,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-01-14",
+      "total": 2.7729,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-01-15",
+      "total": 2.7766,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-01-16",
+      "total": 2.9626,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-01-17",
+      "total": 2.9942,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-01-24",
+      "total": 3.0063,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-01-27",
+      "total": 3.0127,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-01-28",
+      "total": 3.1779,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-01-29",
+      "total": 2.2711,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-01-31",
+      "total": 2.8898,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-02-03",
+      "total": 3.8788,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-02-04",
+      "total": 3.0422,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-02-05",
+      "total": 2.8861,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-02-07",
+      "total": 2.9416,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-02-12",
+      "total": 2.9436,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-02-13",
+      "total": 2.9457,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-02-14",
+      "total": 2.3409,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-02-19",
+      "total": 2.3388,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-02-21",
+      "total": 2.326,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-02-26",
+      "total": 2.321,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-02-28",
+      "total": -1.4767,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-03-03",
+      "total": -2.8247,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-03-04",
+      "total": -2.3304,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-03-05",
+      "total": -2.2842,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-03-06",
+      "total": -2.4068,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-03-07",
+      "total": -1.6114,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-03-12",
+      "total": -1.6062,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-03-13",
+      "total": -1.6015,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-03-17",
+      "total": -2.0563,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-03-18",
+      "total": -1.7579,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-03-20",
+      "total": -1.7005,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-03-25",
+      "total": -1.8517,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-03-26",
+      "total": -1.8056,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-03-28",
+      "total": -2.8041,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-04-01",
+      "total": -3.67,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-04-02",
+      "total": -3.0231,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-04-03",
+      "total": -2.8476,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-04-04",
+      "total": -2.4226,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-04-09",
+      "total": -2.4161,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-04-10",
+      "total": -2.418,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-04-11",
+      "total": -2.4283,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-04-15",
+      "total": -2.5934,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-04-16",
+      "total": -2.1652,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-04-17",
+      "total": -2.1973,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-04-23",
+      "total": -2.279,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-04-24",
+      "total": -2.506,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-04-29",
+      "total": -2.7318,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-04-30",
+      "total": 2.3644,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-05-01",
+      "total": 1.1059,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-05-02",
+      "total": 2.2015,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-05-05",
+      "total": 2.2015,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-05-06",
+      "total": 2.2354,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-05-08",
+      "total": 2.2577,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-05-12",
+      "total": 2.2424,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-05-13",
+      "total": 2.2397,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-05-15",
+      "total": 2.5307,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-05-16",
+      "total": 2.3544,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-05-19",
+      "total": 2.3675,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-05-22",
+      "total": 2.3317,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-05-23",
+      "total": 2.402,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-05-27",
+      "total": 2.1823,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-05-30",
+      "total": 3.8366,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-06-02",
+      "total": 4.6424,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-06-03",
+      "total": 4.6515,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-06-04",
+      "total": 3.503,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-06-05",
+      "total": 3.7947,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-06-06",
+      "total": 3.6942,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-06-09",
+      "total": 3.7693,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-06-11",
+      "total": 3.7342,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-06-12",
+      "total": 3.7413,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-06-17",
+      "total": 3.4689,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-06-18",
+      "total": 3.3989,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-06-23",
+      "total": 3.4055,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-06-25",
+      "total": 3.351,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-06-27",
+      "total": 2.8515,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-07-01",
+      "total": 2.5455,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-07-02",
+      "total": 2.4265,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-07-03",
+      "total": 2.6085,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-07-09",
+      "total": 2.5839,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-07-11",
+      "total": 2.5492,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-07-15",
+      "total": 2.5431,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-07-16",
+      "total": 2.6647,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-07-17",
+      "total": 2.3932,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-07-18",
+      "total": 2.3645,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-07-23",
+      "total": 2.3489,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-07-24",
+      "total": 2.3651,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-07-25",
+      "total": 2.3787,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-07-29",
+      "total": 2.902,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-07-31",
+      "total": 2.3373,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-08-01",
+      "total": 2.1464,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-08-04",
+      "total": 2.4612,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-08-05",
+      "total": 2.4562,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-08-07",
+      "total": 2.5257,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-08-12",
+      "total": 2.5226,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-08-14",
+      "total": 2.5184,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-08-15",
+      "total": 2.5488,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-08-19",
+      "total": 2.2636,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-08-21",
+      "total": 2.2478,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-08-25",
+      "total": 2.1659,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-08-26",
+      "total": 2.1766,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-08-29",
+      "total": 3.4705,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-09-02",
+      "total": 3.0399,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-09-03",
+      "total": 3.0446,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-09-04",
+      "total": 2.9983,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-09-05",
+      "total": 3.0917,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-09-10",
+      "total": 3.0883,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-09-11",
+      "total": 3.1133,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-09-16",
+      "total": 3.4132,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-09-17",
+      "total": 3.3358,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-09-24",
+      "total": 3.4057,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-09-26",
+      "total": 3.8989,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-10-01",
+      "total": 3.8416,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-10-03",
+      "total": 3.7656,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-10-16",
+      "total": 3.8908,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-10-23",
+      "total": 3.9369,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-10-24",
+      "total": 3.9264,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-11-03",
+      "total": 3.9894,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-11-05",
+      "total": 3.9773,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-11-17",
+      "total": 4.0548,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-11-18",
+      "total": 4.0445,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-11-19",
+      "total": 4.2293,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-11-20",
+      "total": 4.1656,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-11-21",
+      "total": 4.2218,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-11-24",
+      "total": 4.2176,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-11-25",
+      "total": 4.0229,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-11-26",
+      "total": 3.8556,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-12-01",
+      "total": 3.8527,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-12-03",
+      "total": 3.845,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-12-04",
+      "total": 3.8102,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-12-05",
+      "total": 3.5283,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-12-11",
+      "total": 3.5705,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-12-16",
+      "total": 3.4728,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2025-12-23",
+      "total": 2.9721,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2026-01-05",
+      "total": 2.6786,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2026-01-06",
+      "total": 2.8747,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2026-01-07",
+      "total": 2.9031,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2026-01-08",
+      "total": 5.4478,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2026-01-09",
+      "total": 5.1308,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2026-01-13",
+      "total": 5.1099,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2026-01-14",
+      "total": 5.2962,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2026-01-15",
+      "total": 5.1926,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2026-01-16",
+      "total": 5.2741,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2026-01-21",
+      "total": 5.4067,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2026-01-22",
+      "total": 5.3721,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2026-01-26",
+      "total": 5.3988,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2026-01-29",
+      "total": 4.2373,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2026-01-30",
+      "total": 4.2319,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2026-02-02",
+      "total": 4.2235,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2026-02-04",
+      "total": 4.1824,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2026-02-10",
+      "total": 3.6753,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2026-02-11",
+      "total": 3.6765,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2026-02-12",
+      "total": 3.6423,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2026-02-13",
+      "total": 3.6403,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2026-02-18",
+      "total": 3.5893,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2026-02-19",
+      "total": 2.999,
+      "pceGoods": null,
+      "pceServices": null,
+      "fixedInv": null,
+      "govt": null,
+      "netExports": null,
+      "inventories": null
+    },
+    {
+      "date": "2026-02-20",
+      "total": 3.1261,
+      "pceGoods": 0.3363,
+      "pceServices": 1.6029,
+      "fixedInv": 0.6624,
+      "govt": 0.2746,
+      "netExports": -0.5132,
+      "inventories": 0.7632
+    },
+    {
+      "date": "2026-02-23",
+      "total": 3.142,
+      "pceGoods": 0.3018,
+      "pceServices": 1.6029,
+      "fixedInv": 0.7146,
+      "govt": 0.2746,
+      "netExports": -0.5131,
+      "inventories": 0.7613
+    },
+    {
+      "date": "2026-02-24",
+      "total": 3.1361,
+      "pceGoods": 0.3064,
+      "pceServices": 1.6057,
+      "fixedInv": 0.7185,
+      "govt": 0.2745,
+      "netExports": -0.5142,
+      "inventories": 0.7451
+    },
+    {
+      "date": "2026-02-27",
+      "total": 3.0321,
+      "pceGoods": 0.3068,
+      "pceServices": 1.6053,
+      "fixedInv": 0.6297,
+      "govt": 0.2599,
+      "netExports": -0.5139,
+      "inventories": 0.7444
+    },
+    {
+      "date": "2026-03-02",
+      "total": 3.0172,
+      "pceGoods": 0.295,
+      "pceServices": 1.6004,
+      "fixedInv": 0.6226,
+      "govt": 0.2596,
+      "netExports": -0.514,
+      "inventories": 0.7536
+    },
+    {
+      "date": "2026-03-04",
+      "total": 3.2068,
+      "pceGoods": 0.4017,
+      "pceServices": 1.6305,
+      "fixedInv": 0.6734,
+      "govt": 0.2612,
+      "netExports": -0.5189,
+      "inventories": 0.759
+    },
+    {
+      "date": "2026-03-05",
+      "total": 3.1821,
+      "pceGoods": 0.3926,
+      "pceServices": 1.6251,
+      "fixedInv": 0.6677,
+      "govt": 0.2609,
+      "netExports": -0.5228,
+      "inventories": 0.7586
+    },
+    {
+      "date": "2026-03-06",
+      "total": 2.1227,
+      "pceGoods": -0.1614,
+      "pceServices": 1.3591,
+      "fixedInv": 0.5054,
+      "govt": 0.2527,
+      "netExports": -0.5001,
+      "inventories": 0.6671
+    },
+    {
+      "date": "2026-03-10",
+      "total": 2.1556,
+      "pceGoods": -0.1593,
+      "pceServices": 1.3615,
+      "fixedInv": 0.534,
+      "govt": 0.2528,
+      "netExports": -0.5006,
+      "inventories": 0.6671
+    },
+    {
+      "date": "2026-03-11",
+      "total": 2.2065,
+      "pceGoods": -0.1588,
+      "pceServices": 1.3622,
+      "fixedInv": 0.5355,
+      "govt": 0.3022,
+      "netExports": -0.5008,
+      "inventories": 0.6661
+    },
+    {
+      "date": "2026-03-12",
+      "total": 2.7429,
+      "pceGoods": -0.1612,
+      "pceServices": 1.3947,
+      "fixedInv": 0.8624,
+      "govt": 0.303,
+      "netExports": -0.3234,
+      "inventories": 0.6674
+    },
+    {
+      "date": "2026-03-13",
+      "total": 2.6979,
+      "pceGoods": -0.0265,
+      "pceServices": 1.271,
+      "fixedInv": 0.8258,
+      "govt": 0.2832,
+      "netExports": -0.3241,
+      "inventories": 0.6685
+    },
+    {
+      "date": "2026-03-16",
+      "total": 2.8368,
+      "pceGoods": -0.0067,
+      "pceServices": 1.3144,
+      "fixedInv": 0.8548,
+      "govt": 0.2844,
+      "netExports": -0.3389,
+      "inventories": 0.7286
+    },
+    {
+      "date": "2026-03-18",
+      "total": 2.8114,
+      "pceGoods": -0.0063,
+      "pceServices": 1.3145,
+      "fixedInv": 0.8479,
+      "govt": 0.2844,
+      "netExports": -0.3385,
+      "inventories": 0.7095
+    },
+    {
+      "date": "2026-03-19",
+      "total": 2.3264,
+      "pceGoods": -0.0058,
+      "pceServices": 1.3134,
+      "fixedInv": 0.5386,
+      "govt": 0.2841,
+      "netExports": -0.3367,
+      "inventories": 0.5328
+    },
+    {
+      "date": "2026-03-23",
+      "total": 1.9991,
+      "pceGoods": -0.0056,
+      "pceServices": 1.3121,
+      "fixedInv": 0.2206,
+      "govt": 0.2752,
+      "netExports": -0.3355,
+      "inventories": 0.5321
+    },
+    {
+      "date": "2026-03-25",
+      "total": 2.1212,
+      "pceGoods": -0.0055,
+      "pceServices": 1.3128,
+      "fixedInv": 0.2207,
+      "govt": 0.2753,
+      "netExports": -0.2124,
+      "inventories": 0.5302
+    },
+    {
+      "date": "2026-04-01",
+      "total": 1.9453,
+      "pceGoods": -0.2861,
+      "pceServices": 1.3264,
+      "fixedInv": 0.2916,
+      "govt": 0.2755,
+      "netExports": -0.2251,
+      "inventories": 0.563
+    },
+    {
+      "date": "2026-04-02",
+      "total": 1.6373,
+      "pceGoods": -0.2758,
+      "pceServices": 1.2545,
+      "fixedInv": 0.5829,
+      "govt": 0.2752,
+      "netExports": -0.762,
+      "inventories": 0.5624
+    },
+    {
+      "date": "2026-04-03",
+      "total": 1.4378,
+      "pceGoods": -0.3421,
+      "pceServices": 1.2178,
+      "fixedInv": 0.535,
+      "govt": 0.2411,
+      "netExports": -0.7471,
+      "inventories": 0.533
+    },
+    {
+      "date": "2026-04-06",
+      "total": 1.4361,
+      "pceGoods": -0.3432,
+      "pceServices": 1.2175,
+      "fixedInv": 0.5348,
+      "govt": 0.2411,
+      "netExports": -0.7471,
+      "inventories": 0.533
+    },
+    {
+      "date": "2026-04-07",
+      "total": 1.3205,
+      "pceGoods": -0.3432,
+      "pceServices": 1.2182,
+      "fixedInv": 0.5347,
+      "govt": 0.2411,
+      "netExports": -0.7483,
+      "inventories": 0.418
+    },
+    {
+      "date": "2026-04-09",
+      "total": 1.3078,
+      "pceGoods": -0.4251,
+      "pceServices": 1.154,
+      "fixedInv": 0.5919,
+      "govt": 0.2464,
+      "netExports": -0.75,
+      "inventories": 0.4905
+    },
+    {
+      "date": "2026-04-10",
+      "total": 1.2284,
+      "pceGoods": -0.4242,
+      "pceServices": 1.1541,
+      "fixedInv": 0.5974,
+      "govt": 0.1943,
+      "netExports": -0.7503,
+      "inventories": 0.4572
+    },
+    {
+      "date": "2026-04-13",
+      "total": 1.2022,
+      "pceGoods": -0.4259,
+      "pceServices": 1.1529,
+      "fixedInv": 0.5738,
+      "govt": 0.1942,
+      "netExports": -0.7499,
+      "inventories": 0.4571
+    },
+    {
+      "date": "2026-04-14",
+      "total": 1.2035,
+      "pceGoods": -0.4255,
+      "pceServices": 1.1532,
+      "fixedInv": 0.5891,
+      "govt": 0.1935,
+      "netExports": -0.7501,
+      "inventories": 0.4433
+    },
+    {
+      "date": "2026-04-15",
+      "total": 1.0906,
+      "pceGoods": -0.4253,
+      "pceServices": 1.1527,
+      "fixedInv": 0.589,
+      "govt": 0.1934,
+      "netExports": -0.866,
+      "inventories": 0.4468
+    },
+    {
+      "date": "2026-04-16",
+      "total": 0.9456,
+      "pceGoods": -0.453,
+      "pceServices": 1.0975,
+      "fixedInv": 0.5779,
+      "govt": 0.1913,
+      "netExports": -0.8666,
+      "inventories": 0.3985
+    },
+    {
+      "date": "2026-04-21",
+      "total": 1.241,
+      "pceGoods": -0.1223,
+      "pceServices": 1.0727,
+      "fixedInv": 0.5939,
+      "govt": 0.1918,
+      "netExports": -0.8702,
+      "inventories": 0.375
+    }
+  ],
+  "composite_z": [
+    {
+      "date": "2021-02-26",
+      "coinc_z": -0.3875,
+      "lead_z": null
+    },
+    {
+      "date": "2021-03-05",
+      "coinc_z": -0.1169,
+      "lead_z": null
+    },
+    {
+      "date": "2021-03-12",
+      "coinc_z": 0.1238,
+      "lead_z": null
+    },
+    {
+      "date": "2021-03-19",
+      "coinc_z": 0.0467,
+      "lead_z": null
+    },
+    {
+      "date": "2021-03-26",
+      "coinc_z": 0.7261,
+      "lead_z": null
+    },
+    {
+      "date": "2021-04-02",
+      "coinc_z": 1.5588,
+      "lead_z": null
+    },
+    {
+      "date": "2021-04-09",
+      "coinc_z": 1.9827,
+      "lead_z": null
+    },
+    {
+      "date": "2021-04-16",
+      "coinc_z": 2.5936,
+      "lead_z": null
+    },
+    {
+      "date": "2021-04-23",
+      "coinc_z": 2.5298,
+      "lead_z": null
+    },
+    {
+      "date": "2021-04-30",
+      "coinc_z": 2.674,
+      "lead_z": null
+    },
+    {
+      "date": "2021-05-07",
+      "coinc_z": 2.6627,
+      "lead_z": null
+    },
+    {
+      "date": "2021-05-14",
+      "coinc_z": 2.4192,
+      "lead_z": null
+    },
+    {
+      "date": "2021-05-21",
+      "coinc_z": 2.3443,
+      "lead_z": null
+    },
+    {
+      "date": "2021-05-28",
+      "coinc_z": 2.2731,
+      "lead_z": null
+    },
+    {
+      "date": "2021-06-04",
+      "coinc_z": 2.2583,
+      "lead_z": null
+    },
+    {
+      "date": "2021-06-11",
+      "coinc_z": 1.8523,
+      "lead_z": null
+    },
+    {
+      "date": "2021-06-18",
+      "coinc_z": 2.073,
+      "lead_z": null
+    },
+    {
+      "date": "2021-06-25",
+      "coinc_z": 1.8784,
+      "lead_z": null
+    },
+    {
+      "date": "2021-07-02",
+      "coinc_z": 1.7371,
+      "lead_z": null
+    },
+    {
+      "date": "2021-07-09",
+      "coinc_z": 1.8067,
+      "lead_z": null
+    },
+    {
+      "date": "2021-07-16",
+      "coinc_z": 1.3687,
+      "lead_z": null
+    },
+    {
+      "date": "2021-07-23",
+      "coinc_z": 1.5034,
+      "lead_z": null
+    },
+    {
+      "date": "2021-07-30",
+      "coinc_z": 1.3952,
+      "lead_z": null
+    },
+    {
+      "date": "2021-08-06",
+      "coinc_z": 1.3715,
+      "lead_z": null
+    },
+    {
+      "date": "2021-08-13",
+      "coinc_z": 1.2322,
+      "lead_z": null
+    },
+    {
+      "date": "2021-08-20",
+      "coinc_z": 1.3201,
+      "lead_z": null
+    },
+    {
+      "date": "2021-08-27",
+      "coinc_z": 1.1154,
+      "lead_z": null
+    },
+    {
+      "date": "2021-09-03",
+      "coinc_z": 1.1786,
+      "lead_z": null
+    },
+    {
+      "date": "2021-09-10",
+      "coinc_z": 1.1015,
+      "lead_z": null
+    },
+    {
+      "date": "2021-09-17",
+      "coinc_z": 1.0991,
+      "lead_z": null
+    },
+    {
+      "date": "2021-09-24",
+      "coinc_z": 1.0526,
+      "lead_z": null
+    },
+    {
+      "date": "2021-10-01",
+      "coinc_z": 0.9832,
+      "lead_z": null
+    },
+    {
+      "date": "2021-10-08",
+      "coinc_z": 0.9339,
+      "lead_z": null
+    },
+    {
+      "date": "2021-10-15",
+      "coinc_z": 0.8004,
+      "lead_z": null
+    },
+    {
+      "date": "2021-10-22",
+      "coinc_z": 0.8497,
+      "lead_z": null
+    },
+    {
+      "date": "2021-10-29",
+      "coinc_z": 0.9653,
+      "lead_z": null
+    },
+    {
+      "date": "2021-11-05",
+      "coinc_z": 1.1303,
+      "lead_z": null
+    },
+    {
+      "date": "2021-11-12",
+      "coinc_z": 1.0136,
+      "lead_z": null
+    },
+    {
+      "date": "2021-11-19",
+      "coinc_z": 1.0115,
+      "lead_z": null
+    },
+    {
+      "date": "2021-11-26",
+      "coinc_z": 1.113,
+      "lead_z": null
+    },
+    {
+      "date": "2021-12-03",
+      "coinc_z": 1.2478,
+      "lead_z": null
+    },
+    {
+      "date": "2021-12-10",
+      "coinc_z": 1.085,
+      "lead_z": null
+    },
+    {
+      "date": "2021-12-17",
+      "coinc_z": 1.1006,
+      "lead_z": null
+    },
+    {
+      "date": "2021-12-24",
+      "coinc_z": 0.9685,
+      "lead_z": null
+    },
+    {
+      "date": "2021-12-31",
+      "coinc_z": 1.1273,
+      "lead_z": null
+    },
+    {
+      "date": "2022-01-07",
+      "coinc_z": 0.9264,
+      "lead_z": null
+    },
+    {
+      "date": "2022-01-14",
+      "coinc_z": 0.6397,
+      "lead_z": null
+    },
+    {
+      "date": "2022-01-21",
+      "coinc_z": 0.7094,
+      "lead_z": null
+    },
+    {
+      "date": "2022-01-28",
+      "coinc_z": 0.4612,
+      "lead_z": null
+    },
+    {
+      "date": "2022-02-04",
+      "coinc_z": 0.5813,
+      "lead_z": null
+    },
+    {
+      "date": "2022-02-11",
+      "coinc_z": 0.5273,
+      "lead_z": null
+    },
+    {
+      "date": "2022-02-18",
+      "coinc_z": 0.5563,
+      "lead_z": null
+    },
+    {
+      "date": "2022-02-25",
+      "coinc_z": 0.726,
+      "lead_z": null
+    },
+    {
+      "date": "2022-03-04",
+      "coinc_z": 0.4676,
+      "lead_z": null
+    },
+    {
+      "date": "2022-03-11",
+      "coinc_z": 0.4167,
+      "lead_z": null
+    },
+    {
+      "date": "2022-03-18",
+      "coinc_z": 0.434,
+      "lead_z": null
+    },
+    {
+      "date": "2022-03-25",
+      "coinc_z": 0.4617,
+      "lead_z": null
+    },
+    {
+      "date": "2022-04-01",
+      "coinc_z": 0.3975,
+      "lead_z": null
+    },
+    {
+      "date": "2022-04-08",
+      "coinc_z": 0.4286,
+      "lead_z": null
+    },
+    {
+      "date": "2022-04-15",
+      "coinc_z": 0.3838,
+      "lead_z": null
+    },
+    {
+      "date": "2022-04-22",
+      "coinc_z": 0.385,
+      "lead_z": null
+    },
+    {
+      "date": "2022-04-29",
+      "coinc_z": 0.4002,
+      "lead_z": null
+    },
+    {
+      "date": "2022-05-06",
+      "coinc_z": 0.4284,
+      "lead_z": null
+    },
+    {
+      "date": "2022-05-13",
+      "coinc_z": 0.4012,
+      "lead_z": null
+    },
+    {
+      "date": "2022-05-20",
+      "coinc_z": 0.3985,
+      "lead_z": null
+    },
+    {
+      "date": "2022-05-27",
+      "coinc_z": 0.2576,
+      "lead_z": null
+    },
+    {
+      "date": "2022-06-03",
+      "coinc_z": 0.199,
+      "lead_z": null
+    },
+    {
+      "date": "2022-06-10",
+      "coinc_z": 0.2508,
+      "lead_z": null
+    },
+    {
+      "date": "2022-06-17",
+      "coinc_z": 0.019,
+      "lead_z": null
+    },
+    {
+      "date": "2022-06-24",
+      "coinc_z": 0.1049,
+      "lead_z": null
+    },
+    {
+      "date": "2022-07-01",
+      "coinc_z": -0.073,
+      "lead_z": null
+    },
+    {
+      "date": "2022-07-08",
+      "coinc_z": 0.0553,
+      "lead_z": null
+    },
+    {
+      "date": "2022-07-15",
+      "coinc_z": -0.0655,
+      "lead_z": null
+    },
+    {
+      "date": "2022-07-22",
+      "coinc_z": -0.0081,
+      "lead_z": null
+    },
+    {
+      "date": "2022-07-29",
+      "coinc_z": 0.2188,
+      "lead_z": null
+    },
+    {
+      "date": "2022-08-05",
+      "coinc_z": 0.1967,
+      "lead_z": null
+    },
+    {
+      "date": "2022-08-12",
+      "coinc_z": 0.2448,
+      "lead_z": null
+    },
+    {
+      "date": "2022-08-19",
+      "coinc_z": 0.1562,
+      "lead_z": null
+    },
+    {
+      "date": "2022-08-26",
+      "coinc_z": 0.1354,
+      "lead_z": null
+    },
+    {
+      "date": "2022-09-02",
+      "coinc_z": 0.0669,
+      "lead_z": null
+    },
+    {
+      "date": "2022-09-09",
+      "coinc_z": 0.1104,
+      "lead_z": null
+    },
+    {
+      "date": "2022-09-16",
+      "coinc_z": 0.0268,
+      "lead_z": null
+    },
+    {
+      "date": "2022-09-23",
+      "coinc_z": -0.1362,
+      "lead_z": null
+    },
+    {
+      "date": "2022-09-30",
+      "coinc_z": 0.152,
+      "lead_z": null
+    },
+    {
+      "date": "2022-10-07",
+      "coinc_z": 0.0848,
+      "lead_z": null
+    },
+    {
+      "date": "2022-10-14",
+      "coinc_z": 0.0096,
+      "lead_z": null
+    },
+    {
+      "date": "2022-10-21",
+      "coinc_z": 0.0153,
+      "lead_z": null
+    },
+    {
+      "date": "2022-10-28",
+      "coinc_z": 0.096,
+      "lead_z": null
+    },
+    {
+      "date": "2022-11-04",
+      "coinc_z": 0.1438,
+      "lead_z": null
+    },
+    {
+      "date": "2022-11-11",
+      "coinc_z": 0.11,
+      "lead_z": null
+    },
+    {
+      "date": "2022-11-18",
+      "coinc_z": 0.0365,
+      "lead_z": null
+    },
+    {
+      "date": "2022-11-25",
+      "coinc_z": -0.0238,
+      "lead_z": null
+    },
+    {
+      "date": "2022-12-02",
+      "coinc_z": -0.0088,
+      "lead_z": null
+    },
+    {
+      "date": "2022-12-09",
+      "coinc_z": -0.0977,
+      "lead_z": null
+    },
+    {
+      "date": "2022-12-16",
+      "coinc_z": -0.2268,
+      "lead_z": null
+    },
+    {
+      "date": "2022-12-23",
+      "coinc_z": -0.0243,
+      "lead_z": null
+    },
+    {
+      "date": "2022-12-30",
+      "coinc_z": 0.0531,
+      "lead_z": null
+    },
+    {
+      "date": "2023-01-06",
+      "coinc_z": -0.0113,
+      "lead_z": null
+    },
+    {
+      "date": "2023-01-13",
+      "coinc_z": -0.1171,
+      "lead_z": null
+    },
+    {
+      "date": "2023-01-20",
+      "coinc_z": -0.1191,
+      "lead_z": null
+    },
+    {
+      "date": "2023-01-27",
+      "coinc_z": -0.3054,
+      "lead_z": null
+    },
+    {
+      "date": "2023-02-03",
+      "coinc_z": -0.1723,
+      "lead_z": null
+    },
+    {
+      "date": "2023-02-10",
+      "coinc_z": -0.1971,
+      "lead_z": null
+    },
+    {
+      "date": "2023-02-17",
+      "coinc_z": -0.1959,
+      "lead_z": null
+    },
+    {
+      "date": "2023-02-24",
+      "coinc_z": -0.1529,
+      "lead_z": null
+    },
+    {
+      "date": "2023-03-03",
+      "coinc_z": -0.1879,
+      "lead_z": null
+    },
+    {
+      "date": "2023-03-10",
+      "coinc_z": -0.2175,
+      "lead_z": null
+    },
+    {
+      "date": "2023-03-17",
+      "coinc_z": -0.1499,
+      "lead_z": null
+    },
+    {
+      "date": "2023-03-24",
+      "coinc_z": -0.1344,
+      "lead_z": null
+    },
+    {
+      "date": "2023-03-31",
+      "coinc_z": -0.1039,
+      "lead_z": null
+    },
+    {
+      "date": "2023-04-07",
+      "coinc_z": -0.0865,
+      "lead_z": null
+    },
+    {
+      "date": "2023-04-14",
+      "coinc_z": -0.1915,
+      "lead_z": null
+    },
+    {
+      "date": "2023-04-21",
+      "coinc_z": -0.2249,
+      "lead_z": null
+    },
+    {
+      "date": "2023-04-28",
+      "coinc_z": -0.2172,
+      "lead_z": null
+    },
+    {
+      "date": "2023-05-05",
+      "coinc_z": -0.1994,
+      "lead_z": null
+    },
+    {
+      "date": "2023-05-12",
+      "coinc_z": -0.1666,
+      "lead_z": null
+    },
+    {
+      "date": "2023-05-19",
+      "coinc_z": -0.2124,
+      "lead_z": null
+    },
+    {
+      "date": "2023-05-26",
+      "coinc_z": -0.2025,
+      "lead_z": null
+    },
+    {
+      "date": "2023-06-02",
+      "coinc_z": -0.2195,
+      "lead_z": null
+    },
+    {
+      "date": "2023-06-09",
+      "coinc_z": -0.2231,
+      "lead_z": null
+    },
+    {
+      "date": "2023-06-16",
+      "coinc_z": -0.2474,
+      "lead_z": null
+    },
+    {
+      "date": "2023-06-23",
+      "coinc_z": -0.1942,
+      "lead_z": null
+    },
+    {
+      "date": "2023-06-30",
+      "coinc_z": -0.1612,
+      "lead_z": null
+    },
+    {
+      "date": "2023-07-07",
+      "coinc_z": -0.1813,
+      "lead_z": null
+    },
+    {
+      "date": "2023-07-14",
+      "coinc_z": -0.1622,
+      "lead_z": null
+    },
+    {
+      "date": "2023-07-21",
+      "coinc_z": -0.1225,
+      "lead_z": null
+    },
+    {
+      "date": "2023-07-28",
+      "coinc_z": -0.1203,
+      "lead_z": null
+    },
+    {
+      "date": "2023-08-04",
+      "coinc_z": 0.0194,
+      "lead_z": null
+    },
+    {
+      "date": "2023-08-11",
+      "coinc_z": -0.0405,
+      "lead_z": null
+    },
+    {
+      "date": "2023-08-18",
+      "coinc_z": -0.0097,
+      "lead_z": null
+    },
+    {
+      "date": "2023-08-25",
+      "coinc_z": 0.1378,
+      "lead_z": null
+    },
+    {
+      "date": "2023-09-01",
+      "coinc_z": 0.1364,
+      "lead_z": null
+    },
+    {
+      "date": "2023-09-08",
+      "coinc_z": 0.1144,
+      "lead_z": null
+    },
+    {
+      "date": "2023-09-15",
+      "coinc_z": 0.1086,
+      "lead_z": null
+    },
+    {
+      "date": "2023-09-22",
+      "coinc_z": 0.1696,
+      "lead_z": null
+    },
+    {
+      "date": "2023-09-29",
+      "coinc_z": 0.0349,
+      "lead_z": null
+    },
+    {
+      "date": "2023-10-06",
+      "coinc_z": 0.0708,
+      "lead_z": null
+    },
+    {
+      "date": "2023-10-13",
+      "coinc_z": 0.1384,
+      "lead_z": null
+    },
+    {
+      "date": "2023-10-20",
+      "coinc_z": 0.143,
+      "lead_z": null
+    },
+    {
+      "date": "2023-10-27",
+      "coinc_z": -0.0272,
+      "lead_z": null
+    },
+    {
+      "date": "2023-11-03",
+      "coinc_z": -0.0631,
+      "lead_z": null
+    },
+    {
+      "date": "2023-11-10",
+      "coinc_z": -0.0544,
+      "lead_z": null
+    },
+    {
+      "date": "2023-11-17",
+      "coinc_z": -0.0451,
+      "lead_z": null
+    },
+    {
+      "date": "2023-11-24",
+      "coinc_z": -0.0614,
+      "lead_z": null
+    },
+    {
+      "date": "2023-12-01",
+      "coinc_z": -0.1373,
+      "lead_z": null
+    },
+    {
+      "date": "2023-12-08",
+      "coinc_z": 0.0031,
+      "lead_z": null
+    },
+    {
+      "date": "2023-12-15",
+      "coinc_z": -0.004,
+      "lead_z": null
+    },
+    {
+      "date": "2023-12-22",
+      "coinc_z": -0.0472,
+      "lead_z": null
+    },
+    {
+      "date": "2023-12-29",
+      "coinc_z": 0.0204,
+      "lead_z": null
+    },
+    {
+      "date": "2024-01-05",
+      "coinc_z": -0.0499,
+      "lead_z": null
+    },
+    {
+      "date": "2024-01-12",
+      "coinc_z": 0.045,
+      "lead_z": null
+    },
+    {
+      "date": "2024-01-19",
+      "coinc_z": -0.0807,
+      "lead_z": null
+    },
+    {
+      "date": "2024-01-26",
+      "coinc_z": -0.1116,
+      "lead_z": null
+    },
+    {
+      "date": "2024-02-02",
+      "coinc_z": -0.0862,
+      "lead_z": null
+    },
+    {
+      "date": "2024-02-09",
+      "coinc_z": 0.0396,
+      "lead_z": null
+    },
+    {
+      "date": "2024-02-16",
+      "coinc_z": -0.114,
+      "lead_z": null
+    },
+    {
+      "date": "2024-02-23",
+      "coinc_z": -0.0936,
+      "lead_z": null
+    },
+    {
+      "date": "2024-03-01",
+      "coinc_z": -0.1155,
+      "lead_z": null
+    },
+    {
+      "date": "2024-03-08",
+      "coinc_z": 0.0357,
+      "lead_z": null
+    },
+    {
+      "date": "2024-03-15",
+      "coinc_z": -0.1181,
+      "lead_z": null
+    },
+    {
+      "date": "2024-03-22",
+      "coinc_z": -0.1268,
+      "lead_z": null
+    },
+    {
+      "date": "2024-03-29",
+      "coinc_z": -0.0853,
+      "lead_z": null
+    },
+    {
+      "date": "2024-04-05",
+      "coinc_z": -0.0737,
+      "lead_z": null
+    },
+    {
+      "date": "2024-04-12",
+      "coinc_z": -0.0918,
+      "lead_z": null
+    },
+    {
+      "date": "2024-04-19",
+      "coinc_z": -0.041,
+      "lead_z": null
+    },
+    {
+      "date": "2024-04-26",
+      "coinc_z": -0.009,
+      "lead_z": null
+    },
+    {
+      "date": "2024-05-03",
+      "coinc_z": 0.0191,
+      "lead_z": null
+    },
+    {
+      "date": "2024-05-10",
+      "coinc_z": -0.0396,
+      "lead_z": null
+    },
+    {
+      "date": "2024-05-17",
+      "coinc_z": 0.0329,
+      "lead_z": null
+    },
+    {
+      "date": "2024-05-24",
+      "coinc_z": -0.0055,
+      "lead_z": null
+    },
+    {
+      "date": "2024-05-31",
+      "coinc_z": 0.0737,
+      "lead_z": null
+    },
+    {
+      "date": "2024-06-07",
+      "coinc_z": 0.0079,
+      "lead_z": null
+    },
+    {
+      "date": "2024-06-14",
+      "coinc_z": 0.0795,
+      "lead_z": null
+    },
+    {
+      "date": "2024-06-21",
+      "coinc_z": 0.0384,
+      "lead_z": null
+    },
+    {
+      "date": "2024-06-28",
+      "coinc_z": -0.0193,
+      "lead_z": null
+    },
+    {
+      "date": "2024-07-05",
+      "coinc_z": 0.0094,
+      "lead_z": null
+    },
+    {
+      "date": "2024-07-12",
+      "coinc_z": 0.0706,
+      "lead_z": null
+    },
+    {
+      "date": "2024-07-19",
+      "coinc_z": -0.0587,
+      "lead_z": null
+    },
+    {
+      "date": "2024-07-26",
+      "coinc_z": -0.018,
+      "lead_z": null
+    },
+    {
+      "date": "2024-08-02",
+      "coinc_z": -0.0712,
+      "lead_z": null
+    },
+    {
+      "date": "2024-08-09",
+      "coinc_z": -0.0427,
+      "lead_z": null
+    },
+    {
+      "date": "2024-08-16",
+      "coinc_z": -0.0656,
+      "lead_z": null
+    },
+    {
+      "date": "2024-08-23",
+      "coinc_z": -0.0589,
+      "lead_z": null
+    },
+    {
+      "date": "2024-08-30",
+      "coinc_z": -0.0363,
+      "lead_z": null
+    },
+    {
+      "date": "2024-09-06",
+      "coinc_z": 0.0354,
+      "lead_z": null
+    },
+    {
+      "date": "2024-09-13",
+      "coinc_z": -0.0275,
+      "lead_z": null
+    },
+    {
+      "date": "2024-09-20",
+      "coinc_z": -0.0031,
+      "lead_z": null
+    },
+    {
+      "date": "2024-09-27",
+      "coinc_z": 0.0819,
+      "lead_z": null
+    },
+    {
+      "date": "2024-10-04",
+      "coinc_z": 0.0309,
+      "lead_z": null
+    },
+    {
+      "date": "2024-10-11",
+      "coinc_z": 0.0567,
+      "lead_z": null
+    },
+    {
+      "date": "2024-10-18",
+      "coinc_z": 0.0109,
+      "lead_z": null
+    },
+    {
+      "date": "2024-10-25",
+      "coinc_z": -0.0402,
+      "lead_z": null
+    },
+    {
+      "date": "2024-11-01",
+      "coinc_z": -0.019,
+      "lead_z": null
+    },
+    {
+      "date": "2024-11-08",
+      "coinc_z": -0.1056,
+      "lead_z": null
+    },
+    {
+      "date": "2024-11-15",
+      "coinc_z": -0.02,
+      "lead_z": null
+    },
+    {
+      "date": "2024-11-22",
+      "coinc_z": -0.0495,
+      "lead_z": null
+    },
+    {
+      "date": "2024-11-29",
+      "coinc_z": 0.2213,
+      "lead_z": null
+    },
+    {
+      "date": "2024-12-06",
+      "coinc_z": -0.0376,
+      "lead_z": null
+    },
+    {
+      "date": "2024-12-13",
+      "coinc_z": 0.0511,
+      "lead_z": null
+    },
+    {
+      "date": "2024-12-20",
+      "coinc_z": 0.1614,
+      "lead_z": null
+    },
+    {
+      "date": "2024-12-27",
+      "coinc_z": 0.0667,
+      "lead_z": null
+    },
+    {
+      "date": "2025-01-03",
+      "coinc_z": 0.1076,
+      "lead_z": null
+    },
+    {
+      "date": "2025-01-10",
+      "coinc_z": -0.0226,
+      "lead_z": null
+    },
+    {
+      "date": "2025-01-17",
+      "coinc_z": 0.0544,
+      "lead_z": null
+    },
+    {
+      "date": "2025-01-24",
+      "coinc_z": 0.1597,
+      "lead_z": null
+    },
+    {
+      "date": "2025-01-31",
+      "coinc_z": 0.1505,
+      "lead_z": null
+    },
+    {
+      "date": "2025-02-07",
+      "coinc_z": 0.0752,
+      "lead_z": null
+    },
+    {
+      "date": "2025-02-14",
+      "coinc_z": 0.0693,
+      "lead_z": null
+    },
+    {
+      "date": "2025-02-21",
+      "coinc_z": 0.0601,
+      "lead_z": null
+    },
+    {
+      "date": "2025-02-28",
+      "coinc_z": -0.1844,
+      "lead_z": null
+    },
+    {
+      "date": "2025-03-07",
+      "coinc_z": -0.2265,
+      "lead_z": null
+    },
+    {
+      "date": "2025-03-14",
+      "coinc_z": -0.1553,
+      "lead_z": null
+    },
+    {
+      "date": "2025-03-21",
+      "coinc_z": -0.2153,
+      "lead_z": null
+    },
+    {
+      "date": "2025-03-28",
+      "coinc_z": -0.3315,
+      "lead_z": null
+    },
+    {
+      "date": "2025-04-04",
+      "coinc_z": -0.268,
+      "lead_z": null
+    },
+    {
+      "date": "2025-04-11",
+      "coinc_z": -0.1091,
+      "lead_z": null
+    },
+    {
+      "date": "2025-04-18",
+      "coinc_z": -0.1956,
+      "lead_z": null
+    },
+    {
+      "date": "2025-04-25",
+      "coinc_z": -0.1957,
+      "lead_z": null
+    },
+    {
+      "date": "2025-05-02",
+      "coinc_z": 0.018,
+      "lead_z": null
+    },
+    {
+      "date": "2025-05-09",
+      "coinc_z": 0.0693,
+      "lead_z": null
+    },
+    {
+      "date": "2025-05-16",
+      "coinc_z": -0.0198,
+      "lead_z": null
+    },
+    {
+      "date": "2025-05-23",
+      "coinc_z": -0.0514,
+      "lead_z": null
+    },
+    {
+      "date": "2025-05-30",
+      "coinc_z": 0.0607,
+      "lead_z": null
+    },
+    {
+      "date": "2025-06-06",
+      "coinc_z": -0.0023,
+      "lead_z": null
+    },
+    {
+      "date": "2025-06-13",
+      "coinc_z": 0.0366,
+      "lead_z": null
+    },
+    {
+      "date": "2025-06-20",
+      "coinc_z": 0.03,
+      "lead_z": null
+    },
+    {
+      "date": "2025-06-27",
+      "coinc_z": 0.0634,
+      "lead_z": null
+    },
+    {
+      "date": "2025-07-04",
+      "coinc_z": 0.0043,
+      "lead_z": null
+    },
+    {
+      "date": "2025-07-11",
+      "coinc_z": 0.1013,
+      "lead_z": null
+    },
+    {
+      "date": "2025-07-18",
+      "coinc_z": 0.0316,
+      "lead_z": null
+    },
+    {
+      "date": "2025-07-25",
+      "coinc_z": 0.01,
+      "lead_z": null
+    },
+    {
+      "date": "2025-08-01",
+      "coinc_z": 0.0642,
+      "lead_z": null
+    },
+    {
+      "date": "2025-08-08",
+      "coinc_z": 0.0908,
+      "lead_z": null
+    },
+    {
+      "date": "2025-08-15",
+      "coinc_z": 0.0736,
+      "lead_z": null
+    },
+    {
+      "date": "2025-08-22",
+      "coinc_z": 0.0611,
+      "lead_z": null
+    },
+    {
+      "date": "2025-08-29",
+      "coinc_z": 0.1502,
+      "lead_z": null
+    },
+    {
+      "date": "2025-09-05",
+      "coinc_z": 0.0465,
+      "lead_z": null
+    },
+    {
+      "date": "2025-09-12",
+      "coinc_z": 0.0656,
+      "lead_z": null
+    },
+    {
+      "date": "2025-09-19",
+      "coinc_z": 0.0764,
+      "lead_z": null
+    },
+    {
+      "date": "2025-09-26",
+      "coinc_z": 0.0615,
+      "lead_z": null
+    },
+    {
+      "date": "2025-10-03",
+      "coinc_z": 0.1133,
+      "lead_z": null
+    },
+    {
+      "date": "2025-10-10",
+      "coinc_z": 0.1157,
+      "lead_z": null
+    },
+    {
+      "date": "2025-10-17",
+      "coinc_z": 0.1461,
+      "lead_z": null
+    },
+    {
+      "date": "2025-10-24",
+      "coinc_z": 0.0733,
+      "lead_z": null
+    },
+    {
+      "date": "2025-10-31",
+      "coinc_z": -0.055,
+      "lead_z": null
+    },
+    {
+      "date": "2025-11-07",
+      "coinc_z": 0.1036,
+      "lead_z": null
+    },
+    {
+      "date": "2025-11-14",
+      "coinc_z": -0.085,
+      "lead_z": null
+    },
+    {
+      "date": "2025-11-21",
+      "coinc_z": 0.1291,
+      "lead_z": null
+    },
+    {
+      "date": "2025-11-28",
+      "coinc_z": 0.0784,
+      "lead_z": null
+    },
+    {
+      "date": "2025-12-05",
+      "coinc_z": 0.0722,
+      "lead_z": null
+    },
+    {
+      "date": "2025-12-12",
+      "coinc_z": 0.082,
+      "lead_z": null
+    },
+    {
+      "date": "2025-12-19",
+      "coinc_z": 0.0774,
+      "lead_z": null
+    },
+    {
+      "date": "2025-12-26",
+      "coinc_z": 0.0264,
+      "lead_z": null
+    },
+    {
+      "date": "2026-01-02",
+      "coinc_z": 0.1338,
+      "lead_z": null
+    },
+    {
+      "date": "2026-01-09",
+      "coinc_z": 0.087,
+      "lead_z": null
+    },
+    {
+      "date": "2026-01-16",
+      "coinc_z": 0.2136,
+      "lead_z": null
+    },
+    {
+      "date": "2026-01-23",
+      "coinc_z": 0.1581,
+      "lead_z": null
+    },
+    {
+      "date": "2026-01-30",
+      "coinc_z": 0.154,
+      "lead_z": null
+    },
+    {
+      "date": "2026-02-06",
+      "coinc_z": 0.0939,
+      "lead_z": null
+    },
+    {
+      "date": "2026-02-13",
+      "coinc_z": 0.1498,
+      "lead_z": null
+    },
+    {
+      "date": "2026-02-20",
+      "coinc_z": 0.1689,
+      "lead_z": null
+    },
+    {
+      "date": "2026-02-27",
+      "coinc_z": 0.1042,
+      "lead_z": null
+    },
+    {
+      "date": "2026-03-06",
+      "coinc_z": 0.023,
+      "lead_z": null
+    },
+    {
+      "date": "2026-03-13",
+      "coinc_z": 0.095,
+      "lead_z": null
+    },
+    {
+      "date": "2026-03-20",
+      "coinc_z": 0.0639,
+      "lead_z": null
+    },
+    {
+      "date": "2026-03-27",
+      "coinc_z": 0.0892,
+      "lead_z": null
+    },
+    {
+      "date": "2026-04-03",
+      "coinc_z": 0.0558,
+      "lead_z": null
+    },
+    {
+      "date": "2026-04-10",
+      "coinc_z": 0.0083,
+      "lead_z": null
+    },
+    {
+      "date": "2026-04-17",
+      "coinc_z": -0.003,
+      "lead_z": null
+    },
+    {
+      "date": "2026-04-24",
+      "coinc_z": -0.0361,
+      "lead_z": null
+    }
+  ]
+}

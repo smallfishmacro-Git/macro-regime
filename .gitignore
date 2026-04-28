@@ -33,3 +33,7 @@ __pycache__/
 *.pyo
 .venv/
 venv/
+
+# Licensed data — RecessionAlert exports must not be committed
+data/recessionalert/raw/*.xlsx
+data/recessionalert/raw/*.xls
