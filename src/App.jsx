@@ -16,25 +16,23 @@ import {
 } from "recharts";
 
 // ========================================================================
-// DESIGN TOKENS — matched to rates-regime.vercel.app
+// DESIGN TOKENS — aligned to smallfish-rates-regime
 // ========================================================================
 const C = {
-  bg: "#0a0a0a",
-  panel: "#0d0d0d",
-  panelSoft: "#111111",
-  panelEdge: "#1c1c1c",
-  panelEdgeStrong: "#262626",
-  grid: "#161616",
-  text: "#e5e5e5",
-  textBright: "#fafafa",
-  textDim: "#737373",
-  textMute: "#4b4b4b",
-  amber: "#fbbf24",
-  amberDeep: "#d97706",
-  amberFaint: "rgba(251,191,36,0.08)",
-  green: "#22c55e",
-  red: "#ef4444",
-  cyan: "#22d3ee",
+  bg: "#08090c",
+  panel: "#0d0f14",
+  panelSoft: "#08090c",         // inner-tile bg = page bg (darker than panel)
+  panelEdge: "#1a1d26",
+  panelEdgeStrong: "#1a1d26",   // single-tone border, matches rates-regime
+  grid: "#1a1d26",
+  text: "#c8cad0",
+  textDim: "#5a5e6a",
+  textMute: "#3a3d46",
+  amber: "#f0b800",
+  amberFaint: "rgba(240,184,0,0.08)",
+  green: "#00c853",
+  red: "#ff5252",
+  cyan: "#00bcd4",
   white: "#ffffff",
   // GDPNow component palette (matches Atlanta Fed convention)
   pceGoods: "#3b82f6",
@@ -132,26 +130,31 @@ const HEDGE_MAP = {
 // ========================================================================
 // PRIMITIVES
 // ========================================================================
-const Tab = ({ active, children, onClick, size = "lg" }) => (
-  <button
-    onClick={onClick}
-    style={{
-      background: "transparent",
-      border: "none",
-      padding: size === "lg" ? "10px 0" : "6px 0",
-      marginRight: size === "lg" ? 28 : 22,
-      fontFamily: FONT_MONO,
-      fontSize: size === "lg" ? 11 : 10,
-      letterSpacing: 1.6,
-      color: active ? C.amber : (size === "sm" ? C.text : C.textDim),
-      cursor: "pointer",
-      borderBottom: active ? `1.5px solid ${C.amber}` : "1.5px solid transparent",
-      transition: "color .15s",
-    }}
-  >
-    {children}
-  </button>
-);
+const Tab = ({ active, children, onClick, size = "lg" }) => {
+  const isLg = size === "lg";
+  const activeColor = isLg ? C.amber : C.text;
+  const underline = isLg ? "2px" : "1px";
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        background: "transparent",
+        border: "none",
+        padding: isLg ? "6px 20px" : "5px 16px",
+        fontFamily: FONT_MONO,
+        fontSize: isLg ? 11 : 10,
+        letterSpacing: isLg ? 1.5 : 1,
+        color: active ? activeColor : C.textDim,
+        fontWeight: isLg && active ? "bold" : "normal",
+        cursor: "pointer",
+        borderBottom: active ? `${underline} solid ${C.amber}` : `${underline} solid transparent`,
+        transition: "color .15s",
+      }}
+    >
+      {children}
+    </button>
+  );
+};
 
 const Pill = ({ active, children, onClick }) => (
   <button
@@ -179,7 +182,7 @@ const Panel = ({ children, style }) => (
       background: C.panel,
       border: `1px solid ${C.panelEdge}`,
       borderRadius: 4,
-      padding: 18,
+      padding: 16,
       ...style,
     }}
   >
@@ -187,13 +190,13 @@ const Panel = ({ children, style }) => (
   </div>
 );
 
-const StatTile = ({ label, value, sub, color = C.text, valueSize = 24 }) => (
-  <div style={{ background: C.panelSoft, border: `1px solid ${C.panelEdge}`, padding: "12px 14px" }}>
-    <div style={{ fontSize: 9, color: C.textDim, letterSpacing: 1.4 }}>{label}</div>
-    <div style={{ fontSize: valueSize, color, fontWeight: 600, letterSpacing: 0.2, marginTop: 4, lineHeight: 1 }}>
+const StatTile = ({ label, value, sub, color = C.text, valueSize = 18 }) => (
+  <div style={{ background: C.bg, border: `1px solid ${C.panelEdge}`, padding: "8px 10px", borderRadius: 3 }}>
+    <div style={{ fontSize: 9, color: C.textDim, letterSpacing: 1.5 }}>{label}</div>
+    <div style={{ fontSize: valueSize, color, fontWeight: 700, letterSpacing: 0.2, marginTop: 2, lineHeight: 1 }}>
       {value}
     </div>
-    {sub && <div style={{ fontSize: 9, color: C.textMute, marginTop: 4 }}>{sub}</div>}
+    {sub && <div style={{ fontSize: 9, color: C.textDim, marginTop: 3 }}>{sub}</div>}
   </div>
 );
 
@@ -276,11 +279,11 @@ export default function MacroRegimeGrowth() {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "14px 24px",
+          padding: "10px 16px",
           borderBottom: `1px solid ${C.panelEdge}`,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div
             style={{
               width: 22,
@@ -298,32 +301,32 @@ export default function MacroRegimeGrowth() {
             S
           </div>
           <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-            <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2.5, color: C.amber }}>
+            <span style={{ fontSize: 14, fontWeight: "bold", letterSpacing: 3, color: C.amber }}>
               SMALLFISHMACRO
             </span>
-            <span style={{ fontSize: 11, letterSpacing: 2.5, color: C.text, fontWeight: 500 }}>
+            <span style={{ fontSize: 12, letterSpacing: 2, color: C.text, fontWeight: "bold" }}>
               TERMINAL
             </span>
-            <span style={{ fontSize: 9, color: C.textDim, letterSpacing: 1 }}>v1.0</span>
+            <span style={{ fontSize: 10, color: C.textDim }}>v1.0</span>
           </div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 18, fontSize: 9, letterSpacing: 1.2, color: C.textDim }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 10, color: C.textDim }}>
           <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <span style={{ width: 14, height: 10, background: "#3b82f6", display: "inline-block", borderRadius: 1 }} />
             US
           </span>
           <span>ATLANTA FED + FRED + UNCTAD + RECESSIONALERT</span>
-          <span style={{ color: C.text }}>2026-04-28 09:24</span>
+          <span style={{ color: C.amber }}>2026-04-28</span>
+          <span>09:24</span>
           <button
             style={{
               background: "transparent",
-              color: C.amber,
-              border: `1px solid ${C.amber}`,
-              padding: "5px 14px",
+              color: C.textDim,
+              border: `1px solid ${C.panelEdge}`,
+              padding: "3px 10px",
               fontFamily: FONT_MONO,
-              fontSize: 9,
-              letterSpacing: 1.4,
-              fontWeight: 600,
+              fontSize: 10,
+              letterSpacing: 1,
               cursor: "pointer",
               borderRadius: 2,
             }}
@@ -336,7 +339,7 @@ export default function MacroRegimeGrowth() {
       {/* ============================================================ */}
       {/* PRIMARY TAB ROW                                               */}
       {/* ============================================================ */}
-      <div style={{ display: "flex", padding: "0 24px", borderBottom: `1px solid ${C.panelEdge}` }}>
+      <div style={{ display: "flex", padding: "0 16px", borderBottom: `1px solid ${C.panelEdge}` }}>
         <Tab active={primaryTab === "RATES_REGIME"}  onClick={() => setPrimaryTab("RATES_REGIME")}>RATES REGIME</Tab>
         <Tab active={primaryTab === "BUY_THE_DIP"}   onClick={() => setPrimaryTab("BUY_THE_DIP")}>BUY THE DIP</Tab>
         <Tab active={primaryTab === "MARKET_RISK"}   onClick={() => setPrimaryTab("MARKET_RISK")}>MARKET RISK</Tab>
@@ -346,7 +349,7 @@ export default function MacroRegimeGrowth() {
       {/* ============================================================ */}
       {/* SECONDARY SUB-TAB ROW                                         */}
       {/* ============================================================ */}
-      <div style={{ display: "flex", padding: "0 24px", borderBottom: `1px solid ${C.panelEdge}` }}>
+      <div style={{ display: "flex", padding: "0 16px", borderBottom: `1px solid ${C.panelEdge}`, marginBottom: 12 }}>
         <Tab size="sm" active={subTab === "GROWTH"}    onClick={() => setSubTab("GROWTH")}>GROWTH</Tab>
         <Tab size="sm" active={subTab === "INFLATION"} onClick={() => setSubTab("INFLATION")}>INFLATION</Tab>
         <Tab size="sm" active={subTab === "LIQUIDITY"} onClick={() => setSubTab("LIQUIDITY")}>LIQUIDITY</Tab>
@@ -358,43 +361,40 @@ export default function MacroRegimeGrowth() {
       {/* ============================================================ */}
       {/* DATA SOURCE CONNECTOR STRIP                                   */}
       {/* ============================================================ */}
-      <div style={{ padding: "16px 24px" }}>
+      <div style={{ padding: "0 16px", marginBottom: 12 }}>
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            gap: 14,
+            gap: 10,
             background: C.panel,
             border: `1px solid ${C.panelEdge}`,
-            padding: "10px 14px",
-            borderRadius: 4,
+            padding: "8px 12px",
+            borderRadius: 3,
+            flexWrap: "wrap",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: 9, color: C.textDim, letterSpacing: 1.4 }}>SOURCES</span>
-            <span
-              style={{
-                fontSize: 8,
-                color: C.green,
-                background: "rgba(34,197,94,0.1)",
-                padding: "2px 6px",
-                letterSpacing: 1,
-                border: `1px solid rgba(34,197,94,0.3)`,
-                borderRadius: 2,
-              }}
-            >
-              ● LIVE
-            </span>
-          </div>
+          <span style={{ fontSize: 10, color: C.textDim, letterSpacing: 1 }}>SOURCES</span>
+          <span
+            style={{
+              fontSize: 9,
+              color: C.green,
+              background: "rgba(0,200,83,0.15)",
+              padding: "2px 6px",
+              borderRadius: 2,
+            }}
+          >
+            ● LIVE
+          </span>
           <div
             style={{
               flex: 1,
+              minWidth: 200,
               fontSize: 10,
               color: C.textDim,
-              letterSpacing: 0.5,
-              padding: "0 10px",
               display: "flex",
-              gap: 18,
+              gap: 16,
+              flexWrap: "wrap",
             }}
           >
             <span><span style={{ color: C.text }}>atlantafed.org</span> · GDPNow + components</span>
@@ -405,20 +405,20 @@ export default function MacroRegimeGrowth() {
           <button
             style={{
               background: C.amber,
-              color: "#000",
-              border: "none",
-              padding: "6px 18px",
+              color: C.bg,
+              border: `1px solid ${C.amber}`,
+              padding: "4px 12px",
               fontFamily: FONT_MONO,
-              fontSize: 9,
-              letterSpacing: 1.4,
-              fontWeight: 700,
+              fontSize: 10,
+              letterSpacing: 1,
+              fontWeight: "bold",
               cursor: "pointer",
               borderRadius: 2,
             }}
           >
             CONNECT
           </button>
-          <span style={{ fontSize: 9, color: C.textMute, letterSpacing: 0.5 }}>
+          <span style={{ fontSize: 9, color: C.textDim }}>
             All sources <span style={{ color: C.cyan }}>free / public</span> · no Bloomberg required
           </span>
         </div>
@@ -427,7 +427,7 @@ export default function MacroRegimeGrowth() {
       {/* ============================================================ */}
       {/* MAIN CONTENT GRID — 60/40                                     */}
       {/* ============================================================ */}
-      <div style={{ display: "grid", gridTemplateColumns: "1.55fr 1fr", gap: 20, padding: "0 24px 32px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1.55fr 1fr", gap: 16, padding: "0 16px 16px" }}>
         {/* ================================================================ */}
         {/* LEFT — US GROWTH                                                  */}
         {/* ================================================================ */}
@@ -461,8 +461,8 @@ export default function MacroRegimeGrowth() {
           </div>
 
           {/* Atlanta Fed components panel */}
-          <Panel style={{ marginBottom: 14 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+          <Panel style={{ marginBottom: 12 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, paddingBottom: 8, borderBottom: `1px solid ${C.panelEdge}` }}>
               <div style={{ fontSize: 10, letterSpacing: 1.4, color: C.text }}>
                 US ATLANTA FED GDPNOW <span style={{ color: C.amber }}>{latestG.total.toFixed(3)}</span>
               </div>
@@ -543,7 +543,7 @@ export default function MacroRegimeGrowth() {
 
           {/* Recent contributions table */}
           <Panel>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, paddingBottom: 8, borderBottom: `1px solid ${C.panelEdge}` }}>
               <div style={{ fontSize: 10, letterSpacing: 1.4, color: C.text }}>
                 COMPONENT CONTRIBUTIONS · LAST 8 OBS
               </div>
@@ -613,8 +613,8 @@ export default function MacroRegimeGrowth() {
           </div>
 
           {/* Composite chart */}
-          <div style={{ background: C.panel, border: `1px solid ${C.panelEdge}`, borderRadius: 4, padding: "12px 14px 14px", marginBottom: 14 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+          <div style={{ background: C.panel, border: `1px solid ${C.panelEdge}`, borderRadius: 4, padding: 16, marginBottom: 12 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, paddingBottom: 8, borderBottom: `1px solid ${C.panelEdge}` }}>
               <span style={{ fontSize: 10, color: C.text, letterSpacing: 1.2 }}>COMPOSITE Z·SCORE</span>
               <div style={{ display: "flex", gap: 12, fontSize: 8, color: C.textDim, letterSpacing: 1 }}>
                 <span><span style={{ color: C.cyan }}>━</span> COINC {latest.coinc >= 0 ? "+" : ""}{latest.coinc.toFixed(2)}</span>
@@ -685,8 +685,8 @@ export default function MacroRegimeGrowth() {
           </div>
 
           {/* Quadrant inset */}
-          <div style={{ background: C.panel, border: `1px solid ${C.panelEdge}`, borderRadius: 4, padding: 14 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+          <div style={{ background: C.panel, border: `1px solid ${C.panelEdge}`, borderRadius: 4, padding: 16 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, paddingBottom: 8, borderBottom: `1px solid ${C.panelEdge}` }}>
               <span style={{ fontSize: 10, color: C.text, letterSpacing: 1.2 }}>QUADRANT</span>
               <span style={{ fontSize: 8, color: C.textMute, letterSpacing: 1 }}>COINC × LEAD</span>
             </div>
@@ -696,7 +696,7 @@ export default function MacroRegimeGrowth() {
       </div>
 
       {/* Bottom note bar */}
-      <div style={{ borderTop: `1px solid ${C.panelEdge}`, padding: "10px 24px", fontSize: 8, color: C.textMute, letterSpacing: 1, display: "flex", justifyContent: "space-between" }}>
+      <div style={{ margin: "16px 16px 0", padding: "8px 0", borderTop: `1px solid ${C.panelEdge}`, fontSize: 9, color: C.textDim, letterSpacing: 1, display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
         <span>SMALLFISHMACRO · MACRO REGIME › GROWTH · prototype · synthetic data</span>
         <span>Z-SCORES vs 10y rolling history · dir = 8w Δ · click <span style={{ color: C.cyan }}>CONNECT</span> to wire live feeds</span>
       </div>
