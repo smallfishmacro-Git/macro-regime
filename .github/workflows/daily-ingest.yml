@@ -1,0 +1,65 @@
+name: Daily macro data ingest
+
+on:
+  # Mon-Fri at 23:00 UTC (after US market close)
+  schedule:
+    - cron: "0 23 * * 1-5"
+  # Manual trigger from the Actions UI
+  workflow_dispatch:
+
+# Allow this workflow to commit + push to main
+permissions:
+  contents: write
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+        with:
+          # We need full history so git diff against HEAD works for
+          # the "skip if no changes" logic
+          fetch-depth: 1
+          # Use a token that can push back; default GITHUB_TOKEN works
+          # because we set permissions: contents: write above
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run ingest_growth.py
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: |
+          python scripts/ingest_growth.py
+
+      - name: Commit refreshed data (skip if no changes)
+        run: |
+          git config --local user.name  "macro-regime-bot"
+          git config --local user.email "macro-regime-bot@users.noreply.github.com"
+
+          # Stage the files the ingest may have changed
+          git add data/growth.json public/data/growth.json data/cache/ || true
+
+          if git diff --cached --quiet; then
+            echo "No data changes — nothing to commit"
+            exit 0
+          fi
+
+          # Build a commit message that reflects what's in the new growth.json.
+          # Pull the regime + GDPNow values from the JSON for a self-documenting
+          # commit history.
+          REGIME=$(python -c "import json; d=json.load(open('data/growth.json'))['current']; print(f\"{d['regime']['level']}/{d['regime']['direction']} · GDPNow {d['gdpnow']:.2f} · NY {d.get('ny_nowcast') or '—'}\")")
+          DATE=$(date -u +"%Y-%m-%d")
+
+          git commit -m "chore(data): daily ingest ${DATE}" -m "${REGIME}"
+          git push
