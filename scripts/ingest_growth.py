@@ -85,6 +85,10 @@ ATLANTA_FED_URL = (
     "https://www.atlantafed.org/-/media/Project/Atlanta/FRBA/Documents/"
     "cqer/researchcq/gdpnow/GDPTrackingModelDataAndForecasts.xlsx"
 )
+NY_FED_URL = (
+    "https://www.newyorkfed.org/medialibrary/Research/Interactives/Data/"
+    "NowCast/Downloads/New-York-Fed-Staff-Nowcast_download_data.xlsx"
+)
 FRED_API = "https://api.stlouisfed.org/fred/series/observations"
 FRED_API_KEY = os.environ.get("FRED_API_KEY")
 
@@ -283,6 +287,64 @@ def _read_contrib_history(xlsx_path: Path) -> pd.DataFrame:
     return out
 
 
+def _read_contrib_archives(xlsx_path: Path) -> pd.DataFrame:
+    """ContribArchives is long-format with header at row 0.
+    Schema (col → meaning):
+        col 0  = 'Forecast Date'
+        col 1  = 'Quarter being forecasted' (groups daily rows by target quarter)
+        col 3  = 'PCE Goods'
+        col 4  = 'PCE Services'
+        col 6  = 'Fixed Investment'
+        col 12 = 'Government'
+        col 21 = 'Change in net exports'
+        col 22 = 'Change in inventory investment'
+
+    Returns a wide-format DataFrame matching the schema produced by
+    _read_contrib_history(): date + 6 component columns. Daily rows from
+    2014-05-01 up to (but not including) the current forecast quarter.
+    """
+    df = pd.read_excel(xlsx_path, sheet_name="ContribArchives", header=0)
+    log(f"    ContribArchives shape: {df.shape}")
+
+    # Defensive lookup by column name with positional fallback.
+    name_to_pos = {
+        "Forecast Date": 0,
+        "PCE Goods": 3,
+        "PCE Services": 4,
+        "Fixed Investment": 6,
+        "Government": 12,
+        "Change in net exports": 21,
+        "Change in inventory investment": 22,
+    }
+    cols_resolved = {}
+    for name, fallback_pos in name_to_pos.items():
+        if name in df.columns:
+            cols_resolved[name] = name
+        elif len(df.columns) > fallback_pos:
+            cols_resolved[name] = df.columns[fallback_pos]
+            log(f"    column '{name}' not found by name — falling back to col {fallback_pos} '{df.columns[fallback_pos]}'")
+        else:
+            fail(f"ContribArchives missing required column '{name}' (and no col at fallback pos {fallback_pos})")
+
+    out = pd.DataFrame({
+        "date":        df[cols_resolved["Forecast Date"]],
+        "pceGoods":    df[cols_resolved["PCE Goods"]],
+        "pceServices": df[cols_resolved["PCE Services"]],
+        "fixedInv":    df[cols_resolved["Fixed Investment"]],
+        "govt":        df[cols_resolved["Government"]],
+        "netExports":  df[cols_resolved["Change in net exports"]],
+        "inventories": df[cols_resolved["Change in inventory investment"]],
+    })
+
+    out["date"] = pd.to_datetime(out["date"], errors="coerce")
+    for c in out.columns[1:]:
+        out[c] = pd.to_numeric(out[c], errors="coerce")
+    out = out.dropna(subset=["date"]).sort_values("date").reset_index(drop=True)
+
+    log(f"    parsed: {len(out)} rows · {out['date'].iloc[0].date()} → {out['date'].iloc[-1].date()}")
+    return out
+
+
 def fetch_atlanta_fed() -> pd.DataFrame:
     """v3 — multi-sheet stitched: TrackingArchives (history) + CurrentQtrEvolution
     (current-Q headline) + ContribHistory (current-Q components).
@@ -334,11 +396,30 @@ def fetch_atlanta_fed() -> pd.DataFrame:
     log(f"  stitched headline: {len(headline)} rows · "
         f"{headline['date'].iloc[0].date()} → {headline['date'].iloc[-1].date()}")
 
-    # 4. Components (current quarter only)
-    log("  reading ContribHistory ...")
-    components = _read_contrib_history(raw_xlsx_path)
+    # 4. Components — current quarter (ContribHistory) + history (ContribArchives)
+    log("  reading ContribHistory (current quarter) ...")
+    components_current = _read_contrib_history(raw_xlsx_path)
+    log("  reading ContribArchives (historical) ...")
+    components_history = _read_contrib_archives(raw_xlsx_path)
 
-    # 5. Outer-merge: components NaN before current quarter
+    # Sanity-check the boundary: ContribArchives last date should be the day
+    # before ContribHistory's first date (no gap, no overlap).
+    if len(components_history) and len(components_current):
+        gap_days = (components_current["date"].iloc[0] - components_history["date"].iloc[-1]).days
+        log(f"    boundary check: ContribArchives ends {components_history['date'].iloc[-1].date()}, "
+            f"ContribHistory starts {components_current['date'].iloc[0].date()} "
+            f"({gap_days} day gap)")
+        if gap_days < 0:
+            log(f"    WARNING: ContribArchives and ContribHistory overlap — ContribHistory will win on overlap")
+
+    # Stitch: ContribArchives + ContribHistory (current wins on any overlap,
+    # though there shouldn't be any in normal Atlanta Fed cadence).
+    components = pd.concat([components_history, components_current], ignore_index=True)
+    components = components.drop_duplicates(subset="date", keep="last").sort_values("date").reset_index(drop=True)
+    log(f"    stitched components: {len(components)} rows · "
+        f"{components['date'].iloc[0].date()} → {components['date'].iloc[-1].date()}")
+
+    # 5. Outer-merge components onto headline (full ~10y daily series)
     out = pd.merge(headline, components, on="date", how="left")
     out = out.sort_values("date").reset_index(drop=True)
 
@@ -346,17 +427,131 @@ def fetch_atlanta_fed() -> pd.DataFrame:
 
     log(f"  FINAL: {len(out)} rows · {out['date'].iloc[0].date()} → {out['date'].iloc[-1].date()}")
     log(f"    total non-null:      {out['total'].notna().sum()}")
-    log(f"    pceGoods non-null:   {out['pceGoods'].notna().sum()}")
+    log(f"    pceGoods non-null:   {out['pceGoods'].notna().sum()}  (was 29 in v3 — current Q only)")
+    if out['pceGoods'].notna().sum() > 0:
+        comp_first = out.dropna(subset=['pceGoods']).iloc[0]
+        comp_last  = out.dropna(subset=['pceGoods']).iloc[-1]
+        log(f"    component date range: {comp_first['date'].date()} → {comp_last['date'].date()}")
     log(f"    latest total:        {out['total'].iloc[-1]:.3f}")
     if out['pceGoods'].notna().sum() > 0:
+        # Decomposition check on the most recent dated row (current quarter)
         last_with_comp = out.dropna(subset=['pceGoods']).iloc[-1]
-        comp_sum = (last_with_comp['pceGoods'] + last_with_comp['pceServices']
-                   + last_with_comp['fixedInv'] + last_with_comp['govt']
-                   + last_with_comp['netExports'] + last_with_comp['inventories'])
-        log(f"    decomposition check on {last_with_comp['date'].date()}: "
-            f"sum(components)={comp_sum:.3f} vs total={last_with_comp['total']:.3f} "
-            f"(diff={comp_sum - last_with_comp['total']:+.3f})")
+        comp_sum_curr = (last_with_comp['pceGoods'] + last_with_comp['pceServices']
+                       + last_with_comp['fixedInv'] + last_with_comp['govt']
+                       + last_with_comp['netExports'] + last_with_comp['inventories'])
+        log(f"    decomposition check (latest): {last_with_comp['date'].date()}: "
+            f"sum(components)={comp_sum_curr:.3f} vs total={last_with_comp['total']:.3f} "
+            f"(diff={comp_sum_curr - last_with_comp['total']:+.3f})")
+        # Decomposition check on a historical row (one year back) — verifies
+        # ContribArchives parsing is semantically correct, not just the current
+        # ContribHistory we already validated.
+        with_comp = out.dropna(subset=['pceGoods']).reset_index(drop=True)
+        if len(with_comp) > 252:  # ~1 year of trading days
+            mid_idx = len(with_comp) - 252
+            mid = with_comp.iloc[mid_idx]
+            comp_sum_mid = (mid['pceGoods'] + mid['pceServices'] + mid['fixedInv']
+                          + mid['govt'] + mid['netExports'] + mid['inventories'])
+            log(f"    decomposition check (1y ago): {mid['date'].date()}: "
+                f"sum(components)={comp_sum_mid:.3f} vs total={mid['total']:.3f} "
+                f"(diff={comp_sum_mid - mid['total']:+.3f})")
 
+    return out
+
+
+# ======================================================================
+# NY Fed Staff Nowcast (separate xlsx, weekly cadence)
+# ======================================================================
+def fetch_ny_fed() -> pd.DataFrame:
+    """Fetch NY Fed Staff Nowcast 2.0 xlsx; extract current-quarter nowcast.
+
+    Reads sheet 'Forecasts By Horizon' (long format, header at row 5):
+      col 0 = forecast_date (weekly Fridays)
+      col 1 = target_quarter (string, e.g. "2026:Q2")
+      col 2 = nowcast_current_quarter (point estimate, % SAAR)
+      col 3 = nowcast_next_quarter (we capture but don't expose in v1)
+      col 4 = nowcast_2q_ahead (sparse, ignored)
+
+    Returns DataFrame with cols: date, ny_nowcast, target_quarter, ny_next_q
+    """
+    log("Fetching NY Fed Staff Nowcast xlsx ...")
+    headers = {"User-Agent": "Mozilla/5.0 (compatible; smallfish-macro-regime-ingest/1.0)"}
+    try:
+        r = requests.get(NY_FED_URL, headers=headers, timeout=60)
+        r.raise_for_status()
+    except Exception as e:
+        fail(f"NY Fed fetch failed: {e}\n"
+             f"Verify URL at https://www.newyorkfed.org/research/policy/nowcast")
+
+    ctype = r.headers.get("Content-Type", "").lower()
+    log(f"  HTTP {r.status_code} · Content-Type: {ctype} · {len(r.content)} bytes")
+
+    if looks_like_html(r.content):
+        fail("NY Fed returned HTML (soft-404 or auth wall). URL likely stale; "
+             "verify at https://www.newyorkfed.org/research/policy/nowcast")
+
+    raw_xlsx = CACHE / "nyfed_nowcast_raw.xlsx"
+    raw_xlsx.write_bytes(r.content)
+    log(f"  saved raw -> {raw_xlsx.relative_to(ROOT)}")
+
+    xl = pd.ExcelFile(raw_xlsx)
+    if "Forecasts By Horizon" not in xl.sheet_names:
+        fail(f"NY Fed xlsx missing 'Forecasts By Horizon' sheet. "
+             f"Available: {xl.sheet_names}")
+
+    # Header is at row 5 (zero-indexed) per the diagnostic dump.
+    df = pd.read_excel(raw_xlsx, sheet_name="Forecasts By Horizon", header=5)
+    log(f"  Forecasts By Horizon shape (post-header): {df.shape}")
+    log(f"  columns: {list(df.columns)}")
+
+    # Defensive positional fallback. After header=5, the columns we want
+    # are positions 0, 1, 2, 3 (date, target_quarter, current_q, next_q).
+    if df.shape[1] < 4:
+        fail(f"Expected ≥4 columns in 'Forecasts By Horizon', got {df.shape[1]}")
+
+    out = pd.DataFrame({
+        "date":            df.iloc[:, 0],
+        "target_quarter":  df.iloc[:, 1],
+        "ny_backcast":     df.iloc[:, 2],   # previous quarter — keep but don't expose in v1
+        "ny_nowcast":      df.iloc[:, 3],   # current quarter — this is the apples-to-apples vs Atlanta GDPNow
+        "ny_next_q":       df.iloc[:, 4],   # next quarter
+    })
+
+    out["date"] = pd.to_datetime(out["date"], errors="coerce")
+    out["ny_backcast"] = pd.to_numeric(out["ny_backcast"], errors="coerce")
+    out["ny_nowcast"] = pd.to_numeric(out["ny_nowcast"], errors="coerce")
+    out["ny_next_q"]  = pd.to_numeric(out["ny_next_q"], errors="coerce")
+    out["target_quarter"] = out["target_quarter"].astype(str).str.strip()
+
+    # Keep only rows with valid date AND a current-quarter nowcast.
+    # Rows with date but no current-Q value are typically the "next quarter
+    # only" early-window rows — preserve them with ny_nowcast=NaN so
+    # ny_next_q remains accessible if we ever expose it.
+    out = out.dropna(subset=["date"]).sort_values("date").reset_index(drop=True)
+
+    n_with_curr = out["ny_nowcast"].notna().sum()
+    n_total = len(out)
+    log(f"  parsed {n_total} rows ({n_with_curr} with current-Q nowcast) · "
+        f"{out['date'].iloc[0].date()} → {out['date'].iloc[-1].date()}")
+
+    # Sanity check: nowcast values should be in plausible GDP-growth range.
+    if n_with_curr:
+        valid = out["ny_nowcast"].dropna()
+        nc_min, nc_max = valid.min(), valid.max()
+        if nc_min < -10 or nc_max > 15:
+            log(f"  WARNING: NY Fed nowcast range ({nc_min:.2f}, {nc_max:.2f}) "
+                f"outside plausible bounds — column may be misaligned")
+        else:
+            log(f"  range check OK: nowcast in [{nc_min:.2f}, {nc_max:.2f}]")
+
+    # Freshness check: latest forecast should be within last ~21 days.
+    age_days = (pd.Timestamp.today() - out["date"].iloc[-1]).days
+    if age_days > 21:
+        log(f"  WARNING: latest NY Fed forecast is {age_days} days old — "
+            f"NY Fed publishes weekly, may indicate a data feed issue")
+    else:
+        log(f"  freshness OK: latest forecast {age_days} days old")
+
+    out.to_csv(CACHE / "nyfed_nowcast.csv", index=False)
     return out
 
 
@@ -486,7 +681,7 @@ def read_recessionalert() -> pd.DataFrame:
 # ======================================================================
 # 5. Compose regime
 # ======================================================================
-def build_growth_payload(gdpnow, wei, unctad, ra) -> dict:
+def build_growth_payload(gdpnow, wei, unctad, ra, ny_fed) -> dict:
     log("Building weekly composite ...")
     end_date = pd.Timestamp.today().normalize()
     start_date = end_date - pd.DateOffset(years=Z_WINDOW_YEARS + 5)
@@ -570,6 +765,7 @@ def build_growth_payload(gdpnow, wei, unctad, ra) -> dict:
             "direction_lookback_weeks": DIRECTION_LOOKBACK_WEEKS,
             "sources": {
                 "atlanta_fed":    f"fetched · latest obs {gdpnow['date'].iloc[-1].date().isoformat()}",
+                "ny_fed":         f"fetched · latest obs {ny_fed['date'].iloc[-1].date().isoformat()}" if len(ny_fed) else "missing",
                 "fred_wei":       f"fetched · latest obs {wei['date'].iloc[-1].date().isoformat()}",
                 "unctad":         f"manual · latest obs {unctad['date'].iloc[-1].date().isoformat()}" if len(unctad) else "missing",
                 "recessionalert": f"manual · latest obs {ra['date'].iloc[-1].date().isoformat()}" if len(ra) else "missing",
@@ -584,6 +780,8 @@ def build_growth_payload(gdpnow, wei, unctad, ra) -> dict:
             "hedge_ratio": hedge["ratio"],
             "hedge_posture": hedge["posture"],
             "gdpnow":         _f(gdpnow["total"].iloc[-1]),
+            "ny_nowcast":     _f(ny_fed["ny_nowcast"].dropna().iloc[-1]) if len(ny_fed) and ny_fed["ny_nowcast"].notna().any() else None,
+            "ny_target_qtr":  ny_fed.dropna(subset=["ny_nowcast"]).iloc[-1]["target_quarter"] if len(ny_fed) and ny_fed["ny_nowcast"].notna().any() else None,
             "wei":            _f(wei["wei"].iloc[-1]),
             "unctad_world":   _f(unctad["unctad_world"].iloc[-1]) if len(unctad) else None,
             "wla":            _f(ra["wla"].iloc[-1]) if "wla" in ra.columns and len(ra) else None,
@@ -592,13 +790,18 @@ def build_growth_payload(gdpnow, wei, unctad, ra) -> dict:
             "lead_z":         _f(lead_z),
         },
         "gdpnow_components": _df_to_records(
-            gdpnow.tail(260),
+            gdpnow,  # full ~1830-row history; frontend RANGE selector handles slicing
             cols=["date", "total", "pceGoods", "pceServices", "fixedInv", "govt", "netExports", "inventories"],
         ),
         "composite_z": _df_to_records(
-            master[["date", "coinc_z", "lead_z"]].dropna(how="all", subset=["coinc_z", "lead_z"]).tail(270)
+            master[["date", "coinc_z", "lead_z"]].dropna(how="all", subset=["coinc_z", "lead_z"])
             if (coinc_available or lead_available) else pd.DataFrame(columns=["date", "coinc_z", "lead_z"]),
             cols=["date", "coinc_z", "lead_z"],
+        ),
+        "ny_fed_nowcast": _df_to_records(
+            ny_fed.dropna(subset=["ny_nowcast"])[["date", "ny_nowcast", "ny_backcast", "ny_next_q", "target_quarter"]]
+            if len(ny_fed) else pd.DataFrame(columns=["date", "ny_nowcast", "ny_backcast", "ny_next_q", "target_quarter"]),
+            cols=["date", "ny_nowcast", "ny_backcast", "ny_next_q", "target_quarter"],
         ),
     }
     return payload
@@ -616,11 +819,20 @@ def _df_to_records(df, cols):
     # Build records via dict comprehension so None survives — assigning
     # None into a float64-dtype Series silently coerces to NaN, which
     # then leaks through to_dict() and emits invalid JSON "NaN" literals.
+    # Numeric columns pass through _f (NaN -> None, round 4 dp).
+    # Non-numeric columns (string) pass through unchanged, with NaN -> None.
     records = []
     for _, row in df.iterrows():
         rec = {"date": row["date"]}
         for c in cols[1:]:
-            rec[c] = _f(row[c])
+            v = row[c]
+            if isinstance(v, (int, float)) or (hasattr(v, "dtype") and pd.api.types.is_numeric_dtype(type(v))):
+                rec[c] = _f(v)
+            else:
+                # String or other; null-guard NaN
+                rec[c] = None if (v is None
+                                  or (isinstance(v, float) and pd.isna(v))
+                                  or (isinstance(v, str) and v.strip().lower() in ("nan", ""))) else v
         records.append(rec)
     return records
 
@@ -629,13 +841,14 @@ def _df_to_records(df, cols):
 # Main
 # ======================================================================
 def main() -> None:
-    log(f"=== SmallFish Macro Regime · GROWTH ingest v3 · {datetime.now(timezone.utc).isoformat()} ===")
+    log(f"=== SmallFish Macro Regime · GROWTH ingest v4 · {datetime.now(timezone.utc).isoformat()} ===")
     log(f"ROOT = {ROOT}")
     gdpnow = fetch_atlanta_fed()
+    ny_fed = fetch_ny_fed()
     wei = fetch_fred_wei()
     unctad = read_unctad_manual()
     ra = read_recessionalert()
-    payload = build_growth_payload(gdpnow, wei, unctad, ra)
+    payload = build_growth_payload(gdpnow, wei, unctad, ra, ny_fed)
     OUTPUT_JSON.write_text(json.dumps(payload, indent=2, allow_nan=False, default=str))
     log(f"WROTE {OUTPUT_JSON.relative_to(ROOT)} ({OUTPUT_JSON.stat().st_size // 1024} KB)")
     # Pattern A dual-write: also drop into public/data/ so Vite serves it as a

@@ -33,6 +33,7 @@ const C = {
   green: "#00c853",
   red: "#ff5252",
   cyan: "#00bcd4",
+  magenta: "#f43f5e",
   white: "#ffffff",
   // GDPNow component palette (matches Atlanta Fed convention)
   pceGoods: "#3b82f6",
@@ -233,13 +234,22 @@ const KVRow = ({ label, value, valueColor = C.text, sub }) => (
 // ======================================================================
 function normalizeGrowthPayload(raw) {
   const fmtDay  = (d) => d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  const fmtWeek = (d) => d.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
+  // "Mar '21" — apostrophe disambiguates from "Mar 21" (day form).
+  const fmtWeek = (d) => {
+    const s = d.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
+    // toLocaleDateString returns "Mar 21" or "Mar 21" — we want "Mar '21"
+    return s.replace(/(\w{3}) (\d{2})/, "$1 '$2");
+  };
 
+  // Note: label is computed at chart render time based on the active
+  // chartRange (see src/App.jsx body). We keep `label` here for backwards
+  // compatibility with the recent-contributions table, which uses the
+  // short "Sep 1" form regardless of chart range.
   const gdpNow = (raw.gdpnow_components || []).map((r) => {
     const d = new Date(r.date);
     return {
       date: d,
-      label: fmtDay(d),
+      label: fmtDay(d),  // short form — used by recent-contributions table
       total: r.total,
       pceGoods:    r.pceGoods,
       pceServices: r.pceServices,
@@ -263,6 +273,19 @@ function normalizeGrowthPayload(raw) {
     };
   });
 
+  // NY Fed Staff Nowcast — weekly cadence (Fridays), 2023-04 onward.
+  // We render this as a step-after line on the same chart as Atlanta's
+  // headline. Drop rows missing ny_nowcast; ny_backcast/ny_next_q are
+  // captured in JSON for future use but unused in v1 render.
+  const nyFed = (raw.ny_fed_nowcast || []).map((r) => {
+    const d = new Date(r.date);
+    return {
+      date: d,
+      ny: r.ny_nowcast,
+      ny_target: r.target_quarter,
+    };
+  }).filter((r) => r.ny != null);
+
   const sigAv = (raw.meta && raw.meta.signal_availability) || { coincident: true, leading: true };
   const cur = raw.current || {};
   const reg = cur.regime || { level: "NORMAL", direction: "UNKNOWN" };
@@ -275,6 +298,8 @@ function normalizeGrowthPayload(raw) {
       hedgeRatio:    cur.hedge_ratio,        // may be null when leading absent
       hedgePosture:  cur.hedge_posture,
       gdpnow:        cur.gdpnow,
+      nyNowcast:     cur.ny_nowcast,         // NY Fed current-quarter nowcast
+      nyTargetQtr:   cur.ny_target_qtr,      // string e.g. "2026:Q2"
       wei:           cur.wei,
       unctadWorld:   cur.unctad_world,
       wla:           cur.wla,                // null when RA absent
@@ -284,6 +309,7 @@ function normalizeGrowthPayload(raw) {
     },
     gdpNow,
     compZ,
+    nyFed,
   };
 }
 
@@ -317,6 +343,7 @@ export default function MacroRegimeGrowth() {
   const [subTab, setSubTab] = useState("GROWTH");
   const [chartMode, setChartMode] = useState("COMPONENTS");
   const [modelMode, setModelMode] = useState("COMPOSITE");
+  const [chartRange, setChartRange] = useState("1Y");  // 6M | 1Y | 2Y | MAX
 
   const { loading, error, data } = useGrowthData();
 
@@ -345,12 +372,168 @@ export default function MacroRegimeGrowth() {
   // Normalized data — see normalizeGrowthPayload() for shape.
   const gdpNow = data.gdpNow;
   const compZ  = data.compZ;
+  const nyFed  = data.nyFed || [];
   const latestG = gdpNow[gdpNow.length - 1] || {};
+
+  // Divergence indicator: NY Fed vs Atlanta on the current quarter.
+  // Color/label varies based on magnitude — caller uses these for the
+  // NY stat tile sub-text.
+  const nyDivergence = (() => {
+    const atl = data.current.gdpnow;
+    const ny = data.current.nyNowcast;
+    if (atl == null || ny == null) return null;
+    const spread = ny - atl;
+    const abs = Math.abs(spread);
+    let tone, text;
+    if (abs > 1.0) {
+      tone = "diverge";
+      text = `${spread >= 0 ? "+" : ""}${spread.toFixed(2)}pp vs ATL`;
+    } else if (abs <= 0.5) {
+      tone = "aligned";
+      text = "aligned with ATL";
+    } else {
+      tone = "neutral";
+      text = `${spread >= 0 ? "+" : ""}${spread.toFixed(2)}pp vs ATL`;
+    }
+    return { spread, tone, text };
+  })();
   const prevG   = gdpNow[Math.max(0, gdpNow.length - 22)] || latestG;
   const m1Delta = (latestG.total != null && prevG.total != null)
     ? +(latestG.total - prevG.total).toFixed(2)
     : 0;
   const tableRows = gdpNow.slice(-8).reverse();
+
+  // ----- Chart range filtering -----
+  // Map RANGE selection to a number of days back from the latest date.
+  // MAX = full history. We slice gdpNow rather than filtering by a date
+  // threshold so the visual is always anchored to "the latest date in
+  // the dataset minus N days" — robust to data refreshes.
+  const RANGE_DAYS = { "6M": 183, "1Y": 365, "2Y": 730, "MAX": Infinity };
+  const rangeDays = RANGE_DAYS[chartRange] ?? 365;
+  const gdpNowFiltered = (() => {
+    if (!gdpNow.length) return [];
+    // Range-aware label — short "Sep 1" for short ranges (year is implicit),
+    // longer "Sep '18" for ranges spanning multiple years.
+    const longLabel = chartRange === "2Y" || chartRange === "MAX";
+    const labelFmt = longLabel
+      ? (d) => d.toLocaleDateString("en-US", { month: "short", year: "2-digit" })
+      : (d) => d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+    let slice;
+    if (rangeDays === Infinity) {
+      slice = gdpNow;
+    } else {
+      const latestDate = gdpNow[gdpNow.length - 1].date;
+      const cutoff = new Date(latestDate.getTime() - rangeDays * 86400000);
+      slice = gdpNow.filter((d) => d.date >= cutoff);
+    }
+
+    // Build a Map of NY Fed values keyed by ISO date for O(1) lookup.
+    const nyByDate = new Map();
+    for (const r of nyFed) {
+      const k = r.date.toISOString().slice(0, 10);
+      nyByDate.set(k, r.ny);
+    }
+
+    // Atlanta-driven join: each Atlanta row gets a matching NY value if
+    // a Friday release falls on the same date.
+    const atlSliceDates = new Set(slice.map((d) => d.date.toISOString().slice(0, 10)));
+    const merged = slice.map((d) => {
+      const k = d.date.toISOString().slice(0, 10);
+      return {
+        ...d,
+        label: labelFmt(d.date),
+        ny: nyByDate.has(k) ? nyByDate.get(k) : null,
+      };
+    });
+
+    // Pad with NY-only rows for any NY Friday that's MORE RECENT than
+    // Atlanta's last data point. These rows have null total/components
+    // (so no bars or white-line continuation) and just the magenta line.
+    // Recharts handles null component values gracefully — the bars stop,
+    // and the white Atlanta line stops at its real last point.
+    const atlLastDate = slice[slice.length - 1].date;
+    const cutoffStart = rangeDays === Infinity
+      ? new Date(0)
+      : new Date(slice[0].date.getTime());
+
+    const nyOnlyRows = nyFed
+      .filter((r) => r.date > atlLastDate && r.date >= cutoffStart && !atlSliceDates.has(r.date.toISOString().slice(0, 10)))
+      .map((r) => ({
+        date: r.date,
+        label: labelFmt(r.date),
+        // null Atlanta fields — bars stop, white line stops, magenta continues
+        total: null,
+        pceGoods: null,
+        pceServices: null,
+        fixedInv: null,
+        govt: null,
+        netExports: null,
+        inventories: null,
+        ny: r.ny,
+      }));
+
+    return [...merged, ...nyOnlyRows];
+  })();
+
+  // ----- Y-axis auto-zoom -----
+  // Domain accounts for both the headline line AND stacked component bars
+  // above/below it. Bars only exist for current-quarter rows; for those
+  // we sum positive contributions (bar top) and negative contributions
+  // (bar bottom) separately so the y-axis can fit both.
+  const yDomain = (() => {
+    if (!gdpNowFiltered.length) return [-1, 4];
+    let yMin = Infinity, yMax = -Infinity;
+    for (const d of gdpNowFiltered) {
+      if (d.total != null) {
+        if (d.total < yMin) yMin = d.total;
+        if (d.total > yMax) yMax = d.total;
+      }
+      // If this row has component bars, bar top = sum of positives,
+      // bar bottom = sum of negatives. recharts stackOffset="sign" stacks
+      // positives upward from 0 and negatives downward from 0.
+      const comps = ["pceGoods", "pceServices", "fixedInv", "govt", "netExports", "inventories"];
+      let pos = 0, neg = 0;
+      let hasComp = false;
+      for (const c of comps) {
+        const v = d[c];
+        if (v != null) {
+          hasComp = true;
+          if (v > 0) pos += v;
+          else neg += v;
+        }
+      }
+      if (hasComp) {
+        if (pos > yMax) yMax = pos;
+        if (neg < yMin) yMin = neg;
+      }
+    }
+    if (yMin === Infinity) return [-1, 4];  // no data — fallback
+    // Pad ~10% on each side, with a minimum padding so flat ranges still breathe.
+    const pad = Math.max(0.3, (yMax - yMin) * 0.1);
+    return [Math.floor((yMin - pad) * 10) / 10, Math.ceil((yMax + pad) * 10) / 10];
+  })();
+
+  // ----- Current-quarter boundary -----
+  // Marks the first data point of the calendar quarter the latest reading
+  // belongs to (e.g. latest=2026-04-21 → boundary at first row >= 2026-04-01).
+  // Pre-Step 6d we used "first row with non-null pceGoods" as a proxy, but
+  // ContribArchives now fills components for the full history, so that proxy
+  // resolves to the leftmost visible point on every range.
+  const currentQtrStart = (() => {
+    if (!gdpNowFiltered.length) return null;
+    const latest = gdpNowFiltered[gdpNowFiltered.length - 1].date;
+    const qStartMonth = Math.floor(latest.getMonth() / 3) * 3;  // 0,3,6,9
+    const qStart = new Date(latest.getFullYear(), qStartMonth, 1);
+    const firstInQtr = gdpNowFiltered.find((d) => d.date >= qStart);
+    return firstInQtr ? firstInQtr.label : null;
+  })();
+
+  // ----- Adaptive x-axis ticks -----
+  // Replace the existing monthTicks block (a few lines below) with this.
+  // For 6M: monthly ticks. For 1Y: monthly. For 2Y: every 2 months.
+  // For MAX: yearly.
+  const tickStride = chartRange === "MAX" ? 12 : chartRange === "2Y" ? 2 : 1;
 
   // Composite z's: last weekly observation, plus 8w-ago lead for direction context.
   // Backend already classifies regime (and emits "UNKNOWN" when leading absent),
@@ -369,16 +552,24 @@ export default function MacroRegimeGrowth() {
   // memoization wasn't earning its keep against the Rules-of-Hooks
   // ordering constraint that conflicts with our early returns above.
   const monthTicks = (() => {
-    if (!gdpNow || !gdpNow.length) return [];
+    if (!gdpNowFiltered || !gdpNowFiltered.length) return [];
     const seen = new Set();
-    return gdpNow
-      .filter((d) => {
-        const k = `${d.date.getFullYear()}-${d.date.getMonth()}`;
-        if (seen.has(k)) return false;
+    const monthsSeen = [];
+    for (const d of gdpNowFiltered) {
+      const k = `${d.date.getFullYear()}-${d.date.getMonth()}`;
+      if (!seen.has(k)) {
         seen.add(k);
-        return true;
-      })
-      .map((d) => d.label);
+        monthsSeen.push(d);
+      }
+    }
+    // Apply stride: tickStride=1 keeps every month, =2 every other,
+    // =12 yearly. Always include the most recent month so the rightmost
+    // edge has a label.
+    const strided = monthsSeen.filter((_, i) => i % tickStride === 0);
+    if (monthsSeen.length && strided[strided.length - 1] !== monthsSeen[monthsSeen.length - 1]) {
+      strided.push(monthsSeen[monthsSeen.length - 1]);
+    }
+    return strided.map((d) => d.label);
   })();
 
   const compZTicks = (() => {
@@ -523,6 +714,7 @@ export default function MacroRegimeGrowth() {
             }}
           >
             <span><span style={{ color: C.text }}>atlantafed.org</span> · GDPNow + components</span>
+            <span><span style={{ color: C.text }}>newyorkfed.org</span> · Staff Nowcast</span>
             <span><span style={{ color: C.text }}>FRED</span> · WEI</span>
             <span><span style={{ color: C.text }}>UNCTAD</span> · World Nowcast</span>
             <span><span style={{ color: C.text }}>RecessionAlert</span> · WLA + Global LEI</span>
@@ -573,60 +765,80 @@ export default function MacroRegimeGrowth() {
           </div>
 
           {/* Stat tile row */}
-          <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr 1fr", gap: 8, marginBottom: 14 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1.2fr 0.9fr 0.9fr 0.9fr", gap: 8, marginBottom: 14 }}>
             <StatTile
-              label="GDPNOW"
-              value={`${latestG.total.toFixed(3)}%`}
-              sub={`Q2 26 · daily · ${m1Delta >= 0 ? "+" : ""}${m1Delta.toFixed(2)} 1M`}
-              color={latestG.total > 2 ? C.green : latestG.total < 0.5 ? C.red : C.amber}
+              label="ATL GDPNOW"
+              value={latestG.total != null ? `${latestG.total.toFixed(3)}%` : "—"}
+              sub={`${data.current.nyTargetQtr ?? "current Q"} · Atlanta · daily`}
+              color={latestG.total != null ? (latestG.total > 2 ? C.green : latestG.total < 0.5 ? C.red : C.amber) : C.textMute}
             />
-            <StatTile label="Δ 1M"  value={`${m1Delta >= 0 ? "+" : ""}${m1Delta.toFixed(2)}`} sub="vs ~22 obs ago" color={m1Delta >= 0 ? C.green : C.red} valueSize={20} />
-            <StatTile label="WEI"    value={fmtNum(data.current.wei, 2)}    sub="Dallas Fed · weekly" color={C.text} valueSize={20} />
-            <StatTile label="WORLD"  value={fmtNum(data.current.unctadWorld, 2, "%")} sub="UNCTAD nowcast · monthly" color={C.text} valueSize={20} />
+            <StatTile
+              label="NY FED NOWCAST"
+              value={data.current.nyNowcast != null ? `${data.current.nyNowcast.toFixed(2)}%` : "—"}
+              sub={
+                nyDivergence == null
+                  ? `${data.current.nyTargetQtr ?? "current Q"} · NY Fed · weekly`
+                  : nyDivergence.tone === "aligned"
+                    ? "aligned with ATL"
+                    : nyDivergence.text
+              }
+              color={
+                data.current.nyNowcast == null ? C.textMute :
+                nyDivergence?.tone === "diverge" ? C.red :
+                nyDivergence?.tone === "aligned" ? C.green : C.magenta
+              }
+            />
+            <StatTile label="Δ 1M"  value={`${m1Delta >= 0 ? "+" : ""}${m1Delta.toFixed(2)}`} sub="ATL · vs ~22 obs ago" color={m1Delta >= 0 ? C.green : C.red} valueSize={18} />
+            <StatTile label="WEI"   value={fmtNum(data.current.wei, 2)} sub="Dallas Fed · weekly" color={C.text} valueSize={18} />
+            <StatTile label="WORLD" value={fmtNum(data.current.unctadWorld, 2, "%")} sub="UNCTAD · monthly" color={C.text} valueSize={18} />
           </div>
 
           {/* Atlanta Fed components panel */}
           <Panel style={{ marginBottom: 12 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, paddingBottom: 8, borderBottom: `1px solid ${C.panelEdge}` }}>
               <div style={{ fontSize: 10, letterSpacing: 1.4, color: C.text }}>
-                US ATLANTA FED GDPNOW <span style={{ color: C.amber }}>{latestG.total.toFixed(3)}</span>
+                US ATLANTA FED GDPNOW <span style={{ color: C.amber }}>{latestG.total != null ? latestG.total.toFixed(3) : "—"}</span>
+                <span style={{ color: C.textMute, marginLeft: 8, fontSize: 8 }}>· {chartRange} VIEW</span>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <span style={{ fontSize: 8, color: C.textMute, letterSpacing: 1 }}>RANGE</span>
                 {["6M", "1Y", "2Y", "MAX"].map((r) => (
-                  <span
+                  <button
                     key={r}
+                    onClick={() => setChartRange(r)}
                     style={{
                       fontSize: 8,
                       padding: "2px 7px",
-                      color: r === "1Y" ? "#000" : C.textDim,
-                      background: r === "1Y" ? C.amber : "transparent",
-                      border: `1px solid ${r === "1Y" ? C.amber : C.panelEdgeStrong}`,
+                      color: r === chartRange ? "#000" : C.textDim,
+                      background: r === chartRange ? C.amber : "transparent",
+                      border: `1px solid ${r === chartRange ? C.amber : C.panelEdgeStrong}`,
                       letterSpacing: 1,
                       cursor: "pointer",
                       borderRadius: 1,
+                      fontFamily: FONT_MONO,
                     }}
                   >
                     {r}
-                  </span>
+                  </button>
                 ))}
               </div>
             </div>
 
             {/* Component legend */}
             <div style={{ display: "flex", flexWrap: "wrap", gap: 14, marginBottom: 8, fontSize: 8, letterSpacing: 1 }}>
-              <Legend color={C.white} label="GDPNOW" value={latestG.total.toFixed(3)} bold />
-              <Legend color={C.pceGoods} label="PCE GOODS" value={latestG.pceGoods.toFixed(3)} />
-              <Legend color={C.pceServices} label="PCE SERVICES" value={latestG.pceServices.toFixed(3)} />
-              <Legend color={C.fixedInv} label="FIXED INV" value={latestG.fixedInv.toFixed(3)} />
-              <Legend color={C.govt} label="GOVT" value={latestG.govt.toFixed(3)} />
-              <Legend color={C.netExports} label="NET EXPORTS" value={latestG.netExports.toFixed(3)} />
-              <Legend color={C.inventories} label="INVENTORIES" value={latestG.inventories.toFixed(3)} />
+              <Legend color={C.white} label="ATL GDPNOW" value={latestG.total != null ? latestG.total.toFixed(3) : "—"} bold />
+              <Legend color={C.magenta} label="NY FED NOWCAST" value={data.current.nyNowcast != null ? data.current.nyNowcast.toFixed(3) : "—"} bold />
+              <Legend color={C.pceGoods} label="PCE GOODS" value={latestG.pceGoods != null ? latestG.pceGoods.toFixed(3) : "—"} />
+              <Legend color={C.pceServices} label="PCE SERVICES" value={latestG.pceServices != null ? latestG.pceServices.toFixed(3) : "—"} />
+              <Legend color={C.fixedInv} label="FIXED INV" value={latestG.fixedInv != null ? latestG.fixedInv.toFixed(3) : "—"} />
+              <Legend color={C.govt} label="GOVT" value={latestG.govt != null ? latestG.govt.toFixed(3) : "—"} />
+              <Legend color={C.netExports} label="NET EXPORTS" value={latestG.netExports != null ? latestG.netExports.toFixed(3) : "—"} />
+              <Legend color={C.inventories} label="INVENTORIES" value={latestG.inventories != null ? latestG.inventories.toFixed(3) : "—"} />
             </div>
 
             <div style={{ height: 280 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={gdpNow} margin={{ top: 6, right: 30, left: 0, bottom: 6 }} stackOffset="sign">
+                <ComposedChart data={gdpNowFiltered} margin={{ top: 6, right: 30, left: 0, bottom: 6 }} stackOffset="sign">
                   <CartesianGrid stroke={C.grid} vertical={false} />
                   <XAxis
                     dataKey="label"
@@ -636,13 +848,29 @@ export default function MacroRegimeGrowth() {
                     tickLine={false}
                   />
                   <YAxis
-                    domain={[-1.2, 4.5]}
+                    domain={yDomain}
                     tick={{ fill: C.textDim, fontSize: 8, fontFamily: FONT_MONO }}
                     axisLine={{ stroke: C.panelEdge }}
                     tickLine={false}
                     width={36}
                   />
                   <ReferenceLine y={0} stroke={C.textMute} strokeWidth={0.5} />
+                  {currentQtrStart && (
+                    <ReferenceLine
+                      x={currentQtrStart}
+                      stroke={C.amber}
+                      strokeDasharray="2 3"
+                      strokeWidth={0.6}
+                      label={{
+                        value: "CURRENT Q",
+                        position: "insideTopRight",
+                        fill: C.amber,
+                        fontSize: 8,
+                        fontFamily: FONT_MONO,
+                        letterSpacing: 1,
+                      }}
+                    />
+                  )}
                   <Tooltip
                     contentStyle={{
                       background: "#000",
@@ -661,6 +889,15 @@ export default function MacroRegimeGrowth() {
                   <Bar dataKey="netExports"  stackId="s" fill={C.netExports}  isAnimationActive={false} />
                   <Bar dataKey="inventories" stackId="s" fill={C.inventories} isAnimationActive={false} />
                   <Line type="monotone" dataKey="total" stroke={C.white} strokeWidth={1.6} dot={false} isAnimationActive={false} />
+                  <Line
+                    type="stepAfter"
+                    dataKey="ny"
+                    stroke={C.magenta}
+                    strokeWidth={2.2}
+                    dot={false}
+                    connectNulls
+                    isAnimationActive={false}
+                  />
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
@@ -794,7 +1031,8 @@ export default function MacroRegimeGrowth() {
           {/* Key indicators */}
           <div style={{ marginBottom: 14 }}>
             <div style={{ fontSize: 10, color: C.textDim, letterSpacing: 1.4, marginBottom: 6 }}>KEY INDICATORS</div>
-            <KVRow label="GDPNOW (US)"   value={`${latestG.total.toFixed(2)}%`} valueColor={latestG.total >= 1 ? C.green : C.red} sub="Atlanta Fed · daily" />
+            <KVRow label="ATL GDPNOW"    value={latestG.total != null ? `${latestG.total.toFixed(2)}%` : "—"} valueColor={latestG.total != null && latestG.total >= 1 ? C.green : C.red} sub="Atlanta Fed · daily" />
+            <KVRow label="NY FED"        value={data.current.nyNowcast != null ? `${data.current.nyNowcast.toFixed(2)}%` : "—"} valueColor={data.current.nyNowcast != null && data.current.nyNowcast >= 1 ? C.green : C.red} sub={`NY Fed · weekly · ${data.current.nyTargetQtr ?? ""}`} />
             <KVRow label="DALLAS WEI"    value={fmtNum(data.current.wei, 2)}  valueColor={C.green} sub="weekly · Dallas Fed" />
             <KVRow label="UNCTAD WORLD"  value={fmtNum(data.current.unctadWorld, 2, "%")} valueColor={C.green} sub="manual · weekly append" />
             <KVRow label="RA WLA"        value={fmtNum(data.current.wla, 2)}   valueColor={leadAvail ? C.amber : C.textMute} sub={leadAvail ? "weekly · RecessionAlert" : "drop xlsx in data/recessionalert/raw/"} />
@@ -832,9 +1070,13 @@ export default function MacroRegimeGrowth() {
 // ========================================================================
 // SMALL HELPERS
 // ========================================================================
-const Legend = ({ color, label, value, bold }) => (
+const Legend = ({ color, label, value, bold, dashed }) => (
   <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
-    <span style={{ width: 8, height: 8, background: color, display: "inline-block" }} />
+    {dashed ? (
+      <span style={{ width: 12, height: 0, borderTop: `2px dashed ${color}`, display: "inline-block" }} />
+    ) : (
+      <span style={{ width: 8, height: 8, background: color, display: "inline-block" }} />
+    )}
     <span style={{ color: C.textDim, letterSpacing: 1 }}>{label}</span>
     <span style={{ color: C.text, fontWeight: bold ? 700 : 500 }}>{value}</span>
   </span>

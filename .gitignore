@@ -37,3 +37,10 @@ venv/
 # Licensed data — RecessionAlert exports must not be committed
 data/recessionalert/raw/*.xlsx
 data/recessionalert/raw/*.xls
+
+# Diagnostic scripts and dumps (kept on disk, not version-controlled)
+scripts/diag_*.py
+*_dump.txt
+
+# Step instruction files (workflow only, not the project)
+step*.md
