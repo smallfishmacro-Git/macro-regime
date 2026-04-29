@@ -638,6 +638,14 @@ def main() -> None:
     payload = build_growth_payload(gdpnow, wei, unctad, ra)
     OUTPUT_JSON.write_text(json.dumps(payload, indent=2, allow_nan=False, default=str))
     log(f"WROTE {OUTPUT_JSON.relative_to(ROOT)} ({OUTPUT_JSON.stat().st_size // 1024} KB)")
+    # Pattern A dual-write: also drop into public/data/ so Vite serves it as a
+    # static asset at /data/growth.json. The canonical copy lives in data/
+    # (git-tracked, debuggable); the public/ copy is what the frontend fetches.
+    public_dir = ROOT / "public" / "data"
+    public_dir.mkdir(parents=True, exist_ok=True)
+    public_json = public_dir / "growth.json"
+    public_json.write_text(json.dumps(payload, indent=2, allow_nan=False, default=str))
+    log(f"WROTE {public_json.relative_to(ROOT)} (dual-write for Vite)")
     cur = payload["current"]
     log("--- CURRENT REGIME ---")
     log(f"  level={cur['regime']['level']}  direction={cur['regime']['direction']}  hedge={cur['hedge_ratio']}%")

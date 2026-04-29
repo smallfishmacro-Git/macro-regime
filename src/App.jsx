@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   ComposedChart,
   Bar,
@@ -220,6 +220,95 @@ const KVRow = ({ label, value, valueColor = C.text, sub }) => (
   </div>
 );
 
+// ======================================================================
+// DATA LAYER — fetches /data/growth.json and normalizes to the shape
+// the existing render code expects.
+//
+// Wire format (backend) → in-memory shape (frontend):
+//   - date strings ("2026-04-21")  → JS Date instances
+//   - missing 'label' field        → derived via toLocaleDateString
+//   - {coinc_z, lead_z}            → {coinc, lead, composite}
+//   - null leading-block fields    → wrapped with .available flag so render
+//                                     code branches on availability, not nulls
+// ======================================================================
+function normalizeGrowthPayload(raw) {
+  const fmtDay  = (d) => d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const fmtWeek = (d) => d.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
+
+  const gdpNow = (raw.gdpnow_components || []).map((r) => {
+    const d = new Date(r.date);
+    return {
+      date: d,
+      label: fmtDay(d),
+      total: r.total,
+      pceGoods:    r.pceGoods,
+      pceServices: r.pceServices,
+      fixedInv:    r.fixedInv,
+      govt:        r.govt,
+      netExports:  r.netExports,
+      inventories: r.inventories,
+    };
+  });
+
+  const compZ = (raw.composite_z || []).map((r) => {
+    const d = new Date(r.date);
+    const c = r.coinc_z;
+    const l = r.lead_z;
+    return {
+      date: d,
+      label: fmtWeek(d),
+      coinc: c,
+      lead:  l,
+      composite: (c != null && l != null) ? (c + l) / 2 : (c ?? l ?? null),
+    };
+  });
+
+  const sigAv = (raw.meta && raw.meta.signal_availability) || { coincident: true, leading: true };
+  const cur = raw.current || {};
+  const reg = cur.regime || { level: "NORMAL", direction: "UNKNOWN" };
+
+  return {
+    meta: raw.meta || {},
+    signalAvailability: { coincident: !!sigAv.coincident, leading: !!sigAv.leading },
+    current: {
+      regime:        reg,
+      hedgeRatio:    cur.hedge_ratio,        // may be null when leading absent
+      hedgePosture:  cur.hedge_posture,
+      gdpnow:        cur.gdpnow,
+      wei:           cur.wei,
+      unctadWorld:   cur.unctad_world,
+      wla:           cur.wla,                // null when RA absent
+      globalLei8m:   cur.global_lei_8m,      // null when RA absent
+      coincZ:        cur.coinc_z,
+      leadZ:         cur.lead_z,             // 0.0 default when leading absent — guard via signalAvailability.leading
+    },
+    gdpNow,
+    compZ,
+  };
+}
+
+function useGrowthData() {
+  const [state, setState] = useState({ loading: true, error: null, data: null });
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/data/growth.json", { cache: "no-store" })
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status} fetching /data/growth.json`);
+        return r.json();
+      })
+      .then((raw) => {
+        if (cancelled) return;
+        setState({ loading: false, error: null, data: normalizeGrowthPayload(raw) });
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setState({ loading: false, error: err.message, data: null });
+      });
+    return () => { cancelled = true; };
+  }, []);
+  return state;
+}
+
 // ========================================================================
 // MAIN
 // ========================================================================
@@ -229,23 +318,58 @@ export default function MacroRegimeGrowth() {
   const [chartMode, setChartMode] = useState("COMPONENTS");
   const [modelMode, setModelMode] = useState("COMPOSITE");
 
-  const gdpNow = useMemo(genGDPNow, []);
-  const compZ = useMemo(genCompZ, []);
-  const latest = compZ[compZ.length - 1];
-  const prevLead = compZ[compZ.length - 5].lead;
-  const regime = classifyRegime(latest.coinc, latest.lead, prevLead);
-  const regimeKey = `${regime.level}_${regime.direction}`;
-  const hedge = HEDGE_MAP[regimeKey];
-  const hedgeColor = hedge.color === "green" ? C.green : hedge.color === "red" ? C.red : C.amber;
-  const latestG = gdpNow[gdpNow.length - 1];
-  const prevG = gdpNow[gdpNow.length - 22]; // ~1 month ago
-  const m1Delta = +(latestG.total - prevG.total).toFixed(2);
+  const { loading, error, data } = useGrowthData();
 
-  // Recent component contributions table (last 8 obs)
+  // Loading and error states render before the rest of the component tree.
+  if (loading) {
+    return (
+      <div style={{ background: C.bg, minHeight: "100vh", color: C.textDim, fontFamily: FONT_MONO,
+        display: "flex", alignItems: "center", justifyContent: "center", letterSpacing: 1.5, fontSize: 11 }}>
+        LOADING /data/growth.json …
+      </div>
+    );
+  }
+  if (error || !data) {
+    return (
+      <div style={{ background: C.bg, minHeight: "100vh", color: C.red, fontFamily: FONT_MONO,
+        padding: 24, fontSize: 11, letterSpacing: 1 }}>
+        <div style={{ marginBottom: 8 }}>FAILED TO LOAD /data/growth.json</div>
+        <div style={{ color: C.textDim }}>{error}</div>
+        <div style={{ color: C.textMute, marginTop: 16, fontSize: 10 }}>
+          Run: python scripts/ingest_growth.py
+        </div>
+      </div>
+    );
+  }
+
+  // Normalized data — see normalizeGrowthPayload() for shape.
+  const gdpNow = data.gdpNow;
+  const compZ  = data.compZ;
+  const latestG = gdpNow[gdpNow.length - 1] || {};
+  const prevG   = gdpNow[Math.max(0, gdpNow.length - 22)] || latestG;
+  const m1Delta = (latestG.total != null && prevG.total != null)
+    ? +(latestG.total - prevG.total).toFixed(2)
+    : 0;
   const tableRows = gdpNow.slice(-8).reverse();
 
-  // X-axis ticks
-  const monthTicks = useMemo(() => {
+  // Composite z's: last weekly observation, plus 8w-ago lead for direction context.
+  // Backend already classifies regime (and emits "UNKNOWN" when leading absent),
+  // so we don't re-derive — just read from data.current.
+  const latest = compZ[compZ.length - 1] || { coinc: 0, lead: 0 };
+  const regime = data.current.regime;                 // {level, direction}
+  const regimeKey = `${regime.level}_${regime.direction}`;
+  const hedge = HEDGE_MAP[regimeKey] || { ratio: data.current.hedgeRatio, posture: data.current.hedgePosture, color: "amber" };
+  const hedgeColor = hedge.color === "green" ? C.green : hedge.color === "red" ? C.red : C.amber;
+
+  // Convenience for degraded-state rendering.
+  const leadAvail = data.signalAvailability.leading;
+  const fmtNum = (v, digits = 2, suffix = "") => v == null ? "—" : `${v.toFixed(digits)}${suffix}`;
+
+  // X-axis ticks — plain const, not useMemo. The arrays here are <300 rows;
+  // memoization wasn't earning its keep against the Rules-of-Hooks
+  // ordering constraint that conflicts with our early returns above.
+  const monthTicks = (() => {
+    if (!gdpNow || !gdpNow.length) return [];
     const seen = new Set();
     return gdpNow
       .filter((d) => {
@@ -255,9 +379,10 @@ export default function MacroRegimeGrowth() {
         return true;
       })
       .map((d) => d.label);
-  }, [gdpNow]);
+  })();
 
-  const compZTicks = useMemo(() => {
+  const compZTicks = (() => {
+    if (!compZ || !compZ.length) return [];
     const seen = new Set();
     return compZ
       .filter((d) => {
@@ -267,7 +392,7 @@ export default function MacroRegimeGrowth() {
         return true;
       })
       .map((d) => d.label);
-  }, [compZ]);
+  })();
 
   return (
     <div style={{ background: C.bg, minHeight: "100vh", color: C.text, fontFamily: FONT_MONO }}>
@@ -316,7 +441,7 @@ export default function MacroRegimeGrowth() {
             US
           </span>
           <span>ATLANTA FED + FRED + UNCTAD + RECESSIONALERT</span>
-          <span style={{ color: C.amber }}>2026-04-28</span>
+          <span style={{ color: C.amber }}>{new Date(data.meta.generated_at).toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "2-digit" }).toUpperCase()}</span>
           <span>09:24</span>
           <button
             style={{
@@ -456,8 +581,8 @@ export default function MacroRegimeGrowth() {
               color={latestG.total > 2 ? C.green : latestG.total < 0.5 ? C.red : C.amber}
             />
             <StatTile label="Δ 1M"  value={`${m1Delta >= 0 ? "+" : ""}${m1Delta.toFixed(2)}`} sub="vs ~22 obs ago" color={m1Delta >= 0 ? C.green : C.red} valueSize={20} />
-            <StatTile label="WEI"    value="1.87"  sub="Dallas Fed · weekly" color={C.text} valueSize={20} />
-            <StatTile label="WORLD"  value="2.61%" sub="UNCTAD nowcast · monthly" color={C.text} valueSize={20} />
+            <StatTile label="WEI"    value={fmtNum(data.current.wei, 2)}    sub="Dallas Fed · weekly" color={C.text} valueSize={20} />
+            <StatTile label="WORLD"  value={fmtNum(data.current.unctadWorld, 2, "%")} sub="UNCTAD nowcast · monthly" color={C.text} valueSize={20} />
           </div>
 
           {/* Atlanta Fed components panel */}
@@ -580,7 +705,7 @@ export default function MacroRegimeGrowth() {
               </tbody>
             </table>
             <div style={{ fontSize: 8, color: C.textMute, marginTop: 10, letterSpacing: 0.5 }}>
-              SOURCE · Atlanta Fed · <span style={{ color: C.cyan }}>gdpnow-history.csv</span> + <span style={{ color: C.cyan }}>gdpnow-forecast-evolution.xlsx</span> · daily
+              SOURCE · Atlanta Fed · <span style={{ color: C.cyan }}>GDPTrackingModelDataAndForecasts.xlsx</span> · TrackingArchives + CurrentQtrEvolution + ContribHistory · daily
             </div>
           </Panel>
         </div>
@@ -608,7 +733,7 @@ export default function MacroRegimeGrowth() {
               REGIME: <span style={{ color: hedgeColor, fontWeight: 700 }}>{regime.level} · {regime.direction}</span>
             </span>
             <span style={{ fontSize: 9, color: C.textDim, letterSpacing: 1.2 }}>
-              HEDGE: <span style={{ color: hedgeColor, fontWeight: 700 }}>{hedge.ratio}%</span>
+              HEDGE: <span style={{ color: hedgeColor, fontWeight: 700 }}>{hedge.ratio == null ? "—" : `${hedge.ratio}%`}</span>
             </span>
           </div>
 
@@ -617,8 +742,8 @@ export default function MacroRegimeGrowth() {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, paddingBottom: 8, borderBottom: `1px solid ${C.panelEdge}` }}>
               <span style={{ fontSize: 10, color: C.text, letterSpacing: 1.2 }}>COMPOSITE Z·SCORE</span>
               <div style={{ display: "flex", gap: 12, fontSize: 8, color: C.textDim, letterSpacing: 1 }}>
-                <span><span style={{ color: C.cyan }}>━</span> COINC {latest.coinc >= 0 ? "+" : ""}{latest.coinc.toFixed(2)}</span>
-                <span><span style={{ color: C.amber }}>━</span> LEAD {latest.lead >= 0 ? "+" : ""}{latest.lead.toFixed(2)}</span>
+                <span><span style={{ color: C.cyan }}>━</span> COINC {latest.coinc == null ? "—" : (latest.coinc >= 0 ? "+" : "") + latest.coinc.toFixed(2)}</span>
+                <span><span style={{ color: leadAvail ? C.amber : C.textMute }}>━</span> LEAD {(!leadAvail || latest.lead == null) ? "—" : (latest.lead >= 0 ? "+" : "") + latest.lead.toFixed(2)}</span>
               </div>
             </div>
             <div style={{ height: 200 }}>
@@ -670,10 +795,10 @@ export default function MacroRegimeGrowth() {
           <div style={{ marginBottom: 14 }}>
             <div style={{ fontSize: 10, color: C.textDim, letterSpacing: 1.4, marginBottom: 6 }}>KEY INDICATORS</div>
             <KVRow label="GDPNOW (US)"   value={`${latestG.total.toFixed(2)}%`} valueColor={latestG.total >= 1 ? C.green : C.red} sub="Atlanta Fed · daily" />
-            <KVRow label="DALLAS WEI"    value="1.87"  valueColor={C.green} sub="weekly · z = +0.42" />
-            <KVRow label="UNCTAD WORLD"  value="2.61%" valueColor={C.green} sub="monthly · z = +0.18" />
-            <KVRow label="RA WLA"        value="3.4"   valueColor={C.amber} sub="weekly · 8w Δ -1.6" />
-            <KVRow label="GLOBAL LEI +8M" value="38.24" valueColor={C.amber} sub="monthly · forward window" />
+            <KVRow label="DALLAS WEI"    value={fmtNum(data.current.wei, 2)}  valueColor={C.green} sub="weekly · Dallas Fed" />
+            <KVRow label="UNCTAD WORLD"  value={fmtNum(data.current.unctadWorld, 2, "%")} valueColor={C.green} sub="manual · weekly append" />
+            <KVRow label="RA WLA"        value={fmtNum(data.current.wla, 2)}   valueColor={leadAvail ? C.amber : C.textMute} sub={leadAvail ? "weekly · RecessionAlert" : "drop xlsx in data/recessionalert/raw/"} />
+            <KVRow label="GLOBAL LEI +8M" value={fmtNum(data.current.globalLei8m, 2)} valueColor={leadAvail ? C.amber : C.textMute} sub={leadAvail ? "monthly · forward window" : "drop xlsx in data/recessionalert/raw/"} />
           </div>
 
           {/* Regime block */}
@@ -681,7 +806,7 @@ export default function MacroRegimeGrowth() {
             <div style={{ fontSize: 10, color: C.textDim, letterSpacing: 1.4, marginBottom: 6 }}>REGIME STATE</div>
             <KVRow label="LEVEL"     value={regime.level}     valueColor={hedgeColor} />
             <KVRow label="DIRECTION" value={regime.direction} valueColor={hedgeColor} />
-            <KVRow label="HEDGE"     value={`${hedge.ratio}%`} valueColor={hedgeColor} sub={hedge.posture} />
+            <KVRow label="HEDGE"     value={hedge.ratio == null ? "—" : `${hedge.ratio}%`} valueColor={hedgeColor} sub={hedge.posture} />
           </div>
 
           {/* Quadrant inset */}
@@ -690,14 +815,14 @@ export default function MacroRegimeGrowth() {
               <span style={{ fontSize: 10, color: C.text, letterSpacing: 1.2 }}>QUADRANT</span>
               <span style={{ fontSize: 8, color: C.textMute, letterSpacing: 1 }}>COINC × LEAD</span>
             </div>
-            <Quadrant coincZ={latest.coinc} leadZ={latest.lead} />
+            <Quadrant coincZ={latest.coinc ?? 0} leadZ={leadAvail ? (latest.lead ?? 0) : 0} />
           </div>
         </div>
       </div>
 
       {/* Bottom note bar */}
       <div style={{ margin: "16px 16px 0", padding: "8px 0", borderTop: `1px solid ${C.panelEdge}`, fontSize: 9, color: C.textDim, letterSpacing: 1, display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
-        <span>SMALLFISHMACRO · MACRO REGIME › GROWTH · prototype · synthetic data</span>
+        <span>SMALLFISHMACRO · MACRO REGIME › GROWTH · live data · {data.signalAvailability.leading ? "full signal" : "partial signal (leading absent)"}</span>
         <span>Z-SCORES vs 10y rolling history · dir = 8w Δ · click <span style={{ color: C.cyan }}>CONNECT</span> to wire live feeds</span>
       </div>
     </div>
