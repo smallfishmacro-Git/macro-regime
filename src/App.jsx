@@ -412,8 +412,6 @@ export default function MacroRegimeGrowth() {
   const rangeDays = RANGE_DAYS[chartRange] ?? 365;
   const gdpNowFiltered = (() => {
     if (!gdpNow.length) return [];
-    // Range-aware label — short "Sep 1" for short ranges (year is implicit),
-    // longer "Sep '18" for ranges spanning multiple years.
     const longLabel = chartRange === "2Y" || chartRange === "MAX";
     const labelFmt = longLabel
       ? (d) => d.toLocaleDateString("en-US", { month: "short", year: "2-digit" })
@@ -435,45 +433,95 @@ export default function MacroRegimeGrowth() {
       nyByDate.set(k, r.ny);
     }
 
-    // Atlanta-driven join: each Atlanta row gets a matching NY value if
-    // a Friday release falls on the same date.
+    // Determine NY's last actual release date — used for the
+    // solid-vs-dashed handoff. Beyond this date, the magenta line is
+    // forward-filled (dashed) rather than reflecting actual NY observations.
+    const nyLastDate = nyFed.length > 0
+      ? nyFed.reduce((max, r) => (r.date > max ? r.date : max), nyFed[0].date)
+      : null;
+    const nyLastValue = nyLastDate
+      ? nyByDate.get(nyLastDate.toISOString().slice(0, 10))
+      : null;
+
+    // Atlanta-driven join: each Atlanta row gets:
+    //   ny       — original combined field (kept for backward compat / legend)
+    //   nyReal   — actual NY observation if this date has one, else null
+    //   nyFilled — last-known NY value held flat at-or-after nyLastDate, else null
+    // The two split fields drive separate <Line> elements in the chart,
+    // so we can render solid for actual data and dashed for forward-fill.
     const atlSliceDates = new Set(slice.map((d) => d.date.toISOString().slice(0, 10)));
     const merged = slice.map((d) => {
       const k = d.date.toISOString().slice(0, 10);
+      const actualNy = nyByDate.has(k) ? nyByDate.get(k) : null;
+
+      const nyReal = actualNy;
+
+      const nyFilled = (nyLastDate && d.date >= nyLastDate)
+        ? nyLastValue
+        : null;
+
       return {
         ...d,
         label: labelFmt(d.date),
-        ny: nyByDate.has(k) ? nyByDate.get(k) : null,
+        ny: actualNy,
+        nyReal,
+        nyFilled,
       };
     });
 
-    // Pad with NY-only rows for any NY Friday that's MORE RECENT than
-    // Atlanta's last data point. These rows have null total/components
-    // (so no bars or white-line continuation) and just the magenta line.
-    // Recharts handles null component values gracefully — the bars stop,
-    // and the white Atlanta line stops at its real last point.
+    // Pad with NY-only rows for any NY release date in the visible range
+    // that has no matching Atlanta date. Each NY-only row forward-fills
+    // total + components from the prior Atlanta business day (see below),
+    // so Atlanta's white line and bars remain continuous without needing
+    // connectNulls.
     const atlLastDate = slice[slice.length - 1].date;
     const cutoffStart = rangeDays === Infinity
       ? new Date(0)
       : new Date(slice[0].date.getTime());
 
+    // Build NY-only rows. For each NY Friday with no matching Atlanta
+    // date, find the most recent Atlanta row with a date strictly less
+    // than the NY date, and inherit its total + component values. This
+    // keeps the bar wall continuous and the white line unbroken.
+    // The forward-fill is honest: we're saying "Atlanta hadn't published
+    // a new value yet, so the visible bar represents the latest known
+    // estimate" — same convention Bloomberg uses for daily charts with
+    // missing trading days.
     const nyOnlyRows = nyFed
-      .filter((r) => r.date > atlLastDate && r.date >= cutoffStart && !atlSliceDates.has(r.date.toISOString().slice(0, 10)))
-      .map((r) => ({
-        date: r.date,
-        label: labelFmt(r.date),
-        // null Atlanta fields — bars stop, white line stops, magenta continues
-        total: null,
-        pceGoods: null,
-        pceServices: null,
-        fixedInv: null,
-        govt: null,
-        netExports: null,
-        inventories: null,
-        ny: r.ny,
-      }));
+      .filter((r) => r.date >= cutoffStart && !atlSliceDates.has(r.date.toISOString().slice(0, 10)))
+      .map((r) => {
+        // Find the most recent Atlanta row strictly before this NY date.
+        // slice is sorted by date, so we walk backwards from the end.
+        let priorAtl = null;
+        for (let i = slice.length - 1; i >= 0; i--) {
+          if (slice[i].date < r.date) {
+            priorAtl = slice[i];
+            break;
+          }
+        }
+        // Fallback: if no prior Atlanta row in slice (NY date is before
+        // any Atlanta in the visible range), use the first Atlanta row
+        // in the full series instead. Edge case for very early-range NY.
+        if (!priorAtl && gdpNow.length > 0) {
+          priorAtl = gdpNow[0];
+        }
+        return {
+          date: r.date,
+          label: labelFmt(r.date),
+          total: priorAtl ? priorAtl.total : null,
+          pceGoods: priorAtl ? priorAtl.pceGoods : null,
+          pceServices: priorAtl ? priorAtl.pceServices : null,
+          fixedInv: priorAtl ? priorAtl.fixedInv : null,
+          govt: priorAtl ? priorAtl.govt : null,
+          netExports: priorAtl ? priorAtl.netExports : null,
+          inventories: priorAtl ? priorAtl.inventories : null,
+          ny: r.ny,
+          nyReal: r.ny,
+          nyFilled: null,
+        };
+      });
 
-    return [...merged, ...nyOnlyRows];
+    return [...merged, ...nyOnlyRows].sort((a, b) => a.date - b.date);
   })();
 
   // ----- Y-axis auto-zoom -----
@@ -889,11 +937,24 @@ export default function MacroRegimeGrowth() {
                   <Bar dataKey="netExports"  stackId="s" fill={C.netExports}  isAnimationActive={false} />
                   <Bar dataKey="inventories" stackId="s" fill={C.inventories} isAnimationActive={false} />
                   <Line type="monotone" dataKey="total" stroke={C.white} strokeWidth={1.6} dot={false} isAnimationActive={false} />
+                  {/* NY Fed actual observations — solid magenta. */}
                   <Line
                     type="stepAfter"
-                    dataKey="ny"
+                    dataKey="nyReal"
                     stroke={C.magenta}
                     strokeWidth={2.2}
+                    dot={false}
+                    connectNulls
+                    isAnimationActive={false}
+                  />
+                  {/* NY Fed forward-fill segment — dashed, same color and weight,
+                      indicates "last known value, no release since". */}
+                  <Line
+                    type="stepAfter"
+                    dataKey="nyFilled"
+                    stroke={C.magenta}
+                    strokeWidth={2.2}
+                    strokeDasharray="3 3"
                     dot={false}
                     connectNulls
                     isAnimationActive={false}
