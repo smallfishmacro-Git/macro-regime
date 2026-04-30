@@ -286,6 +286,44 @@ function normalizeGrowthPayload(raw) {
     };
   }).filter((r) => r.ny != null);
 
+  // Dallas Fed-style WEI vs GDP YoY data for the LEADING tab chart.
+  // wei_series: weekly observations of WEI + 13wk MA.
+  // gdp_yoy_series: quarterly observations of Real GDP YoY %.
+  const weiSeries = (raw.wei_series || []).map((r) => {
+    const d = new Date(r.date);
+    return {
+      date: d,
+      wei: r.wei,
+      wei_ma13: r.wei_ma13,
+    };
+  });
+  const gdpYoySeries = (raw.gdp_yoy_series || []).map((r) => {
+    const d = new Date(r.date);
+    return {
+      date: d,
+      gdp_yoy: r.gdp_yoy,
+    };
+  }).filter((r) => r.gdp_yoy != null);
+
+  // RecessionAlert leading composite — monthly cadence: USMLEI, %G20, %CBANK.
+  const raLeadingSeries = (raw.ra_leading_series || []).map((r) => {
+    const d = new Date(r.date);
+    return {
+      date: d,
+      usmlei: r.usmlei,
+      pct_g20_rising: r.pct_g20_rising,
+      cb_net_cutters: r.cb_net_cutters,
+    };
+  });
+  // RecessionAlert weekly AVG — weekly cadence, higher-resolution overlay.
+  const raWeeklyAvgSeries = (raw.ra_weekly_avg_series || []).map((r) => {
+    const d = new Date(r.date);
+    return {
+      date: d,
+      avg: r.avg,
+    };
+  }).filter((r) => r.avg != null);
+
   const sigAv = (raw.meta && raw.meta.signal_availability) || { coincident: true, leading: true };
   const cur = raw.current || {};
   const reg = cur.regime || { level: "NORMAL", direction: "UNKNOWN" };
@@ -310,6 +348,10 @@ function normalizeGrowthPayload(raw) {
     gdpNow,
     compZ,
     nyFed,
+    weiSeries,
+    gdpYoySeries,
+    raLeadingSeries,
+    raWeeklyAvgSeries,
   };
 }
 
@@ -341,9 +383,11 @@ function useGrowthData() {
 export default function MacroRegimeGrowth() {
   const [primaryTab, setPrimaryTab] = useState("MACRO_REGIME");
   const [subTab, setSubTab] = useState("GROWTH");
-  const [chartMode, setChartMode] = useState("COMPONENTS");
+  const [chartMode, setChartMode] = useState("COINCIDENT");
   const [modelMode, setModelMode] = useState("COMPOSITE");
   const [chartRange, setChartRange] = useState("1Y");  // 6M | 1Y | 2Y | MAX
+  const [leadingRange, setLeadingRange] = useState("5Y");      // 1Y | 5Y | MAX — drives COINCIDENT chart
+  const [leadingTabRange, setLeadingTabRange] = useState("10Y"); // 5Y | 10Y | MAX — drives LEADING chart
 
   const { loading, error, data } = useGrowthData();
 
@@ -373,6 +417,10 @@ export default function MacroRegimeGrowth() {
   const gdpNow = data.gdpNow;
   const compZ  = data.compZ;
   const nyFed  = data.nyFed || [];
+  const weiSeries = data.weiSeries || [];
+  const gdpYoySeries = data.gdpYoySeries || [];
+  const raLeadingSeries = data.raLeadingSeries || [];
+  const raWeeklyAvgSeries = data.raWeeklyAvgSeries || [];
   const latestG = gdpNow[gdpNow.length - 1] || {};
 
   // Divergence indicator: NY Fed vs Atlanta on the current quarter.
@@ -620,6 +668,293 @@ export default function MacroRegimeGrowth() {
     return strided.map((d) => d.label);
   })();
 
+  // ---- LEADING chart data preparation ----
+  // Merge WEI (weekly) + GDP YoY (quarterly) onto a single time-sorted
+  // array. Each row carries date + (wei | wei_ma13 | gdp_yoy), with
+  // nulls where a series doesn't have a value at that date. Recharts'
+  // connectNulls handles the gaps.
+  const LEADING_RANGE_DAYS = { "1Y": 365, "5Y": 1825, "MAX": Infinity };
+  const leadingRangeDays = LEADING_RANGE_DAYS[leadingRange] ?? 1825;
+
+  const leadingChartData = (() => {
+    if (!weiSeries.length && !gdpYoySeries.length) return [];
+
+    // Range filter — anchor to "today" (latest date in either series)
+    const latestWei = weiSeries.length ? weiSeries[weiSeries.length - 1].date : null;
+    const latestGdp = gdpYoySeries.length ? gdpYoySeries[gdpYoySeries.length - 1].date : null;
+    const latestDate = (latestWei && latestGdp)
+      ? (latestWei > latestGdp ? latestWei : latestGdp)
+      : (latestWei || latestGdp);
+
+    const cutoff = leadingRangeDays === Infinity
+      ? new Date(0)
+      : new Date(latestDate.getTime() - leadingRangeDays * 86400000);
+
+    const weiInRange = weiSeries.filter((r) => r.date >= cutoff);
+    const gdpInRange = gdpYoySeries.filter((r) => r.date >= cutoff);
+
+    // Range-aware date labels — short for 1Y, longer for 5Y/MAX
+    const longLabel = leadingRange === "5Y" || leadingRange === "MAX";
+    const labelFmt = longLabel
+      ? (d) => d.toLocaleDateString("en-US", { month: "short", year: "2-digit" })
+      : (d) => d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+    // Build a Map keyed by ISO date for union-merge
+    const merged = new Map();
+    for (const r of weiInRange) {
+      const k = r.date.toISOString().slice(0, 10);
+      merged.set(k, { date: r.date, label: labelFmt(r.date), wei: r.wei, wei_ma13: r.wei_ma13, gdp_yoy: null });
+    }
+    for (const r of gdpInRange) {
+      const k = r.date.toISOString().slice(0, 10);
+      const existing = merged.get(k);
+      if (existing) {
+        existing.gdp_yoy = r.gdp_yoy;
+      } else {
+        merged.set(k, { date: r.date, label: labelFmt(r.date), wei: null, wei_ma13: null, gdp_yoy: r.gdp_yoy });
+      }
+    }
+
+    // Sort by date and return as array
+    return Array.from(merged.values()).sort((a, b) => a.date - b.date);
+  })();
+
+  // Compute y-axis domain for LEADING chart with padding
+  const leadingYDomain = (() => {
+    if (!leadingChartData.length) return [-2, 5];
+    let yMin = Infinity, yMax = -Infinity;
+    for (const r of leadingChartData) {
+      for (const v of [r.wei, r.wei_ma13, r.gdp_yoy]) {
+        if (v != null) {
+          if (v < yMin) yMin = v;
+          if (v > yMax) yMax = v;
+        }
+      }
+    }
+    if (yMin === Infinity) return [-2, 5];
+    const pad = Math.max(0.5, (yMax - yMin) * 0.1);
+    return [Math.floor((yMin - pad) * 2) / 2, Math.ceil((yMax + pad) * 2) / 2];
+  })();
+
+  // Latest values for legend/tile display
+  const latestWeiRow = weiSeries.length ? weiSeries[weiSeries.length - 1] : null;
+  const latestGdpRow = gdpYoySeries.length ? gdpYoySeries[gdpYoySeries.length - 1] : null;
+
+  // Adaptive x-axis tick stride for LEADING chart
+  const leadingTickStride = leadingRange === "MAX" ? 24 : leadingRange === "5Y" ? 6 : 2;
+  const leadingMonthTicks = (() => {
+    if (!leadingChartData.length) return [];
+    const seen = new Set();
+    const monthsSeen = [];
+    for (const d of leadingChartData) {
+      const k = `${d.date.getFullYear()}-${d.date.getMonth()}`;
+      if (!seen.has(k)) {
+        seen.add(k);
+        monthsSeen.push(d);
+      }
+    }
+    const strided = monthsSeen.filter((_, i) => i % leadingTickStride === 0);
+    if (monthsSeen.length && strided[strided.length - 1] !== monthsSeen[monthsSeen.length - 1]) {
+      strided.push(monthsSeen[monthsSeen.length - 1]);
+    }
+    return strided.map((d) => d.label);
+  })();
+
+  // ---- LEADING tab chart data preparation ----
+  // Merge RA monthly (USMLEI, %G20, %CBANK) + weekly AVG into one
+  // date-sorted array. Each row carries date + (usmlei | pct_g20_rising |
+  // cb_net_cutters | avg), with nulls where a series doesn't have a
+  // value at that date. connectNulls handles gaps.
+  const LEADING_TAB_RANGE_DAYS = { "5Y": 1825, "10Y": 3650, "MAX": Infinity };
+  const leadingTabRangeDays = LEADING_TAB_RANGE_DAYS[leadingTabRange] ?? 3650;
+
+  const leadingTabChartData = (() => {
+    if (!raLeadingSeries.length && !raWeeklyAvgSeries.length) return [];
+
+    // Lead times (in months) for forward-shifted series.
+    // RecessionAlert's reference chart shifts %G20 RISING by 8 months
+    // (their stated empirical lead time on coincident activity).
+    // We additionally shift %CBANK CUTTERS by 12 months — global rate
+    // policy typically affects real economy with a ~1yr lag.
+    const G20_LEAD_MONTHS = 8;
+    const CBANK_LEAD_MONTHS = 12;
+
+    // Helper to shift a date forward by N months (preserves day-of-month
+    // when possible; falls back to month-end if target month is shorter).
+    const shiftMonths = (d, n) => {
+      const out = new Date(d.getTime());
+      out.setMonth(out.getMonth() + n);
+      return out;
+    };
+
+    // Range filter — anchor to latest date across all source series.
+    // Note: forward-shifted observations land at native_date + lead, so
+    // the displayed chart will extend further right than latestNativeDate.
+    // The cutoff still uses native dates (we want N years of history
+    // ending at "today", regardless of forward projection).
+    const latestMonthly = raLeadingSeries.length ? raLeadingSeries[raLeadingSeries.length - 1].date : null;
+    const latestWeekly  = raWeeklyAvgSeries.length ? raWeeklyAvgSeries[raWeeklyAvgSeries.length - 1].date : null;
+    const latestNativeDate = (latestMonthly && latestWeekly)
+      ? (latestMonthly > latestWeekly ? latestMonthly : latestWeekly)
+      : (latestMonthly || latestWeekly);
+
+    const cutoff = leadingTabRangeDays === Infinity
+      ? new Date(0)
+      : new Date(latestNativeDate.getTime() - leadingTabRangeDays * 86400000);
+
+    const monthlyInRange = raLeadingSeries.filter((r) => r.date >= cutoff);
+    const weeklyInRange = raWeeklyAvgSeries.filter((r) => r.date >= cutoff);
+
+    // Range-aware date labels — note: labels reflect the SHIFTED date
+    // for forward series, native date for non-shifted series.
+    const longLabel = leadingTabRange === "10Y" || leadingTabRange === "MAX";
+    const labelFmt = longLabel
+      ? (d) => d.toLocaleDateString("en-US", { month: "short", year: "2-digit" })
+      : (d) => d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+    // Union-merge via Map keyed by ISO date.
+    // Forward-shifted variants land at separate keys (date + lead_months).
+    // USMLEI and AVG stay at native dates. The Map automatically handles
+    // merging when multiple series happen to land on the same shifted date.
+    const merged = new Map();
+
+    // Add USMLEI at native dates (no shift)
+    for (const r of monthlyInRange) {
+      const k = r.date.toISOString().slice(0, 10);
+      const existing = merged.get(k);
+      if (existing) {
+        existing.usmlei = r.usmlei;
+      } else {
+        merged.set(k, {
+          date: r.date,
+          label: labelFmt(r.date),
+          usmlei: r.usmlei,
+          pct_g20_rising: null,
+          cb_net_cutters: null,
+          avg: null,
+        });
+      }
+    }
+
+    // Add %G20 at shifted dates (date + 8 months)
+    for (const r of monthlyInRange) {
+      if (r.pct_g20_rising == null) continue;
+      const shiftedDate = shiftMonths(r.date, G20_LEAD_MONTHS);
+      const k = shiftedDate.toISOString().slice(0, 10);
+      const existing = merged.get(k);
+      if (existing) {
+        existing.pct_g20_rising = r.pct_g20_rising;
+      } else {
+        merged.set(k, {
+          date: shiftedDate,
+          label: labelFmt(shiftedDate),
+          usmlei: null,
+          pct_g20_rising: r.pct_g20_rising,
+          cb_net_cutters: null,
+          avg: null,
+        });
+      }
+    }
+
+    // Add %CBANK at shifted dates (date + 12 months)
+    for (const r of monthlyInRange) {
+      if (r.cb_net_cutters == null) continue;
+      const shiftedDate = shiftMonths(r.date, CBANK_LEAD_MONTHS);
+      const k = shiftedDate.toISOString().slice(0, 10);
+      const existing = merged.get(k);
+      if (existing) {
+        existing.cb_net_cutters = r.cb_net_cutters;
+      } else {
+        merged.set(k, {
+          date: shiftedDate,
+          label: labelFmt(shiftedDate),
+          usmlei: null,
+          pct_g20_rising: null,
+          cb_net_cutters: r.cb_net_cutters,
+          avg: null,
+        });
+      }
+    }
+
+    // Add weekly AVG at native dates (no shift)
+    for (const r of weeklyInRange) {
+      const k = r.date.toISOString().slice(0, 10);
+      const existing = merged.get(k);
+      if (existing) {
+        existing.avg = r.avg;
+      } else {
+        merged.set(k, {
+          date: r.date,
+          label: labelFmt(r.date),
+          usmlei: null,
+          pct_g20_rising: null,
+          cb_net_cutters: null,
+          avg: r.avg,
+        });
+      }
+    }
+
+    return Array.from(merged.values()).sort((a, b) => a.date - b.date);
+  })();
+
+  // Y-axis domains for LEADING tab chart — three axes total:
+  //   Left (outer):  USMLEI + AVG, FIXED bounds for visual stability
+  //                  across range views.
+  //   Right (inner): %G20 RISING, AUTO-ZOOMED to visible-range data so
+  //                  the line uses full vertical height.
+  //   Right (outer): %CBANK CUTTERS, AUTO-ZOOMED similarly.
+  //
+  // Each leading series gets its own axis because their absolute scales
+  // aren't directly comparable. Turning-point alignment is achieved by
+  // the forward-shift transformation (8mo for %G20, 12mo for %CBANK)
+  // applied in leadingTabChartData; magnitude alignment isn't meaningful
+  // and would require visual compression to enforce.
+  const leadingTabLeftDomain = [-100, 80];
+
+  // Compute auto-zoom domain for a given column from leadingTabChartData.
+  // Returns [floor(min - pad), ceil(max + pad)] rounded to nearest 5.
+  // Padding is 10% of range, with a 2-unit floor.
+  const autoZoomDomain = (col, fallback = [0, 100]) => {
+    if (!leadingTabChartData.length) return fallback;
+    let yMin = Infinity, yMax = -Infinity;
+    for (const r of leadingTabChartData) {
+      const v = r[col];
+      if (v != null) {
+        if (v < yMin) yMin = v;
+        if (v > yMax) yMax = v;
+      }
+    }
+    if (yMin === Infinity) return fallback;
+    const pad = Math.max(2, (yMax - yMin) * 0.1);
+    return [Math.floor((yMin - pad) / 5) * 5, Math.ceil((yMax + pad) / 5) * 5];
+  };
+  const leadingTabG20Domain = autoZoomDomain("pct_g20_rising", [0, 100]);
+  const leadingTabCbankDomain = autoZoomDomain("cb_net_cutters", [-50, 50]);
+
+  // Latest values for legend display
+  const latestUsmleiRow = raLeadingSeries.length ? raLeadingSeries[raLeadingSeries.length - 1] : null;
+  const latestRaWeekly = raWeeklyAvgSeries.length ? raWeeklyAvgSeries[raWeeklyAvgSeries.length - 1] : null;
+
+  // Adaptive x-axis tick stride for LEADING tab chart
+  const leadingTabTickStride = leadingTabRange === "MAX" ? 24 : leadingTabRange === "10Y" ? 12 : 6;
+  const leadingTabMonthTicks = (() => {
+    if (!leadingTabChartData.length) return [];
+    const seen = new Set();
+    const monthsSeen = [];
+    for (const d of leadingTabChartData) {
+      const k = `${d.date.getFullYear()}-${d.date.getMonth()}`;
+      if (!seen.has(k)) {
+        seen.add(k);
+        monthsSeen.push(d);
+      }
+    }
+    const strided = monthsSeen.filter((_, i) => i % leadingTabTickStride === 0);
+    if (monthsSeen.length && strided[strided.length - 1] !== monthsSeen[monthsSeen.length - 1]) {
+      strided.push(monthsSeen[monthsSeen.length - 1]);
+    }
+    return strided.map((d) => d.label);
+  })();
+
   const compZTicks = (() => {
     if (!compZ || !compZ.length) return [];
     const seen = new Set();
@@ -807,7 +1142,7 @@ export default function MacroRegimeGrowth() {
             </div>
             <div style={{ display: "flex", gap: 4 }}>
               <Pill active={chartMode === "NOWCAST"}    onClick={() => setChartMode("NOWCAST")}>NOWCAST</Pill>
-              <Pill active={chartMode === "COMPONENTS"} onClick={() => setChartMode("COMPONENTS")}>COMPONENTS</Pill>
+              <Pill active={chartMode === "COINCIDENT"} onClick={() => setChartMode("COINCIDENT")}>COINCIDENT</Pill>
               <Pill active={chartMode === "LEADING"}    onClick={() => setChartMode("LEADING")}>LEADING</Pill>
             </div>
           </div>
@@ -845,167 +1180,440 @@ export default function MacroRegimeGrowth() {
           <Panel style={{ marginBottom: 12 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, paddingBottom: 8, borderBottom: `1px solid ${C.panelEdge}` }}>
               <div style={{ fontSize: 10, letterSpacing: 1.4, color: C.text }}>
-                US ATLANTA FED GDPNOW <span style={{ color: C.amber }}>{latestG.total != null ? latestG.total.toFixed(3) : "—"}</span>
-                <span style={{ color: C.textMute, marginLeft: 8, fontSize: 8 }}>· {chartRange} VIEW</span>
+                {chartMode === "COINCIDENT" ? (
+                  <>
+                    US COINCIDENT <span style={{ color: C.amber }}>—</span>
+                    <span style={{ color: C.textMute, marginLeft: 8, fontSize: 8 }}>· WEI vs GDP YOY</span>
+                  </>
+                ) : chartMode === "LEADING" ? (
+                  <>
+                    US LEADING INDICATORS <span style={{ color: C.amber }}>—</span>
+                    <span style={{ color: C.textMute, marginLeft: 8, fontSize: 8 }}>· RecessionAlert composite</span>
+                  </>
+                ) : (
+                  <>
+                    US ATLANTA FED GDPNOW <span style={{ color: C.amber }}>{latestG.total != null ? latestG.total.toFixed(3) : "—"}</span>
+                    <span style={{ color: C.textMute, marginLeft: 8, fontSize: 8 }}>· {chartRange} VIEW</span>
+                  </>
+                )}
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <span style={{ fontSize: 8, color: C.textMute, letterSpacing: 1 }}>RANGE</span>
-                {["6M", "1Y", "2Y", "MAX"].map((r) => (
-                  <button
-                    key={r}
-                    onClick={() => setChartRange(r)}
-                    style={{
-                      fontSize: 8,
-                      padding: "2px 7px",
-                      color: r === chartRange ? "#000" : C.textDim,
-                      background: r === chartRange ? C.amber : "transparent",
-                      border: `1px solid ${r === chartRange ? C.amber : C.panelEdgeStrong}`,
-                      letterSpacing: 1,
-                      cursor: "pointer",
-                      borderRadius: 1,
-                      fontFamily: FONT_MONO,
-                    }}
-                  >
-                    {r}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Component legend */}
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 14, marginBottom: 8, fontSize: 8, letterSpacing: 1 }}>
-              <Legend color={C.white} label="ATL GDPNOW" value={latestG.total != null ? latestG.total.toFixed(3) : "—"} bold />
-              <Legend color={C.magenta} label="NY FED NOWCAST" value={data.current.nyNowcast != null ? data.current.nyNowcast.toFixed(3) : "—"} bold />
-              <Legend color={C.pceGoods} label="PCE GOODS" value={latestG.pceGoods != null ? latestG.pceGoods.toFixed(3) : "—"} />
-              <Legend color={C.pceServices} label="PCE SERVICES" value={latestG.pceServices != null ? latestG.pceServices.toFixed(3) : "—"} />
-              <Legend color={C.fixedInv} label="FIXED INV" value={latestG.fixedInv != null ? latestG.fixedInv.toFixed(3) : "—"} />
-              <Legend color={C.govt} label="GOVT" value={latestG.govt != null ? latestG.govt.toFixed(3) : "—"} />
-              <Legend color={C.netExports} label="NET EXPORTS" value={latestG.netExports != null ? latestG.netExports.toFixed(3) : "—"} />
-              <Legend color={C.inventories} label="INVENTORIES" value={latestG.inventories != null ? latestG.inventories.toFixed(3) : "—"} />
-            </div>
-
-            <div style={{ height: 280 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={gdpNowFiltered} margin={{ top: 6, right: 30, left: 0, bottom: 6 }} stackOffset="sign">
-                  <CartesianGrid stroke={C.grid} vertical={false} />
-                  <XAxis
-                    dataKey="label"
-                    ticks={monthTicks}
-                    tick={{ fill: C.textDim, fontSize: 8, fontFamily: FONT_MONO }}
-                    axisLine={{ stroke: C.panelEdge }}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    domain={yDomain}
-                    tick={{ fill: C.textDim, fontSize: 8, fontFamily: FONT_MONO }}
-                    axisLine={{ stroke: C.panelEdge }}
-                    tickLine={false}
-                    width={36}
-                  />
-                  <ReferenceLine y={0} stroke={C.textMute} strokeWidth={0.5} />
-                  {currentQtrStart && (
-                    <ReferenceLine
-                      x={currentQtrStart}
-                      stroke={C.amber}
-                      strokeDasharray="2 3"
-                      strokeWidth={0.6}
-                      label={{
-                        value: "CURRENT Q",
-                        position: "insideTopRight",
-                        fill: C.amber,
+              {chartMode === "NOWCAST" && (
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ fontSize: 8, color: C.textMute, letterSpacing: 1 }}>RANGE</span>
+                  {["6M", "1Y", "2Y", "MAX"].map((r) => (
+                    <button
+                      key={r}
+                      onClick={() => setChartRange(r)}
+                      style={{
                         fontSize: 8,
-                        fontFamily: FONT_MONO,
+                        padding: "2px 7px",
+                        color: r === chartRange ? "#000" : C.textDim,
+                        background: r === chartRange ? C.amber : "transparent",
+                        border: `1px solid ${r === chartRange ? C.amber : C.panelEdgeStrong}`,
                         letterSpacing: 1,
+                        cursor: "pointer",
+                        borderRadius: 1,
+                        fontFamily: FONT_MONO,
                       }}
-                    />
-                  )}
-                  <Tooltip
-                    contentStyle={{
-                      background: "#000",
-                      border: `1px solid ${C.amber}`,
-                      fontFamily: FONT_MONO,
-                      fontSize: 9,
-                      borderRadius: 2,
-                    }}
-                    labelStyle={{ color: C.amber, marginBottom: 4 }}
-                    itemStyle={{ padding: "1px 0" }}
-                  />
-                  <Bar dataKey="pceGoods"    stackId="s" fill={C.pceGoods}    isAnimationActive={false} />
-                  <Bar dataKey="pceServices" stackId="s" fill={C.pceServices} isAnimationActive={false} />
-                  <Bar dataKey="fixedInv"    stackId="s" fill={C.fixedInv}    isAnimationActive={false} />
-                  <Bar dataKey="govt"        stackId="s" fill={C.govt}        isAnimationActive={false} />
-                  <Bar dataKey="netExports"  stackId="s" fill={C.netExports}  isAnimationActive={false} />
-                  <Bar dataKey="inventories" stackId="s" fill={C.inventories} isAnimationActive={false} />
-                  <Line type="monotone" dataKey="total" stroke={C.white} strokeWidth={1.6} dot={false} isAnimationActive={false} />
-                  {/* NY Fed actual observations — solid magenta. */}
-                  <Line
-                    type="stepAfter"
-                    dataKey="nyReal"
-                    stroke={C.magenta}
-                    strokeWidth={2.2}
-                    dot={false}
-                    connectNulls
-                    isAnimationActive={false}
-                  />
-                  {/* NY Fed forward-fill segment — dashed, same color and weight,
-                      indicates "last known value, no release since". */}
-                  <Line
-                    type="stepAfter"
-                    dataKey="nyFilled"
-                    stroke={C.magenta}
-                    strokeWidth={2.2}
-                    strokeDasharray="3 3"
-                    dot={false}
-                    connectNulls
-                    isAnimationActive={false}
-                  />
-                </ComposedChart>
-              </ResponsiveContainer>
+                    >
+                      {r}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
+
+            {chartMode === "COINCIDENT" ? (
+              <>
+                {/* COINCIDENT chart legend + range selector row */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, marginTop: 4 }}>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 14, fontSize: 8, letterSpacing: 1 }}>
+                    <Legend color={C.cyan}  label="WEI (RAW)"  value={latestWeiRow?.wei != null ? latestWeiRow.wei.toFixed(2) : "—"} />
+                    <Legend color={C.white} label="WEI 13W MA" value={latestWeiRow?.wei_ma13 != null ? latestWeiRow.wei_ma13.toFixed(2) : "—"} bold />
+                    <Legend color={C.amber} label="GDP YOY"    value={latestGdpRow?.gdp_yoy != null ? `${latestGdpRow.gdp_yoy.toFixed(2)}%` : "—"} bold />
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ fontSize: 8, color: C.textMute, letterSpacing: 1 }}>RANGE</span>
+                    {["1Y", "5Y", "MAX"].map((r) => (
+                      <button
+                        key={r}
+                        onClick={() => setLeadingRange(r)}
+                        style={{
+                          fontSize: 8,
+                          padding: "2px 7px",
+                          color: r === leadingRange ? "#000" : C.textDim,
+                          background: r === leadingRange ? C.amber : "transparent",
+                          border: `1px solid ${r === leadingRange ? C.amber : C.panelEdgeStrong}`,
+                          letterSpacing: 1,
+                          cursor: "pointer",
+                          borderRadius: 1,
+                          fontFamily: FONT_MONO,
+                        }}
+                      >
+                        {r}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* LEADING chart */}
+                <div style={{ width: "100%", height: 460 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <ComposedChart data={leadingChartData} margin={{ top: 6, right: 30, left: 0, bottom: 6 }}>
+                      <CartesianGrid stroke={C.panelEdge} strokeDasharray="2 4" vertical={false} />
+                      <XAxis
+                        dataKey="label"
+                        ticks={leadingMonthTicks}
+                        tick={{ fill: C.textDim, fontSize: 8, fontFamily: FONT_MONO }}
+                        axisLine={{ stroke: C.panelEdge }}
+                        tickLine={false}
+                      />
+                      <YAxis
+                        domain={leadingYDomain}
+                        tick={{ fill: C.textDim, fontSize: 8, fontFamily: FONT_MONO }}
+                        axisLine={{ stroke: C.panelEdge }}
+                        tickLine={false}
+                        width={36}
+                        tickFormatter={(v) => `${v}%`}
+                      />
+                      <ReferenceLine y={0} stroke={C.textMute} strokeWidth={0.5} />
+                      <Tooltip
+                        contentStyle={{
+                          background: "#000",
+                          border: `1px solid ${C.amber}`,
+                          fontFamily: FONT_MONO,
+                          fontSize: 9,
+                          borderRadius: 2,
+                        }}
+                        labelStyle={{ color: C.amber, marginBottom: 4 }}
+                        itemStyle={{ padding: "1px 0" }}
+                      />
+                      {/* WEI raw — thin cyan line */}
+                      <Line
+                        type="monotone"
+                        dataKey="wei"
+                        stroke={C.cyan}
+                        strokeWidth={1.0}
+                        dot={false}
+                        connectNulls
+                        isAnimationActive={false}
+                      />
+                      {/* WEI 13wk MA — thicker white line */}
+                      <Line
+                        type="monotone"
+                        dataKey="wei_ma13"
+                        stroke={C.white}
+                        strokeWidth={1.8}
+                        dot={false}
+                        connectNulls
+                        isAnimationActive={false}
+                      />
+                      {/* GDP YoY — stepped amber line (quarterly cadence) */}
+                      <Line
+                        type="stepAfter"
+                        dataKey="gdp_yoy"
+                        stroke={C.amber}
+                        strokeWidth={2.0}
+                        dot={false}
+                        connectNulls
+                        isAnimationActive={false}
+                      />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Source footer */}
+                <div style={{ marginTop: 8, fontSize: 8, color: C.textMute, letterSpacing: 0.8 }}>
+                  SOURCE · Dallas Fed · <span style={{ color: C.cyan }}>WEI</span> · weekly · BEA · <span style={{ color: C.amber }}>Real GDP YoY</span> · quarterly · via FRED
+                </div>
+              </>
+            ) : chartMode === "LEADING" ? (
+              <>
+                {/* LEADING chart legend + range selector row */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, marginTop: 4 }}>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 14, fontSize: 8, letterSpacing: 1 }}>
+                    <Legend color={C.white}   label="USMLEI"          value={latestUsmleiRow?.usmlei != null ? latestUsmleiRow.usmlei.toFixed(2) : "—"} bold />
+                    <Legend color={C.cyan}    label="WEEKLY AVG"      value={latestRaWeekly?.avg != null ? latestRaWeekly.avg.toFixed(2) : "—"} />
+                    <Legend color={C.amber}   label="%G20 RISING +8M"     value={latestUsmleiRow?.pct_g20_rising != null ? `${latestUsmleiRow.pct_g20_rising.toFixed(1)}%` : "—"} bold />
+                    <Legend color={C.magenta} label="%CBANK CUTTERS +12M" value={latestUsmleiRow?.cb_net_cutters != null ? `${latestUsmleiRow.cb_net_cutters.toFixed(1)}%` : "—"} bold />
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ fontSize: 8, color: C.textMute, letterSpacing: 1 }}>RANGE</span>
+                    {["5Y", "10Y", "MAX"].map((r) => (
+                      <button
+                        key={r}
+                        onClick={() => setLeadingTabRange(r)}
+                        style={{
+                          fontSize: 8,
+                          padding: "2px 7px",
+                          color: r === leadingTabRange ? "#000" : C.textDim,
+                          background: r === leadingTabRange ? C.amber : "transparent",
+                          border: `1px solid ${r === leadingTabRange ? C.amber : C.panelEdgeStrong}`,
+                          letterSpacing: 1,
+                          cursor: "pointer",
+                          borderRadius: 1,
+                          fontFamily: FONT_MONO,
+                        }}
+                      >
+                        {r}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* LEADING chart — dual y-axes */}
+                <div style={{ width: "100%", height: 460 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <ComposedChart data={leadingTabChartData} margin={{ top: 6, right: 76, left: 0, bottom: 6 }}>
+                      <CartesianGrid stroke={C.panelEdge} strokeDasharray="2 4" vertical={false} />
+                      <XAxis
+                        dataKey="label"
+                        ticks={leadingTabMonthTicks}
+                        tick={{ fill: C.textDim, fontSize: 8, fontFamily: FONT_MONO }}
+                        axisLine={{ stroke: C.panelEdge }}
+                        tickLine={false}
+                      />
+                      {/* LEFT axis (outer) — USMLEI + AVG (composite indices)
+                          Fixed bounds [-100, 80] for visual stability. */}
+                      <YAxis
+                        yAxisId="left"
+                        orientation="left"
+                        domain={leadingTabLeftDomain}
+                        tick={{ fill: C.textDim, fontSize: 8, fontFamily: FONT_MONO }}
+                        axisLine={{ stroke: C.panelEdge }}
+                        tickLine={false}
+                        width={36}
+                      />
+                      {/* RIGHT axis (inner) — %G20 RISING
+                          Auto-zoomed; tick labels in amber to match line color. */}
+                      <YAxis
+                        yAxisId="g20"
+                        orientation="right"
+                        domain={leadingTabG20Domain}
+                        tick={{ fill: C.amber, fontSize: 8, fontFamily: FONT_MONO }}
+                        axisLine={{ stroke: C.amber, strokeOpacity: 0.4 }}
+                        tickLine={false}
+                        width={32}
+                        tickFormatter={(v) => `${v}%`}
+                      />
+                      {/* RIGHT axis (outer) — %CBANK CUTTERS
+                          Auto-zoomed; tick labels in magenta to match line color. */}
+                      <YAxis
+                        yAxisId="cbank"
+                        orientation="right"
+                        domain={leadingTabCbankDomain}
+                        tick={{ fill: C.magenta, fontSize: 8, fontFamily: FONT_MONO }}
+                        axisLine={{ stroke: C.magenta, strokeOpacity: 0.4 }}
+                        tickLine={false}
+                        width={32}
+                        tickFormatter={(v) => `${v}%`}
+                      />
+                      <ReferenceLine yAxisId="left" y={0} stroke={C.textMute} strokeWidth={0.5} />
+                      <Tooltip
+                        contentStyle={{
+                          background: "#000",
+                          border: `1px solid ${C.amber}`,
+                          fontFamily: FONT_MONO,
+                          fontSize: 9,
+                          borderRadius: 2,
+                        }}
+                        labelStyle={{ color: C.amber, marginBottom: 4 }}
+                        itemStyle={{ padding: "1px 0" }}
+                      />
+
+                      {/* USMLEI — white smooth (left axis) */}
+                      <Line
+                        yAxisId="left"
+                        type="monotone"
+                        dataKey="usmlei"
+                        stroke={C.white}
+                        strokeWidth={1.6}
+                        dot={false}
+                        connectNulls
+                        isAnimationActive={false}
+                      />
+                      {/* Weekly AVG — cyan thinner (left axis) */}
+                      <Line
+                        yAxisId="left"
+                        type="monotone"
+                        dataKey="avg"
+                        stroke={C.cyan}
+                        strokeWidth={1.0}
+                        dot={false}
+                        connectNulls
+                        isAnimationActive={false}
+                      />
+                      {/* %G20 rising — amber stepped (its own auto-zoom right axis) */}
+                      <Line
+                        yAxisId="g20"
+                        type="stepAfter"
+                        dataKey="pct_g20_rising"
+                        stroke={C.amber}
+                        strokeWidth={1.8}
+                        dot={false}
+                        connectNulls
+                        isAnimationActive={false}
+                      />
+                      {/* %CBANK — magenta stepped (its own auto-zoom right axis) */}
+                      <Line
+                        yAxisId="cbank"
+                        type="stepAfter"
+                        dataKey="cb_net_cutters"
+                        stroke={C.magenta}
+                        strokeWidth={1.8}
+                        dot={false}
+                        connectNulls
+                        isAnimationActive={false}
+                      />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Source footer */}
+                <div style={{ marginTop: 8, fontSize: 8, color: C.textMute, letterSpacing: 0.8 }}>
+                  SOURCE · RecessionAlert · <span style={{ color: C.white }}>USMLEI</span> · <span style={{ color: C.cyan }}>weekly AVG</span> · OECD <span style={{ color: C.amber }}>%G20 (+8mo lead)</span> · <span style={{ color: C.magenta }}>%CBANK (+12mo lead)</span> · monthly + weekly
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Component legend */}
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 14, marginBottom: 8, fontSize: 8, letterSpacing: 1 }}>
+                  <Legend color={C.white} label="ATL GDPNOW" value={latestG.total != null ? latestG.total.toFixed(3) : "—"} bold />
+                  <Legend color={C.magenta} label="NY FED NOWCAST" value={data.current.nyNowcast != null ? data.current.nyNowcast.toFixed(3) : "—"} bold />
+                  <Legend color={C.pceGoods} label="PCE GOODS" value={latestG.pceGoods != null ? latestG.pceGoods.toFixed(3) : "—"} />
+                  <Legend color={C.pceServices} label="PCE SERVICES" value={latestG.pceServices != null ? latestG.pceServices.toFixed(3) : "—"} />
+                  <Legend color={C.fixedInv} label="FIXED INV" value={latestG.fixedInv != null ? latestG.fixedInv.toFixed(3) : "—"} />
+                  <Legend color={C.govt} label="GOVT" value={latestG.govt != null ? latestG.govt.toFixed(3) : "—"} />
+                  <Legend color={C.netExports} label="NET EXPORTS" value={latestG.netExports != null ? latestG.netExports.toFixed(3) : "—"} />
+                  <Legend color={C.inventories} label="INVENTORIES" value={latestG.inventories != null ? latestG.inventories.toFixed(3) : "—"} />
+                </div>
+
+                <div style={{ height: 280 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <ComposedChart data={gdpNowFiltered} margin={{ top: 6, right: 30, left: 0, bottom: 6 }} stackOffset="sign">
+                      <CartesianGrid stroke={C.grid} vertical={false} />
+                      <XAxis
+                        dataKey="label"
+                        ticks={monthTicks}
+                        tick={{ fill: C.textDim, fontSize: 8, fontFamily: FONT_MONO }}
+                        axisLine={{ stroke: C.panelEdge }}
+                        tickLine={false}
+                      />
+                      <YAxis
+                        domain={yDomain}
+                        tick={{ fill: C.textDim, fontSize: 8, fontFamily: FONT_MONO }}
+                        axisLine={{ stroke: C.panelEdge }}
+                        tickLine={false}
+                        width={36}
+                      />
+                      <ReferenceLine y={0} stroke={C.textMute} strokeWidth={0.5} />
+                      {currentQtrStart && (
+                        <ReferenceLine
+                          x={currentQtrStart}
+                          stroke={C.amber}
+                          strokeDasharray="2 3"
+                          strokeWidth={0.6}
+                          label={{
+                            value: "CURRENT Q",
+                            position: "insideTopRight",
+                            fill: C.amber,
+                            fontSize: 8,
+                            fontFamily: FONT_MONO,
+                            letterSpacing: 1,
+                          }}
+                        />
+                      )}
+                      <Tooltip
+                        contentStyle={{
+                          background: "#000",
+                          border: `1px solid ${C.amber}`,
+                          fontFamily: FONT_MONO,
+                          fontSize: 9,
+                          borderRadius: 2,
+                        }}
+                        labelStyle={{ color: C.amber, marginBottom: 4 }}
+                        itemStyle={{ padding: "1px 0" }}
+                      />
+                      <Bar dataKey="pceGoods"    stackId="s" fill={C.pceGoods}    isAnimationActive={false} />
+                      <Bar dataKey="pceServices" stackId="s" fill={C.pceServices} isAnimationActive={false} />
+                      <Bar dataKey="fixedInv"    stackId="s" fill={C.fixedInv}    isAnimationActive={false} />
+                      <Bar dataKey="govt"        stackId="s" fill={C.govt}        isAnimationActive={false} />
+                      <Bar dataKey="netExports"  stackId="s" fill={C.netExports}  isAnimationActive={false} />
+                      <Bar dataKey="inventories" stackId="s" fill={C.inventories} isAnimationActive={false} />
+                      <Line type="monotone" dataKey="total" stroke={C.white} strokeWidth={1.6} dot={false} isAnimationActive={false} />
+                      {/* NY Fed actual observations — solid magenta. */}
+                      <Line
+                        type="stepAfter"
+                        dataKey="nyReal"
+                        stroke={C.magenta}
+                        strokeWidth={2.2}
+                        dot={false}
+                        connectNulls
+                        isAnimationActive={false}
+                      />
+                      {/* NY Fed forward-fill segment — dashed, same color and weight,
+                          indicates "last known value, no release since". */}
+                      <Line
+                        type="stepAfter"
+                        dataKey="nyFilled"
+                        stroke={C.magenta}
+                        strokeWidth={2.2}
+                        strokeDasharray="3 3"
+                        dot={false}
+                        connectNulls
+                        isAnimationActive={false}
+                      />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                </div>
+              </>
+            )}
           </Panel>
 
-          {/* Recent contributions table */}
-          <Panel>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, paddingBottom: 8, borderBottom: `1px solid ${C.panelEdge}` }}>
-              <div style={{ fontSize: 10, letterSpacing: 1.4, color: C.text }}>
-                COMPONENT CONTRIBUTIONS · LAST 8 OBS
+          {/* Recent contributions table — only relevant for NOWCAST (Atlanta GDPNow) */}
+          {chartMode === "NOWCAST" && (
+            <Panel>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, paddingBottom: 8, borderBottom: `1px solid ${C.panelEdge}` }}>
+                <div style={{ fontSize: 10, letterSpacing: 1.4, color: C.text }}>
+                  COMPONENT CONTRIBUTIONS · LAST 8 OBS
+                </div>
+                <div style={{ fontSize: 8, color: C.textMute, letterSpacing: 1 }}>
+                  pp contribution to annualized %
+                </div>
               </div>
-              <div style={{ fontSize: 8, color: C.textMute, letterSpacing: 1 }}>
-                pp contribution to annualized %
-              </div>
-            </div>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 9 }}>
-              <thead>
-                <tr style={{ color: C.textDim, letterSpacing: 1, textAlign: "right" }}>
-                  <th style={{ padding: "6px 8px", borderBottom: `1px solid ${C.panelEdge}`, fontWeight: 500, textAlign: "left" }}>DATE</th>
-                  <th style={{ padding: "6px 8px", borderBottom: `1px solid ${C.panelEdge}`, fontWeight: 500 }}>GDPNOW</th>
-                  <th style={{ padding: "6px 8px", borderBottom: `1px solid ${C.panelEdge}`, fontWeight: 500 }}>PCE·G</th>
-                  <th style={{ padding: "6px 8px", borderBottom: `1px solid ${C.panelEdge}`, fontWeight: 500 }}>PCE·S</th>
-                  <th style={{ padding: "6px 8px", borderBottom: `1px solid ${C.panelEdge}`, fontWeight: 500 }}>FIX INV</th>
-                  <th style={{ padding: "6px 8px", borderBottom: `1px solid ${C.panelEdge}`, fontWeight: 500 }}>GOVT</th>
-                  <th style={{ padding: "6px 8px", borderBottom: `1px solid ${C.panelEdge}`, fontWeight: 500 }}>NET XP</th>
-                  <th style={{ padding: "6px 8px", borderBottom: `1px solid ${C.panelEdge}`, fontWeight: 500 }}>INVT</th>
-                </tr>
-              </thead>
-              <tbody>
-                {tableRows.map((r, idx) => (
-                  <tr key={idx} style={{ background: idx === 0 ? C.amberFaint : "transparent" }}>
-                    <td style={{ padding: "5px 8px", color: idx === 0 ? C.amber : C.text }}>{r.label}</td>
-                    <Cell v={r.total}        bold highlight={idx === 0} />
-                    <Cell v={r.pceGoods}     />
-                    <Cell v={r.pceServices}  />
-                    <Cell v={r.fixedInv}     />
-                    <Cell v={r.govt}         />
-                    <Cell v={r.netExports}   />
-                    <Cell v={r.inventories}  />
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 9 }}>
+                <thead>
+                  <tr style={{ color: C.textDim, letterSpacing: 1, textAlign: "right" }}>
+                    <th style={{ padding: "6px 8px", borderBottom: `1px solid ${C.panelEdge}`, fontWeight: 500, textAlign: "left" }}>DATE</th>
+                    <th style={{ padding: "6px 8px", borderBottom: `1px solid ${C.panelEdge}`, fontWeight: 500 }}>GDPNOW</th>
+                    <th style={{ padding: "6px 8px", borderBottom: `1px solid ${C.panelEdge}`, fontWeight: 500 }}>PCE·G</th>
+                    <th style={{ padding: "6px 8px", borderBottom: `1px solid ${C.panelEdge}`, fontWeight: 500 }}>PCE·S</th>
+                    <th style={{ padding: "6px 8px", borderBottom: `1px solid ${C.panelEdge}`, fontWeight: 500 }}>FIX INV</th>
+                    <th style={{ padding: "6px 8px", borderBottom: `1px solid ${C.panelEdge}`, fontWeight: 500 }}>GOVT</th>
+                    <th style={{ padding: "6px 8px", borderBottom: `1px solid ${C.panelEdge}`, fontWeight: 500 }}>NET XP</th>
+                    <th style={{ padding: "6px 8px", borderBottom: `1px solid ${C.panelEdge}`, fontWeight: 500 }}>INVT</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-            <div style={{ fontSize: 8, color: C.textMute, marginTop: 10, letterSpacing: 0.5 }}>
-              SOURCE · Atlanta Fed · <span style={{ color: C.cyan }}>GDPTrackingModelDataAndForecasts.xlsx</span> · TrackingArchives + CurrentQtrEvolution + ContribHistory · daily
-            </div>
-          </Panel>
+                </thead>
+                <tbody>
+                  {tableRows.map((r, idx) => (
+                    <tr key={idx} style={{ background: idx === 0 ? C.amberFaint : "transparent" }}>
+                      <td style={{ padding: "5px 8px", color: idx === 0 ? C.amber : C.text }}>{r.label}</td>
+                      <Cell v={r.total}        bold highlight={idx === 0} />
+                      <Cell v={r.pceGoods}     />
+                      <Cell v={r.pceServices}  />
+                      <Cell v={r.fixedInv}     />
+                      <Cell v={r.govt}         />
+                      <Cell v={r.netExports}   />
+                      <Cell v={r.inventories}  />
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div style={{ fontSize: 8, color: C.textMute, marginTop: 10, letterSpacing: 0.5 }}>
+                SOURCE · Atlanta Fed · <span style={{ color: C.cyan }}>GDPTrackingModelDataAndForecasts.xlsx</span> · TrackingArchives + CurrentQtrEvolution + ContribHistory · daily
+              </div>
+            </Panel>
+          )}
         </div>
 
         {/* ================================================================ */}

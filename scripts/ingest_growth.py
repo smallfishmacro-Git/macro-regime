@@ -587,6 +587,65 @@ def fetch_fred_wei() -> pd.DataFrame:
 
 
 # ======================================================================
+# FRED Real GDP YoY (quarterly, used for LEADING tab WEI vs GDP chart)
+# ======================================================================
+def fetch_fred_gdp() -> pd.DataFrame:
+    """Fetch FRED A191RO1Q156NBEA — Real GDP, % change from year ago,
+    quarterly. Already pre-computed YoY by BEA, so no further math
+    needed.
+
+    Returns DataFrame with cols: date, gdp_yoy
+    Date is the quarter-start convention as FRED publishes.
+    """
+    log("Fetching FRED Real GDP YoY (A191RO1Q156NBEA) ...")
+    if not FRED_API_KEY:
+        log("  WARNING: FRED_API_KEY not set — returning empty df")
+        return pd.DataFrame(columns=["date", "gdp_yoy"])
+
+    params = {
+        "series_id": "A191RO1Q156NBEA",
+        "api_key": FRED_API_KEY,
+        "file_type": "json",
+        "observation_start": "1990-01-01",  # ~35 years history is plenty
+    }
+    try:
+        r = requests.get(FRED_API, params=params, timeout=30)
+        r.raise_for_status()
+        data = r.json()
+    except Exception as e:
+        log(f"  FRED GDP fetch failed: {e} — returning empty df")
+        return pd.DataFrame(columns=["date", "gdp_yoy"])
+
+    obs = data.get("observations", [])
+    if not obs:
+        log(f"  no observations returned — returning empty df")
+        return pd.DataFrame(columns=["date", "gdp_yoy"])
+
+    df = pd.DataFrame(obs)
+    df["date"] = pd.to_datetime(df["date"], errors="coerce")
+    df["gdp_yoy"] = pd.to_numeric(df["value"], errors="coerce")
+    df = df[["date", "gdp_yoy"]].dropna(subset=["date"]).sort_values("date").reset_index(drop=True)
+
+    n_with_value = df["gdp_yoy"].notna().sum()
+    log(f"  fetched {len(df)} quarterly obs ({n_with_value} non-null) · "
+        f"{df['date'].iloc[0].date()} → {df['date'].iloc[-1].date()}")
+
+    if n_with_value:
+        latest = df.dropna(subset=["gdp_yoy"]).iloc[-1]
+        log(f"  latest: {latest['date'].date()} = {latest['gdp_yoy']:.2f}%")
+        # Sanity: historical GDP YoY range roughly -10 to +12; outliers
+        # (COVID Q2 2020) can hit -10. Anything outside is suspicious.
+        valid = df["gdp_yoy"].dropna()
+        if valid.min() < -15 or valid.max() > 20:
+            log(f"  WARNING: gdp_yoy range [{valid.min():.2f}, {valid.max():.2f}] outside expected (-15, +20)")
+        else:
+            log(f"  range OK: [{valid.min():.2f}, {valid.max():.2f}]")
+
+    df.to_csv(CACHE / "fred_gdp_yoy.csv", index=False)
+    return df
+
+
+# ======================================================================
 # 3. UNCTAD manual
 # ======================================================================
 def read_unctad_manual() -> pd.DataFrame:
@@ -602,86 +661,219 @@ def read_unctad_manual() -> pd.DataFrame:
 
 
 # ======================================================================
-# 4. RecessionAlert manual xlsx
+# RecessionAlert (manual xlsx drop — both Weekly + Monthly files)
 # ======================================================================
 def read_recessionalert() -> pd.DataFrame:
-    log("Reading RecessionAlert latest xlsx ...")
-    candidates = sorted(glob.glob(str(RA_RAW_DIR / "*.xlsx")))
-    if not candidates:
-        log(f"  no xlsx in {RA_RAW_DIR.relative_to(ROOT)} — skipping (WLA/LEI null)")
-        return pd.DataFrame(columns=["date", "wla", "global_lei"])
+    """Read RecessionAlert WeeklyData_*.xlsx + MonthlyData_*.xlsx from
+    data/recessionalert/raw/. Extract WLEI2 (weekly), G20 CLI level
+    (monthly), ROC (monthly), and %CBANK (monthly bonus indicator).
 
-    latest = candidates[-1]
-    log(f"  using {Path(latest).name}")
-    xl = pd.ExcelFile(latest)
-    log(f"  sheets: {xl.sheet_names}")
-    for s in xl.sheet_names:
+    Returns a DataFrame with cols:
+      date              — common date axis (monthly EOM, joined)
+      wla               — WLEI2 from WeeklyData (resampled to monthly)
+      global_lei        — G20 CLI level from WORLD sheet col 1
+      global_lei_8m     — G20 CLI ROC (6mo smoothed) from WORLD sheet col 3
+                          (dashboard displays this as "GLOBAL LEI +8M")
+      cb_net_cutters    — %CBANK from WORLD sheet col 6 (bonus)
+
+    If either file is missing or unreadable, returns an empty DataFrame
+    so the calling code's signal_availability.leading=False guard
+    activates correctly.
+    """
+    raw_dir = ROOT / "data" / "recessionalert" / "raw"
+
+    if not raw_dir.exists():
+        log("RecessionAlert: data/recessionalert/raw/ doesn't exist — leading data unavailable")
+        return pd.DataFrame(), pd.DataFrame()
+
+    weekly_files = sorted(raw_dir.glob("WeeklyData_*.xlsx"))
+    monthly_files = sorted(raw_dir.glob("MonthlyData_*.xlsx"))
+
+    if not weekly_files and not monthly_files:
+        log("RecessionAlert: no WeeklyData_*.xlsx or MonthlyData_*.xlsx found — leading data unavailable")
+        return pd.DataFrame(), pd.DataFrame()
+
+    # ---- Weekly: extract WLEI2 + AVG ----
+    weekly = pd.DataFrame(columns=["date", "wlei2", "avg"])
+    if weekly_files:
+        weekly_path = weekly_files[-1]  # latest by lexicographic ISO sort
+        log(f"RecessionAlert weekly: reading {weekly_path.name}")
         try:
-            head = pd.read_excel(latest, sheet_name=s, nrows=2)
-            log(f"    sheet '{s}' columns: {list(head.columns)[:6]}")
+            # Header at row 0, blank row 1, data starts row 2.
+            wdf = pd.read_excel(weekly_path, sheet_name="WEEKLY LEI's", header=0)
+            log(f"  shape: {wdf.shape}, cols: {list(wdf.columns)[:6]}")
+
+            # Capture WLEI2 (existing) + AVG. (new for LEADING chart).
+            # Drop the blank separator row by filtering on date validity.
+            wdf = wdf[["DATE", "WLEI2", "AVG."]].copy()
+            wdf.columns = ["date", "wlei2", "avg"]
+            wdf["date"] = pd.to_datetime(wdf["date"], errors="coerce")
+            wdf["wlei2"] = pd.to_numeric(wdf["wlei2"], errors="coerce")
+            wdf["avg"] = pd.to_numeric(wdf["avg"], errors="coerce")
+            wdf = wdf.dropna(subset=["date"]).sort_values("date").reset_index(drop=True)
+
+            n_wlei2 = wdf["wlei2"].notna().sum()
+            n_avg = wdf["avg"].notna().sum()
+            log(f"  weekly WLEI2: {n_wlei2} obs · AVG: {n_avg} obs · "
+                f"{wdf['date'].iloc[0].date()} → {wdf['date'].iloc[-1].date()}")
+            weekly = wdf
         except Exception as e:
-            log(f"    sheet '{s}' preview failed: {e}")
+            log(f"  WARNING: weekly file unreadable ({e}) — skipping")
 
-    wla = None
-    lei = None
-    for s in xl.sheet_names:
-        s_lower = s.lower()
-        if "weekly" in s_lower or "wla" in s_lower:
-            try:
-                df = pd.read_excel(latest, sheet_name=s)
-                date_col = next((c for c in df.columns if "date" in str(c).lower()), df.columns[0])
-                wla_col = next((c for c in df.columns if "wla" in str(c).lower() or "aggregate" in str(c).lower()), None)
-                if wla_col:
-                    wla = df[[date_col, wla_col]].copy()
-                    wla.columns = ["date", "wla"]
-                    log(f"  found WLA on sheet '{s}' col '{wla_col}'")
-            except Exception as e:
-                log(f"  could not parse '{s}' for WLA: {e}")
-        if "global" in s_lower or "lei" in s_lower:
-            try:
-                df = pd.read_excel(latest, sheet_name=s)
-                date_col = next((c for c in df.columns if "date" in str(c).lower()), df.columns[0])
-                lei_col = next((c for c in df.columns if "lei" in str(c).lower() and "+8" in str(c).lower()), None)
-                if not lei_col:
-                    lei_col = next((c for c in df.columns if c != date_col), None)
-                if lei_col:
-                    lei = df[[date_col, lei_col]].copy()
-                    lei.columns = ["date", "global_lei"]
-                    log(f"  found LEI on sheet '{s}' col '{lei_col}'")
-            except Exception as e:
-                log(f"  could not parse '{s}' for LEI: {e}")
+    # ---- Monthly: extract G20 CLI level + ROC + %CBANK from WORLD sheet ----
+    monthly = pd.DataFrame(columns=["date", "global_lei", "global_lei_8m", "cb_net_cutters"])
+    if monthly_files:
+        monthly_path = monthly_files[-1]
+        log(f"RecessionAlert monthly: reading {monthly_path.name}")
+        try:
+            # WORLD sheet has NO header at top — the header is at row ~663
+            # (bottom of data). Use header=None and reference columns
+            # positionally. Rows below the data block are dropped via
+            # date-validity filtering.
+            mdf = pd.read_excel(monthly_path, sheet_name="WORLD", header=None)
+            log(f"  shape: {mdf.shape}")
 
-    if wla is None and lei is None:
-        log("  WARNING: could not auto-parse RecessionAlert xlsx.")
-        return pd.DataFrame(columns=["date", "wla", "global_lei"])
+            # Verified column mapping (from Excel direct view of the legend
+            # at row 666+ of the WORLD sheet):
+            #   col 0 = DATE (EOM)
+            #   col 1 = G20 CLI (level, base 100)
+            #   col 2 = REC (binary signal)
+            #   col 3 = ROC (6mo smoothed rate of change)
+            #   col 4 = % LEI (% G20 with rising CLI)
+            #   col 5 = %LEIg (% G20 with rising CLI 6mo smoothed)
+            #   col 6 = %CBANK (net % of 38 CBs where last move was a cut)
+            if mdf.shape[1] < 7:
+                fail(f"WORLD sheet has only {mdf.shape[1]} cols, need ≥7")
 
-    if wla is not None:
-        wla["date"] = pd.to_datetime(wla["date"], errors="coerce")
-        wla["wla"] = pd.to_numeric(wla["wla"], errors="coerce")
-        wla = wla.dropna()
-    if lei is not None:
-        lei["date"] = pd.to_datetime(lei["date"], errors="coerce")
-        lei["global_lei"] = pd.to_numeric(lei["global_lei"], errors="coerce")
-        lei = lei.dropna()
+            wdf2 = pd.DataFrame({
+                "date":           mdf.iloc[:, 0],
+                "global_lei":     mdf.iloc[:, 1],
+                "global_lei_8m":  mdf.iloc[:, 3],   # ROC — what dashboard shows as "GLOBAL LEI +8M"
+                "pct_g20_rising": mdf.iloc[:, 4],   # % G20 countries with rising CLI (NEW for LEADING chart)
+                "cb_net_cutters": mdf.iloc[:, 6],   # %CBANK bonus indicator
+            })
 
-    if wla is not None and lei is not None:
-        out = pd.merge(wla, lei, on="date", how="outer").sort_values("date").reset_index(drop=True)
-    elif wla is not None:
-        out = wla.copy()
-        out["global_lei"] = pd.NA
+            wdf2["date"] = pd.to_datetime(wdf2["date"], errors="coerce")
+            for c in ["global_lei", "global_lei_8m", "pct_g20_rising", "cb_net_cutters"]:
+                wdf2[c] = pd.to_numeric(wdf2[c], errors="coerce")
+
+            # Drop the legend/header rows below the data block (col 0 not a date)
+            wdf2 = wdf2.dropna(subset=["date"]).sort_values("date").reset_index(drop=True)
+
+            # Sanity check: G20 CLI level should be in 80-120 range
+            if wdf2["global_lei"].notna().any():
+                lv = wdf2["global_lei"].dropna()
+                if lv.min() < 70 or lv.max() > 130:
+                    log(f"  WARNING: global_lei range [{lv.min():.2f}, {lv.max():.2f}] outside expected 80-120 — column may be misaligned")
+                else:
+                    log(f"  global_lei (G20 CLI) range OK: [{lv.min():.2f}, {lv.max():.2f}]")
+
+            n_lei = wdf2["global_lei"].notna().sum()
+            n_roc = wdf2["global_lei_8m"].notna().sum()
+            n_pct = wdf2["pct_g20_rising"].notna().sum()
+            n_cb  = wdf2["cb_net_cutters"].notna().sum()
+            log(f"  monthly · G20 CLI: {n_lei} obs · ROC: {n_roc} obs · "
+                f"%G20 rising: {n_pct} obs · %CBANK: {n_cb} obs · "
+                f"{wdf2['date'].iloc[0].date()} → {wdf2['date'].iloc[-1].date()}")
+
+            monthly = wdf2
+        except Exception as e:
+            log(f"  WARNING: monthly WORLD sheet unreadable ({e}) — skipping")
+
+    # ---- Monthly: extract USMLEI from DATA sheet ----
+    # DATA sheet has 2-row header: row 2 = group labels, row 3 = column
+    # names. Data starts row 4. Use header=3 to consume row 3 as column
+    # names; this gives us a usable DataFrame.
+    usmlei = pd.DataFrame(columns=["date", "usmlei"])
+    if monthly_files:
+        try:
+            ddf = pd.read_excel(monthly_path, sheet_name="DATA", header=3)
+            log(f"  monthly DATA shape (post-header): {ddf.shape}")
+
+            # Column 0 is "MONTH" (date), column 16 is "USMLEI V2".
+            # Use positional access to be defensive against header
+            # whitespace differences.
+            if ddf.shape[1] < 17:
+                log(f"  WARNING: DATA sheet has only {ddf.shape[1]} cols, can't extract USMLEI")
+            else:
+                usmlei = pd.DataFrame({
+                    "date":   ddf.iloc[:, 0],
+                    "usmlei": ddf.iloc[:, 16],
+                })
+                usmlei["date"] = pd.to_datetime(usmlei["date"], errors="coerce")
+                usmlei["usmlei"] = pd.to_numeric(usmlei["usmlei"], errors="coerce")
+                usmlei = usmlei.dropna(subset=["date"]).sort_values("date").reset_index(drop=True)
+
+                n_usmlei = usmlei["usmlei"].notna().sum()
+                if n_usmlei:
+                    log(f"  USMLEI: {n_usmlei} obs · "
+                        f"{usmlei['date'].iloc[0].date()} → {usmlei['date'].iloc[-1].date()}")
+                    # Sanity check: USMLEI ranges roughly -70 to +70 historically
+                    valid = usmlei["usmlei"].dropna()
+                    if valid.min() < -100 or valid.max() > 100:
+                        log(f"  WARNING: USMLEI range [{valid.min():.2f}, {valid.max():.2f}] outside ±100 — column may be misaligned")
+                    else:
+                        log(f"  USMLEI range OK: [{valid.min():.2f}, {valid.max():.2f}]")
+        except Exception as e:
+            log(f"  WARNING: monthly DATA sheet unreadable ({e}) — skipping USMLEI")
+
+    # ---- Combine: monthly is the bottleneck cadence; resample weekly to monthly ----
+    if len(weekly) == 0 and len(monthly) == 0:
+        log("RecessionAlert: both weekly and monthly empty — returning empty df")
+        return pd.DataFrame(), pd.DataFrame()
+
+    # Resample weekly WLEI2 to monthly EOM (last value of each month)
+    if len(weekly):
+        weekly_monthly = (
+            weekly.set_index("date")["wlei2"]
+            .resample("ME").last()
+            .rename("wla")
+            .reset_index()
+        )
     else:
-        out = lei.copy()
-        out["wla"] = pd.NA
+        weekly_monthly = pd.DataFrame(columns=["date", "wla"])
 
-    out.to_csv(CACHE / "recessionalert.csv", index=False)
-    log(f"  parsed {len(out)} rows from RecessionAlert")
-    return out
+    # Outer-join weekly-resampled with monthly on date
+    if len(monthly):
+        out = pd.merge(weekly_monthly, monthly, on="date", how="outer")
+    else:
+        out = weekly_monthly.copy()
+        out["global_lei"] = None
+        out["global_lei_8m"] = None
+        out["pct_g20_rising"] = None
+        out["cb_net_cutters"] = None
+
+    # Also merge USMLEI on date (monthly EOM cadence, aligns with WORLD)
+    if len(usmlei):
+        out = pd.merge(out, usmlei, on="date", how="outer")
+    else:
+        out["usmlei"] = None
+
+    out = out.sort_values("date").reset_index(drop=True)
+
+    log(f"RecessionAlert FINAL: {len(out)} monthly rows · "
+        f"{out['date'].iloc[0].date()} → {out['date'].iloc[-1].date()}")
+
+    def _last(col):
+        if col in out.columns and out[col].notna().any():
+            return f"{out[col].dropna().iloc[-1]:.4f}"
+        return "None"
+
+    log(f"  latest values: wla={_last('wla')}, usmlei={_last('usmlei')}, "
+        f"global_lei={_last('global_lei')}, global_lei_8m={_last('global_lei_8m')}, "
+        f"pct_g20_rising={_last('pct_g20_rising')}, cb_net_cutters={_last('cb_net_cutters')}")
+
+    out.to_csv(CACHE / "recessionalert_combined.csv", index=False)
+    # Return tuple: (monthly composite, weekly raw with avg)
+    # The weekly DataFrame is needed by build_growth_payload to expose
+    # the AVG series at native weekly cadence (un-resampled).
+    return out, weekly
 
 
 # ======================================================================
 # 5. Compose regime
 # ======================================================================
-def build_growth_payload(gdpnow, wei, unctad, ra, ny_fed) -> dict:
+def build_growth_payload(gdpnow, wei, unctad, ra, ny_fed, gdp_yoy, ra_weekly) -> dict:
     log("Building weekly composite ...")
     end_date = pd.Timestamp.today().normalize()
     start_date = end_date - pd.DateOffset(years=Z_WINDOW_YEARS + 5)
@@ -758,6 +950,15 @@ def build_growth_payload(gdpnow, wei, unctad, ra, ny_fed) -> dict:
         {"ratio": None, "posture": "Insufficient leading data — direction unknown"},
     )
 
+    # ---- WEI 13-week moving average (for LEADING tab chart) ----
+    if len(wei) > 0 and "wei" in wei.columns:
+        wei_with_ma = wei.copy()
+        wei_with_ma["wei_ma13"] = wei_with_ma["wei"].rolling(window=13, min_periods=1).mean()
+        log(f"  computed WEI 13wk MA: latest = {wei_with_ma['wei_ma13'].dropna().iloc[-1]:.3f}" if wei_with_ma["wei_ma13"].notna().any() else "  WEI 13wk MA: empty")
+    else:
+        wei_with_ma = wei.copy()
+        wei_with_ma["wei_ma13"] = None
+
     payload = {
         "meta": {
             "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -767,6 +968,7 @@ def build_growth_payload(gdpnow, wei, unctad, ra, ny_fed) -> dict:
                 "atlanta_fed":    f"fetched · latest obs {gdpnow['date'].iloc[-1].date().isoformat()}",
                 "ny_fed":         f"fetched · latest obs {ny_fed['date'].iloc[-1].date().isoformat()}" if len(ny_fed) else "missing",
                 "fred_wei":       f"fetched · latest obs {wei['date'].iloc[-1].date().isoformat()}",
+                "fred_gdp_yoy":   f"fetched · latest obs {gdp_yoy['date'].iloc[-1].date().isoformat()}" if len(gdp_yoy) else "missing",
                 "unctad":         f"manual · latest obs {unctad['date'].iloc[-1].date().isoformat()}" if len(unctad) else "missing",
                 "recessionalert": f"manual · latest obs {ra['date'].iloc[-1].date().isoformat()}" if len(ra) else "missing",
             },
@@ -784,8 +986,12 @@ def build_growth_payload(gdpnow, wei, unctad, ra, ny_fed) -> dict:
             "ny_target_qtr":  ny_fed.dropna(subset=["ny_nowcast"]).iloc[-1]["target_quarter"] if len(ny_fed) and ny_fed["ny_nowcast"].notna().any() else None,
             "wei":            _f(wei["wei"].iloc[-1]),
             "unctad_world":   _f(unctad["unctad_world"].iloc[-1]) if len(unctad) else None,
-            "wla":            _f(ra["wla"].iloc[-1]) if "wla" in ra.columns and len(ra) else None,
-            "global_lei_8m":  _f(ra["global_lei"].iloc[-1]) if "global_lei" in ra.columns and len(ra) else None,
+            "wla":            _f(ra["wla"].dropna().iloc[-1]) if "wla" in ra.columns and ra["wla"].notna().any() else None,
+            "usmlei":         _f(ra["usmlei"].dropna().iloc[-1]) if "usmlei" in ra.columns and ra["usmlei"].notna().any() else None,
+            "global_lei":     _f(ra["global_lei"].dropna().iloc[-1]) if "global_lei" in ra.columns and ra["global_lei"].notna().any() else None,
+            "global_lei_8m":  _f(ra["global_lei_8m"].dropna().iloc[-1]) if "global_lei_8m" in ra.columns and ra["global_lei_8m"].notna().any() else None,
+            "pct_g20_rising": _f(ra["pct_g20_rising"].dropna().iloc[-1]) if "pct_g20_rising" in ra.columns and ra["pct_g20_rising"].notna().any() else None,
+            "cb_net_cutters": _f(ra["cb_net_cutters"].dropna().iloc[-1]) if "cb_net_cutters" in ra.columns and ra["cb_net_cutters"].notna().any() else None,
             "coinc_z":        _f(coinc_z),
             "lead_z":         _f(lead_z),
         },
@@ -802,6 +1008,28 @@ def build_growth_payload(gdpnow, wei, unctad, ra, ny_fed) -> dict:
             ny_fed.dropna(subset=["ny_nowcast"])[["date", "ny_nowcast", "ny_backcast", "ny_next_q", "target_quarter"]]
             if len(ny_fed) else pd.DataFrame(columns=["date", "ny_nowcast", "ny_backcast", "ny_next_q", "target_quarter"]),
             cols=["date", "ny_nowcast", "ny_backcast", "ny_next_q", "target_quarter"],
+        ),
+        "wei_series": _df_to_records(
+            wei_with_ma[["date", "wei", "wei_ma13"]].dropna(how="all", subset=["wei", "wei_ma13"])
+            if len(wei_with_ma) else pd.DataFrame(columns=["date", "wei", "wei_ma13"]),
+            cols=["date", "wei", "wei_ma13"],
+        ),
+        "gdp_yoy_series": _df_to_records(
+            gdp_yoy.dropna(subset=["gdp_yoy"])
+            if len(gdp_yoy) else pd.DataFrame(columns=["date", "gdp_yoy"]),
+            cols=["date", "gdp_yoy"],
+        ),
+        "ra_leading_series": _df_to_records(
+            ra[["date", "usmlei", "pct_g20_rising", "cb_net_cutters"]].dropna(how="all", subset=["usmlei", "pct_g20_rising", "cb_net_cutters"])
+            if all(c in ra.columns for c in ["usmlei", "pct_g20_rising", "cb_net_cutters"]) and len(ra)
+            else pd.DataFrame(columns=["date", "usmlei", "pct_g20_rising", "cb_net_cutters"]),
+            cols=["date", "usmlei", "pct_g20_rising", "cb_net_cutters"],
+        ),
+        "ra_weekly_avg_series": _df_to_records(
+            ra_weekly[["date", "avg"]].dropna(subset=["avg"])
+            if len(ra_weekly) and "avg" in ra_weekly.columns
+            else pd.DataFrame(columns=["date", "avg"]),
+            cols=["date", "avg"],
         ),
     }
     return payload
@@ -841,14 +1069,15 @@ def _df_to_records(df, cols):
 # Main
 # ======================================================================
 def main() -> None:
-    log(f"=== SmallFish Macro Regime · GROWTH ingest v4 · {datetime.now(timezone.utc).isoformat()} ===")
+    log(f"=== SmallFish Macro Regime · GROWTH ingest v5 · {datetime.now(timezone.utc).isoformat()} ===")
     log(f"ROOT = {ROOT}")
     gdpnow = fetch_atlanta_fed()
     ny_fed = fetch_ny_fed()
     wei = fetch_fred_wei()
+    gdp_yoy = fetch_fred_gdp()
     unctad = read_unctad_manual()
-    ra = read_recessionalert()
-    payload = build_growth_payload(gdpnow, wei, unctad, ra, ny_fed)
+    ra, ra_weekly = read_recessionalert()
+    payload = build_growth_payload(gdpnow, wei, unctad, ra, ny_fed, gdp_yoy, ra_weekly)
     OUTPUT_JSON.write_text(json.dumps(payload, indent=2, allow_nan=False, default=str))
     log(f"WROTE {OUTPUT_JSON.relative_to(ROOT)} ({OUTPUT_JSON.stat().st_size // 1024} KB)")
     # Pattern A dual-write: also drop into public/data/ so Vite serves it as a
