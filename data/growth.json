@@ -1,11 +1,11 @@
 {
   "meta": {
-    "generated_at": "2026-04-30T23:41:56.289874+00:00",
+    "generated_at": "2026-05-01T23:41:58.344521+00:00",
     "z_window_years": 10,
     "direction_lookback_weeks": 8,
     "sources": {
-      "atlanta_fed": "fetched \u00b7 latest obs 2026-04-30",
-      "ny_fed": "fetched \u00b7 latest obs 2026-04-24",
+      "atlanta_fed": "fetched \u00b7 latest obs 2026-05-01",
+      "ny_fed": "fetched \u00b7 latest obs 2026-05-01",
       "fred_wei": "fetched \u00b7 latest obs 2026-04-25",
       "fred_gdp_yoy": "fetched \u00b7 latest obs 2026-01-01",
       "unctad": "manual \u00b7 latest obs 2026-04-22",
@@ -23,8 +23,8 @@
     },
     "hedge_ratio": null,
     "hedge_posture": "Insufficient leading data \u2014 direction unknown",
-    "gdpnow": 3.7007,
-    "ny_nowcast": 2.81,
+    "gdpnow": 3.5185,
+    "ny_nowcast": 2.52,
     "ny_target_qtr": "2026:Q2",
     "wei": 2.96,
     "unctad_world": 2.61,
@@ -34,7 +34,7 @@
     "global_lei_8m": null,
     "pct_g20_rising": null,
     "cb_net_cutters": null,
-    "coinc_z": -0.026,
+    "coinc_z": 0.1984,
     "lead_z": 0.0
   },
   "gdpnow_components": [
@@ -18357,6 +18357,16 @@
       "govt": 0.2649,
       "netExports": 0.0636,
       "inventories": 0.6906
+    },
+    {
+      "date": "2026-05-01",
+      "total": 3.5185,
+      "pceGoods": 0.5966,
+      "pceServices": 1.1345,
+      "fixedInv": 0.7843,
+      "govt": 0.2643,
+      "netExports": 0.0715,
+      "inventories": 0.6673
     }
   ],
   "composite_z": [
@@ -21624,6 +21634,11 @@
       "date": "2026-04-24",
       "coinc_z": -0.026,
       "lead_z": "<NA>"
+    },
+    {
+      "date": "2026-05-01",
+      "coinc_z": 0.1984,
+      "lead_z": "<NA>"
     }
   ],
   "ny_fed_nowcast": [
@@ -22835,6 +22850,13 @@
       "date": "2026-04-24",
       "ny_nowcast": 2.81,
       "ny_backcast": 2.36,
+      "ny_next_q": null,
+      "target_quarter": "2026:Q2"
+    },
+    {
+      "date": "2026-05-01",
+      "ny_nowcast": 2.52,
+      "ny_backcast": 2.35,
       "ny_next_q": null,
       "target_quarter": "2026:Q2"
     }
