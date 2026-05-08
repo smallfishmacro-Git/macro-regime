@@ -871,6 +871,91 @@ def read_recessionalert() -> pd.DataFrame:
 
 
 # ======================================================================
+# Cron-safe data preservation
+# ======================================================================
+def preserve_from_prior(new_payload: dict) -> tuple[dict, list[str]]:
+    """Read the previous run's growth.json from disk; for each
+    preservable field, if the new payload produced empty/null, copy
+    the prior value forward. Returns (merged_payload, preserved_fields).
+
+    This makes the ingest cron-safe: when xlsx source files aren't
+    available on the runner (gitignored, not in cron environment), the
+    affected fields get preserved from the last-known-good state
+    instead of being clobbered to null.
+
+    Sources NOT covered by this preservation (Atlanta, NY Fed, FRED,
+    UNCTAD) all have automated fetches that work in any environment;
+    they always produce fresh data so preservation isn't needed.
+    """
+    growth_json_path = ROOT / "data" / "growth.json"
+    if not growth_json_path.exists():
+        log("preserve_from_prior: no prior growth.json — nothing to preserve")
+        return new_payload, []
+
+    try:
+        with open(growth_json_path) as f:
+            prior = json.load(f)
+    except Exception as e:
+        log(f"preserve_from_prior: prior growth.json unreadable ({e}) — skipping preservation")
+        return new_payload, []
+
+    preserved = []
+
+    # ---- Group 1: RecessionAlert scalars in current{} ----
+    ra_scalar_fields = [
+        "wla", "usmlei", "global_lei", "global_lei_8m",
+        "pct_g20_rising", "cb_net_cutters",
+    ]
+    for field in ra_scalar_fields:
+        new_val = new_payload.get("current", {}).get(field)
+        prior_val = prior.get("current", {}).get(field)
+        if new_val is None and prior_val is not None:
+            new_payload.setdefault("current", {})[field] = prior_val
+            preserved.append(f"current.{field}")
+
+    # ---- Group 2: RecessionAlert time series arrays ----
+    array_fields = ["ra_leading_series", "ra_weekly_avg_series"]
+    for field in array_fields:
+        new_arr = new_payload.get(field, [])
+        prior_arr = prior.get(field, [])
+        if not new_arr and prior_arr:
+            new_payload[field] = prior_arr
+            preserved.append(field)
+
+    # ---- Group 3: Regime fields (downstream of leading data) ----
+    # If we preserved any RecessionAlert data, also preserve the regime
+    # call, since it depends on leading inputs that we couldn't refresh.
+    # If RA data was fresh, regime is already correctly computed.
+    ra_was_preserved = any(p.startswith("current.wla") or
+                           p.startswith("current.usmlei") or
+                           p.startswith("current.global_lei") or
+                           p.startswith("ra_") for p in preserved)
+    if ra_was_preserved:
+        # Preserve regime block + hedge_ratio + composite_z_lead
+        regime_fields_to_preserve = ["regime", "hedge_ratio", "lead_z"]
+        for field in regime_fields_to_preserve:
+            prior_val = prior.get("current", {}).get(field)
+            if prior_val is not None:
+                new_payload.setdefault("current", {})[field] = prior_val
+                preserved.append(f"current.{field}")
+
+        # Also preserve signal_availability.leading flag (currently True
+        # if RA data was real on prior run; would have flipped False on
+        # this run if we didn't preserve)
+        prior_sig_av = prior.get("meta", {}).get("signal_availability", {})
+        if prior_sig_av.get("leading") is True:
+            new_payload.setdefault("meta", {}).setdefault("signal_availability", {})["leading"] = True
+            preserved.append("meta.signal_availability.leading")
+
+    log(f"preserve_from_prior: preserved {len(preserved)} field(s) from prior run")
+    if preserved:
+        for p in preserved:
+            log(f"  - {p}")
+
+    return new_payload, preserved
+
+
+# ======================================================================
 # 5. Compose regime
 # ======================================================================
 def build_growth_payload(gdpnow, wei, unctad, ra, ny_fed, gdp_yoy, ra_weekly) -> dict:
@@ -1032,6 +1117,13 @@ def build_growth_payload(gdpnow, wei, unctad, ra, ny_fed, gdp_yoy, ra_weekly) ->
             cols=["date", "avg"],
         ),
     }
+
+    # Cron-safe preservation: if any sources produced empty/null this
+    # run (e.g., RecessionAlert xlsx not present in cron runner), copy
+    # those fields forward from the previous growth.json.
+    payload, preserved_fields = preserve_from_prior(payload)
+    payload.setdefault("meta", {})["preserved_fields"] = preserved_fields
+
     return payload
 
 
