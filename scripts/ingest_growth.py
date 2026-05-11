@@ -116,6 +116,26 @@ def rolling_zscore(series: pd.Series, window_obs: int) -> pd.Series:
     return (series - mean) / std
 
 
+def _classify_quadrant(lead_z, coinc_z):
+    """Classify a (lead, coinc) point into one of four regime quadrants.
+    Returns None if either value is null/NaN/non-numeric.
+    """
+    if lead_z is None or coinc_z is None:
+        return None
+    try:
+        l = float(lead_z)
+        c = float(coinc_z)
+    except (TypeError, ValueError):
+        return None
+    if pd.isna(l) or pd.isna(c):
+        return None
+    if l >= 0 and c >= 0: return "ACCELERATING"
+    if l < 0 and c >= 0:  return "SLOWING"
+    if l < 0 and c < 0:   return "CONTRACTION"
+    if l >= 0 and c < 0:  return "RECOVERY"
+    return None
+
+
 def classify_regime(coinc_z: float, lead_z: float, lead_z_8w_ago: float) -> dict:
     if coinc_z > 0.5:
         level = "HIGH"
@@ -905,7 +925,12 @@ def preserve_from_prior(new_payload: dict) -> tuple[dict, list[str]]:
     ra_scalar_fields = [
         "wla", "usmlei", "global_lei", "global_lei_8m",
         "pct_g20_rising", "cb_net_cutters",
-        "avg_z",  # depends on RA weekly AVG; preserved when xlsx absent
+        "avg_z",             # depends on RA weekly AVG
+        "lead_z_quadrant",   # depends on USMLEI (RA-derived)
+        "coinc_z_quadrant",  # depends on GDP YoY (FRED) — fresh, but
+                             # paired with lead so both preserved together
+                             # for visual coherence in degraded mode
+        "quadrant",          # classification depends on both
     ]
     for field in ra_scalar_fields:
         new_val = new_payload.get("current", {}).get(field)
@@ -915,7 +940,7 @@ def preserve_from_prior(new_payload: dict) -> tuple[dict, list[str]]:
             preserved.append(f"current.{field}")
 
     # ---- Group 2: RecessionAlert time series arrays ----
-    array_fields = ["ra_leading_series", "ra_weekly_avg_series", "avg_z_series"]
+    array_fields = ["ra_leading_series", "ra_weekly_avg_series", "avg_z_series", "quadrant_trajectory"]
     for field in array_fields:
         new_arr = new_payload.get(field, [])
         prior_arr = prior.get(field, [])
@@ -1067,6 +1092,53 @@ def build_growth_payload(gdpnow, wei, unctad, ra, ny_fed, gdp_yoy, ra_weekly) ->
         if len(avg_z_df):
             log(f"  computed AVG z-score (5Y rolling): {len(avg_z_df)} obs · latest = {avg_z_df['avg_z'].iloc[-1]:.3f}")
 
+    # ---- Z-scores for QUADRANT panel (Step 13c) ----
+    # USMLEI z-score: monthly cadence, 5Y window = 60 obs. The existing
+    # rolling_zscore helper sets min_periods = max(20, window//4) = 20;
+    # spec asked for 12, but the helper's floor only affects early-band
+    # coverage, not latest values.
+    usmlei_z_df = pd.DataFrame(columns=["date", "usmlei_z"])
+    if "usmlei" in ra.columns and ra["usmlei"].notna().any():
+        usmlei_src = ra[["date", "usmlei"]].dropna(subset=["usmlei"]).sort_values("date").reset_index(drop=True)
+        usmlei_src["usmlei_z"] = rolling_zscore(usmlei_src["usmlei"], 60)
+        usmlei_z_df = usmlei_src[["date", "usmlei_z"]].dropna(subset=["usmlei_z"])
+        if len(usmlei_z_df):
+            log(f"  computed USMLEI z-score (5Y rolling): {len(usmlei_z_df)} obs · latest = {usmlei_z_df['usmlei_z'].iloc[-1]:.3f}")
+
+    # GDP YoY z-score: quarterly cadence, 5Y window = 20 obs.
+    gdp_z_df = pd.DataFrame(columns=["date", "gdp_z"])
+    if len(gdp_yoy) > 0 and "gdp_yoy" in gdp_yoy.columns:
+        gdp_src = gdp_yoy.copy().sort_values("date").reset_index(drop=True)
+        gdp_src["gdp_z"] = rolling_zscore(gdp_src["gdp_yoy"], 20)
+        gdp_z_df = gdp_src[["date", "gdp_z"]].dropna(subset=["gdp_z"])
+        if len(gdp_z_df):
+            log(f"  computed GDP YoY z-score (5Y rolling): {len(gdp_z_df)} obs · latest = {gdp_z_df['gdp_z'].iloc[-1]:.3f}")
+
+    # ---- Build monthly quadrant trajectory from WEI + AVG weekly z-scores ----
+    # Resample both weekly z-series to monthly EOM (last weekly z within each
+    # calendar month). Replaces the previous USMLEI + GDP-YoY sourcing for
+    # timeliness (weekly data, ~1 week stale) and internal consistency with
+    # the regime panel pills. The usmlei_z_df / gdp_z_df computations above
+    # are retained — they remain valid signals and may drive future overlays.
+    quadrant_df = pd.DataFrame(columns=["date", "lead_z", "coinc_z"])
+    if len(wei_z_df) and len(avg_z_df):
+        wei_monthly = (
+            wei_z_df.set_index("date")["wei_z"]
+            .resample("ME").last()
+            .rename("coinc_z")
+        )
+        avg_monthly = (
+            avg_z_df.set_index("date")["avg_z"]
+            .resample("ME").last()
+            .rename("lead_z")
+        )
+        quadrant_df = pd.concat([avg_monthly, wei_monthly], axis=1).reset_index()
+        quadrant_df = quadrant_df.dropna(subset=["lead_z", "coinc_z"]).reset_index(drop=True)
+        if len(quadrant_df):
+            log(f"  computed quadrant trajectory (WEI/AVG): {len(quadrant_df)} monthly obs · "
+                f"latest ({quadrant_df['date'].iloc[-1].date()}): "
+                f"lead_z={quadrant_df['lead_z'].iloc[-1]:.3f}, coinc_z={quadrant_df['coinc_z'].iloc[-1]:.3f}")
+
     payload = {
         "meta": {
             "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -1104,6 +1176,12 @@ def build_growth_payload(gdpnow, wei, unctad, ra, ny_fed, gdp_yoy, ra_weekly) ->
             "lead_z":         _f(lead_z),
             "wei_z":          _f(wei_z_df["wei_z"].iloc[-1]) if len(wei_z_df) else None,
             "avg_z":          _f(avg_z_df["avg_z"].iloc[-1]) if len(avg_z_df) else None,
+            "lead_z_quadrant":  _f(quadrant_df["lead_z"].iloc[-1]) if len(quadrant_df) else None,
+            "coinc_z_quadrant": _f(quadrant_df["coinc_z"].iloc[-1]) if len(quadrant_df) else None,
+            "quadrant": _classify_quadrant(
+                quadrant_df["lead_z"].iloc[-1] if len(quadrant_df) else None,
+                quadrant_df["coinc_z"].iloc[-1] if len(quadrant_df) else None,
+            ),
         },
         "gdpnow_components": _df_to_records(
             gdpnow,  # full ~1830-row history; frontend RANGE selector handles slicing
@@ -1146,6 +1224,10 @@ def build_growth_payload(gdpnow, wei, unctad, ra, ny_fed, gdp_yoy, ra_weekly) ->
         ),
         "avg_z_series": _df_to_records(
             avg_z_df, cols=["date", "avg_z"],
+        ),
+        "quadrant_trajectory": _df_to_records(
+            quadrant_df.tail(12) if len(quadrant_df) else pd.DataFrame(columns=["date", "lead_z", "coinc_z"]),
+            cols=["date", "lead_z", "coinc_z"],
         ),
     }
 

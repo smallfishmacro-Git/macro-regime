@@ -6,6 +6,7 @@ import {
   LineChart,
   AreaChart,
   Area,
+  Scatter,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -341,6 +342,19 @@ function normalizeGrowthPayload(raw) {
     };
   }).filter((r) => r.avg_z != null);
 
+  // QUADRANT panel trajectory — 12 most recent monthly observations of
+  // (lead_z = USMLEI z, coinc_z = GDP YoY z). Hybrid sourcing: regime
+  // panel uses high-frequency WEI/AVG; quadrant uses slower-moving
+  // USMLEI/GDP for trajectory stability.
+  const quadrantTrajectory = (raw.quadrant_trajectory || []).map((r) => {
+    const d = new Date(r.date);
+    return {
+      date: d,
+      lead_z: r.lead_z,
+      coinc_z: r.coinc_z,
+    };
+  }).filter((r) => r.lead_z != null && r.coinc_z != null);
+
   const sigAv = (raw.meta && raw.meta.signal_availability) || { coincident: true, leading: true };
   const cur = raw.current || {};
   const reg = cur.regime || { level: "NORMAL", direction: "UNKNOWN" };
@@ -363,6 +377,9 @@ function normalizeGrowthPayload(raw) {
       leadZ:         cur.lead_z,             // 0.0 default when leading absent — guard via signalAvailability.leading
       weiZ:          cur.wei_z,              // 5Y rolling z of WEI — REGIME MODEL COINCIDENT pill
       avgZ:          cur.avg_z,              // 5Y rolling z of RA weekly AVG — REGIME MODEL LEADING pill
+      leadZQuadrant:  cur.lead_z_quadrant,   // USMLEI z — QUADRANT panel X axis
+      coincZQuadrant: cur.coinc_z_quadrant,  // GDP YoY z — QUADRANT panel Y axis
+      quadrant:       cur.quadrant,          // "ACCELERATING" / "SLOWING" / "CONTRACTION" / "RECOVERY" / null
     },
     gdpNow,
     compZ,
@@ -373,6 +390,7 @@ function normalizeGrowthPayload(raw) {
     raWeeklyAvgSeries,
     weiZSeries,
     avgZSeries,
+    quadrantTrajectory,
   };
 }
 
@@ -410,6 +428,7 @@ export default function MacroRegimeGrowth() {
   const [leadingRange, setLeadingRange] = useState("5Y");      // 1Y | 5Y | MAX — drives COINCIDENT chart
   const [leadingTabRange, setLeadingTabRange] = useState("10Y"); // 5Y | 10Y | MAX — drives LEADING chart
   const [regimeRange, setRegimeRange] = useState("10Y"); // 6M | 1Y | 5Y | 10Y | MAX — drives REGIME MODEL chart
+  const [quadrantRange, setQuadrantRange] = useState("FULL"); // FULL | TIGHT | AUTO — drives QUADRANT axis domain
 
   const { loading, error, data } = useGrowthData();
 
@@ -445,6 +464,10 @@ export default function MacroRegimeGrowth() {
   const raWeeklyAvgSeries = data.raWeeklyAvgSeries || [];
   const weiZSeries = data.weiZSeries || [];
   const avgZSeries = data.avgZSeries || [];
+  const quadrantTrajectory = data.quadrantTrajectory || [];
+  const currentQuadrant = data.current.quadrant || null;
+  const latestLeadZQuadrant = data.current.leadZQuadrant ?? null;
+  const latestCoincZQuadrant = data.current.coincZQuadrant ?? null;
   const latestG = gdpNow[gdpNow.length - 1] || {};
 
   // Divergence indicator: NY Fed vs Atlanta on the current quarter.
@@ -1745,13 +1768,55 @@ export default function MacroRegimeGrowth() {
                   : modelMode === "QUADRANT" ? "QUADRANT"
                   : "COMPOSITE Z·SCORE (5Y)"}
               </span>
-              <div style={{ display: "flex", gap: 12, fontSize: 8, color: C.textDim, letterSpacing: 1 }}>
+              <div style={{ display: "flex", gap: 12, fontSize: 8, color: C.textDim, letterSpacing: 1, alignItems: "center" }}>
                 {(modelMode === "COINCIDENT" || modelMode === "COMPOSITE") && (
                   <span><span style={{ color: C.cyan }}>━</span> COINC {latestWeiZ == null ? "—" : (latestWeiZ >= 0 ? "+" : "") + latestWeiZ.toFixed(2)}</span>
                 )}
                 {(modelMode === "LEADING" || modelMode === "COMPOSITE") && (
                   <span><span style={{ color: leadAvail ? C.amber : C.textMute }}>━</span> LEAD {(!leadAvail || latestAvgZ == null) ? "—" : (latestAvgZ >= 0 ? "+" : "") + latestAvgZ.toFixed(2)}</span>
                 )}
+                {modelMode === "QUADRANT" && (() => {
+                  const qColor = currentQuadrant === "ACCELERATING" ? C.green
+                              : currentQuadrant === "SLOWING" ? C.amber
+                              : currentQuadrant === "CONTRACTION" ? C.magenta
+                              : currentQuadrant === "RECOVERY" ? C.cyan
+                              : C.textMute;
+                  return (
+                    <>
+                      <span>LEAD {latestLeadZQuadrant == null ? "—" : (latestLeadZQuadrant >= 0 ? "+" : "") + latestLeadZQuadrant.toFixed(2)}</span>
+                      <span>COINC {latestCoincZQuadrant == null ? "—" : (latestCoincZQuadrant >= 0 ? "+" : "") + latestCoincZQuadrant.toFixed(2)}</span>
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                        <span style={{ fontSize: 7, color: C.textMute, letterSpacing: 1, marginRight: 2 }}>ZOOM</span>
+                        {["FULL", "TIGHT", "AUTO"].map((r) => (
+                          <button
+                            key={r}
+                            onClick={() => setQuadrantRange(r)}
+                            style={{
+                              fontSize: 7,
+                              padding: "2px 6px",
+                              color: r === quadrantRange ? "#000" : C.textDim,
+                              background: r === quadrantRange ? C.amber : "transparent",
+                              border: `1px solid ${r === quadrantRange ? C.amber : C.panelEdgeStrong}`,
+                              letterSpacing: 1,
+                              cursor: "pointer",
+                              borderRadius: 1,
+                              fontFamily: FONT_MONO,
+                            }}
+                          >
+                            {r}
+                          </button>
+                        ))}
+                      </span>
+                      <span style={{
+                        fontSize: 9, letterSpacing: 1.4, padding: "2px 8px",
+                        background: currentQuadrant ? qColor : "transparent",
+                        color: currentQuadrant ? "#000" : C.textDim,
+                        border: `1px solid ${qColor}`,
+                        borderRadius: 1, fontFamily: FONT_MONO, fontWeight: 700,
+                      }}>{currentQuadrant || "—"}</span>
+                    </>
+                  );
+                })()}
               </div>
             </div>
             {modelMode !== "QUADRANT" && (
@@ -1778,11 +1843,155 @@ export default function MacroRegimeGrowth() {
                 ))}
               </div>
             )}
-            {modelMode === "QUADRANT" ? (
-              <div style={{ height: 200, display: "flex", alignItems: "center", justifyContent: "center", color: C.textMute, fontSize: 9, letterSpacing: 1.2 }}>
-                QUADRANT VIEW — coming in Step 13c
-              </div>
-            ) : (
+            {modelMode === "QUADRANT" ? (() => {
+              const qColor = currentQuadrant === "ACCELERATING" ? C.green
+                          : currentQuadrant === "SLOWING" ? C.amber
+                          : currentQuadrant === "CONTRACTION" ? C.magenta
+                          : currentQuadrant === "RECOVERY" ? C.cyan
+                          : C.text;
+              const trajWithOpacity = quadrantTrajectory.slice(0, -1).map((p, i, arr) => ({
+                ...p,
+                opacity: 0.2 + (0.6 * i / Math.max(arr.length - 1, 1)),
+              }));
+
+              // QUADRANT axis domain — driven by quadrantRange selector.
+              // Symmetric across both axes so quadrant structure (zero lines
+              // equidistant from edges) remains intuitive.
+              const quadrantDomain = (() => {
+                if (quadrantRange === "FULL") return [-3, 3];
+                if (quadrantRange === "TIGHT") return [-1.5, 1.5];
+                if (!quadrantTrajectory.length) return [-3, 3];
+                let xMin = Infinity, xMax = -Infinity, yMin = Infinity, yMax = -Infinity;
+                for (const p of quadrantTrajectory) {
+                  if (p.lead_z < xMin) xMin = p.lead_z;
+                  if (p.lead_z > xMax) xMax = p.lead_z;
+                  if (p.coinc_z < yMin) yMin = p.coinc_z;
+                  if (p.coinc_z > yMax) yMax = p.coinc_z;
+                }
+                const absMax = Math.max(Math.abs(xMin), Math.abs(xMax), Math.abs(yMin), Math.abs(yMax));
+                const padded = Math.max(0.3, absMax + 0.3);
+                return [-padded, padded];
+              })();
+
+              return (
+                <div style={{ width: "100%", height: 320, position: "relative" }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <ComposedChart margin={{ top: 12, right: 18, left: 4, bottom: 18 }}>
+                      <CartesianGrid stroke={C.panelEdge} strokeDasharray="2 4" />
+                      <XAxis
+                        type="number"
+                        dataKey="lead_z"
+                        domain={quadrantDomain}
+                        tick={{ fill: C.textDim, fontSize: 8, fontFamily: FONT_MONO }}
+                        axisLine={{ stroke: C.panelEdge }}
+                        tickLine={false}
+                        label={{ value: "LEAD Z", position: "insideBottom", offset: -8,
+                          style: { fill: C.textMute, fontSize: 8, fontFamily: FONT_MONO, letterSpacing: 1 } }}
+                      />
+                      <YAxis
+                        type="number"
+                        dataKey="coinc_z"
+                        domain={quadrantDomain}
+                        tick={{ fill: C.textDim, fontSize: 8, fontFamily: FONT_MONO }}
+                        axisLine={{ stroke: C.panelEdge }}
+                        tickLine={false}
+                        width={28}
+                        label={{ value: "COINC Z", angle: -90, position: "insideLeft",
+                          style: { fill: C.textMute, fontSize: 8, fontFamily: FONT_MONO, letterSpacing: 1 } }}
+                      />
+                      <ReferenceLine x={0} stroke={C.textMute} strokeWidth={0.8} />
+                      <ReferenceLine y={0} stroke={C.textMute} strokeWidth={0.8} />
+
+                      {/* Hover tooltip — shows date + values + quadrant for hovered point */}
+                      <Tooltip
+                        cursor={{ stroke: C.text, strokeWidth: 0.5, strokeDasharray: "2 2" }}
+                        content={(tProps) => {
+                          if (!tProps.active || !tProps.payload || !tProps.payload.length) return null;
+                          const pt = tProps.payload[0].payload;
+                          if (!pt || pt.lead_z == null || pt.coinc_z == null) return null;
+                          const dateStr = pt.date instanceof Date
+                            ? pt.date.toLocaleDateString("en-US", { year: "numeric", month: "short" })
+                            : new Date(pt.date).toLocaleDateString("en-US", { year: "numeric", month: "short" });
+                          const qClass = pt.lead_z >= 0 && pt.coinc_z >= 0 ? "ACCELERATING"
+                                       : pt.lead_z < 0 && pt.coinc_z >= 0 ? "SLOWING"
+                                       : pt.lead_z < 0 && pt.coinc_z < 0  ? "CONTRACTION"
+                                       : pt.lead_z >= 0 && pt.coinc_z < 0 ? "RECOVERY"
+                                       : "—";
+                          const qCol = qClass === "ACCELERATING" ? C.green
+                                     : qClass === "SLOWING" ? C.amber
+                                     : qClass === "CONTRACTION" ? C.magenta
+                                     : qClass === "RECOVERY" ? C.cyan
+                                     : C.text;
+                          return (
+                            <div style={{
+                              background: C.bg,
+                              border: `1px solid ${C.panelEdgeStrong}`,
+                              padding: "4px 8px",
+                              fontSize: 8,
+                              fontFamily: FONT_MONO,
+                              letterSpacing: 1,
+                              color: C.text,
+                            }}>
+                              <span style={{ color: C.textMute }}>{dateStr}</span>
+                              <span style={{ marginLeft: 8 }}>LEAD {pt.lead_z >= 0 ? "+" : ""}{pt.lead_z.toFixed(2)}</span>
+                              <span style={{ marginLeft: 8 }}>COINC {pt.coinc_z >= 0 ? "+" : ""}{pt.coinc_z.toFixed(2)}</span>
+                              <span style={{ marginLeft: 8, color: qCol, fontWeight: 700 }}>{qClass}</span>
+                            </div>
+                          );
+                        }}
+                      />
+
+                      {/* Trajectory line — connects all 12 points in chronological order */}
+                      <Line
+                        data={quadrantTrajectory}
+                        type="linear"
+                        dataKey="coinc_z"
+                        stroke={C.text}
+                        strokeWidth={1}
+                        strokeOpacity={0.35}
+                        dot={false}
+                        connectNulls
+                        isAnimationActive={false}
+                      />
+
+                      {/* Trajectory dots (excluding current) with opacity fade */}
+                      <Scatter
+                        data={trajWithOpacity}
+                        shape={(props) => {
+                          const { cx, cy, payload } = props;
+                          return (
+                            <circle cx={cx} cy={cy} r={2.5} fill={C.text}
+                              fillOpacity={payload.opacity} stroke="none" />
+                          );
+                        }}
+                        isAnimationActive={false}
+                      />
+
+                      {/* Current point — large dot with quadrant-colored ring */}
+                      <Scatter
+                        data={quadrantTrajectory.slice(-1)}
+                        shape={(props) => {
+                          const { cx, cy } = props;
+                          return (
+                            <g>
+                              <circle cx={cx} cy={cy} r={7} fill="none" stroke={qColor} strokeWidth={1.5} />
+                              <circle cx={cx} cy={cy} r={4} fill={qColor} />
+                            </g>
+                          );
+                        }}
+                        isAnimationActive={false}
+                      />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+
+                  {/* Quadrant label overlays */}
+                  <div style={{ position: "absolute", top: 18, right: 22, fontSize: 8, color: C.green,   opacity: 0.55, letterSpacing: 1.4, fontFamily: FONT_MONO, pointerEvents: "none" }}>ACCELERATING</div>
+                  <div style={{ position: "absolute", top: 18, left: 38, fontSize: 8, color: C.amber,   opacity: 0.55, letterSpacing: 1.4, fontFamily: FONT_MONO, pointerEvents: "none" }}>SLOWING</div>
+                  <div style={{ position: "absolute", bottom: 36, left: 38, fontSize: 8, color: C.magenta, opacity: 0.55, letterSpacing: 1.4, fontFamily: FONT_MONO, pointerEvents: "none" }}>CONTRACTION</div>
+                  <div style={{ position: "absolute", bottom: 36, right: 22, fontSize: 8, color: C.cyan,  opacity: 0.55, letterSpacing: 1.4, fontFamily: FONT_MONO, pointerEvents: "none" }}>RECOVERY</div>
+                </div>
+              );
+            })() : (
               <div style={{ height: 200 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <ComposedChart data={regimePanelData} margin={{ top: 6, right: 14, left: 0, bottom: 4 }}>
@@ -1843,11 +2052,17 @@ export default function MacroRegimeGrowth() {
                 </ResponsiveContainer>
               </div>
             )}
-            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: 8, color: C.textMute, letterSpacing: 0.8 }}>
-              <span>HIGH +0.5</span>
-              <span>NORMAL band</span>
-              <span>LOW -0.5</span>
-            </div>
+            {modelMode === "QUADRANT" ? (
+              <div style={{ marginTop: 6, fontSize: 8, color: C.textMute, letterSpacing: 0.8 }}>
+                SOURCE · LEAD: <span style={{ color: C.text }}>RA AVG</span> 5Y-z · COINC: <span style={{ color: C.text }}>WEI</span> 5Y-z · trajectory = last 12 monthly samples
+              </div>
+            ) : (
+              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: 8, color: C.textMute, letterSpacing: 0.8 }}>
+                <span>HIGH +0.5</span>
+                <span>NORMAL band</span>
+                <span>LOW -0.5</span>
+              </div>
+            )}
           </div>
 
           {/* Key indicators */}
