@@ -324,6 +324,23 @@ function normalizeGrowthPayload(raw) {
     };
   }).filter((r) => r.avg != null);
 
+  // WEI z-score (5Y rolling) — for REGIME MODEL panel COINCIDENT pill.
+  const weiZSeries = (raw.wei_z_series || []).map((r) => {
+    const d = new Date(r.date);
+    return {
+      date: d,
+      wei_z: r.wei_z,
+    };
+  }).filter((r) => r.wei_z != null);
+  // RA weekly AVG z-score (5Y rolling) — for REGIME MODEL panel LEADING pill.
+  const avgZSeries = (raw.avg_z_series || []).map((r) => {
+    const d = new Date(r.date);
+    return {
+      date: d,
+      avg_z: r.avg_z,
+    };
+  }).filter((r) => r.avg_z != null);
+
   const sigAv = (raw.meta && raw.meta.signal_availability) || { coincident: true, leading: true };
   const cur = raw.current || {};
   const reg = cur.regime || { level: "NORMAL", direction: "UNKNOWN" };
@@ -344,6 +361,8 @@ function normalizeGrowthPayload(raw) {
       globalLei8m:   cur.global_lei_8m,      // null when RA absent
       coincZ:        cur.coinc_z,
       leadZ:         cur.lead_z,             // 0.0 default when leading absent — guard via signalAvailability.leading
+      weiZ:          cur.wei_z,              // 5Y rolling z of WEI — REGIME MODEL COINCIDENT pill
+      avgZ:          cur.avg_z,              // 5Y rolling z of RA weekly AVG — REGIME MODEL LEADING pill
     },
     gdpNow,
     compZ,
@@ -352,6 +371,8 @@ function normalizeGrowthPayload(raw) {
     gdpYoySeries,
     raLeadingSeries,
     raWeeklyAvgSeries,
+    weiZSeries,
+    avgZSeries,
   };
 }
 
@@ -388,6 +409,7 @@ export default function MacroRegimeGrowth() {
   const [chartRange, setChartRange] = useState("1Y");  // 6M | 1Y | 2Y | MAX
   const [leadingRange, setLeadingRange] = useState("5Y");      // 1Y | 5Y | MAX — drives COINCIDENT chart
   const [leadingTabRange, setLeadingTabRange] = useState("10Y"); // 5Y | 10Y | MAX — drives LEADING chart
+  const [regimeRange, setRegimeRange] = useState("10Y"); // 6M | 1Y | 5Y | 10Y | MAX — drives REGIME MODEL chart
 
   const { loading, error, data } = useGrowthData();
 
@@ -421,6 +443,8 @@ export default function MacroRegimeGrowth() {
   const gdpYoySeries = data.gdpYoySeries || [];
   const raLeadingSeries = data.raLeadingSeries || [];
   const raWeeklyAvgSeries = data.raWeeklyAvgSeries || [];
+  const weiZSeries = data.weiZSeries || [];
+  const avgZSeries = data.avgZSeries || [];
   const latestG = gdpNow[gdpNow.length - 1] || {};
 
   // Divergence indicator: NY Fed vs Atlanta on the current quarter.
@@ -968,6 +992,75 @@ export default function MacroRegimeGrowth() {
       .map((d) => d.label);
   })();
 
+  // Regime panel chart data — resamples WEI z-score + RA AVG z-score to monthly
+  // EOM so both series align on the same row (raw cadence is weekly but on
+  // different weekdays, so a date-keyed merge would be sparse). Per Step 13b
+  // spec: monthly resample is for visual smoothness only; the regime
+  // classifier still uses weekly z internally.
+  const regimePanelData = (() => {
+    if (!weiZSeries.length && !avgZSeries.length) return [];
+    const fmtWeek = (d) => d.toLocaleDateString("en-US", { month: "short", year: "2-digit" }).replace(/(\w{3}) (\d{2})/, "$1 '$2");
+    const monthKey = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    const months = new Map();
+    const ensure = (d) => {
+      const k = monthKey(d);
+      let bucket = months.get(k);
+      if (!bucket) {
+        bucket = { key: k, lastWeiDate: null, lastWeiZ: null, lastAvgDate: null, lastAvgZ: null };
+        months.set(k, bucket);
+      }
+      return bucket;
+    };
+    for (const r of weiZSeries) {
+      const b = ensure(r.date);
+      if (!b.lastWeiDate || r.date > b.lastWeiDate) {
+        b.lastWeiDate = r.date;
+        b.lastWeiZ = r.wei_z;
+      }
+    }
+    for (const r of avgZSeries) {
+      const b = ensure(r.date);
+      if (!b.lastAvgDate || r.date > b.lastAvgDate) {
+        b.lastAvgDate = r.date;
+        b.lastAvgZ = r.avg_z;
+      }
+    }
+    const rows = Array.from(months.values()).map((b) => {
+      const [y, m] = b.key.split("-").map(Number);
+      const eom = new Date(y, m, 0); // day=0 of next month = last day of this month
+      return {
+        date: eom,
+        label: fmtWeek(eom),
+        wei_z: b.lastWeiZ,
+        avg_z: b.lastAvgZ,
+      };
+    }).sort((a, b) => a.date - b.date);
+
+    // Apply selected range — slice off rows older than (latest - rangeDays).
+    const REGIME_RANGE_DAYS = { "6M": 183, "1Y": 365, "5Y": 1825, "10Y": 3650, "MAX": Infinity };
+    const rangeDays = REGIME_RANGE_DAYS[regimeRange] ?? 3650;
+    if (rangeDays === Infinity || !rows.length) return rows;
+    const cutoff = new Date(rows[rows.length - 1].date.getTime() - rangeDays * 86400000);
+    return rows.filter((r) => r.date >= cutoff);
+  })();
+
+  const regimePanelTicks = (() => {
+    if (!regimePanelData.length) return [];
+    const seen = new Set();
+    return regimePanelData
+      .filter((d) => {
+        const k = `${d.date.getFullYear()}-${Math.floor(d.date.getMonth() / 6)}`;
+        if (seen.has(k)) return false;
+        seen.add(k);
+        return true;
+      })
+      .map((d) => d.label);
+  })();
+
+  // Latest scalar values for the regime panel header subtitle.
+  const latestWeiZ = data.current.weiZ ?? (weiZSeries.length ? weiZSeries[weiZSeries.length - 1].wei_z : null);
+  const latestAvgZ = data.current.avgZ ?? (avgZSeries.length ? avgZSeries[avgZSeries.length - 1].avg_z : null);
+
   return (
     <div style={{ background: C.bg, minHeight: "100vh", color: C.text, fontFamily: FONT_MONO }}>
       {/* ============================================================ */}
@@ -1488,7 +1581,7 @@ export default function MacroRegimeGrowth() {
                   <Legend color={C.inventories} label="INVENTORIES" value={latestG.inventories != null ? latestG.inventories.toFixed(3) : "—"} />
                 </div>
 
-                <div style={{ height: 280 }}>
+                <div style={{ width: "100%", height: 460 }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <ComposedChart data={gdpNowFiltered} margin={{ top: 6, right: 30, left: 0, bottom: 6 }} stackOffset="sign">
                       <CartesianGrid stroke={C.grid} vertical={false} />
@@ -1646,50 +1739,110 @@ export default function MacroRegimeGrowth() {
           {/* Composite chart */}
           <div style={{ background: C.panel, border: `1px solid ${C.panelEdge}`, borderRadius: 4, padding: 16, marginBottom: 12 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, paddingBottom: 8, borderBottom: `1px solid ${C.panelEdge}` }}>
-              <span style={{ fontSize: 10, color: C.text, letterSpacing: 1.2 }}>COMPOSITE Z·SCORE</span>
+              <span style={{ fontSize: 10, color: C.text, letterSpacing: 1.2 }}>
+                {modelMode === "LEADING" ? "AVG Z·SCORE (5Y)"
+                  : modelMode === "COINCIDENT" ? "WEI Z·SCORE (5Y)"
+                  : modelMode === "QUADRANT" ? "QUADRANT"
+                  : "COMPOSITE Z·SCORE (5Y)"}
+              </span>
               <div style={{ display: "flex", gap: 12, fontSize: 8, color: C.textDim, letterSpacing: 1 }}>
-                <span><span style={{ color: C.cyan }}>━</span> COINC {latest.coinc == null ? "—" : (latest.coinc >= 0 ? "+" : "") + latest.coinc.toFixed(2)}</span>
-                <span><span style={{ color: leadAvail ? C.amber : C.textMute }}>━</span> LEAD {(!leadAvail || latest.lead == null) ? "—" : (latest.lead >= 0 ? "+" : "") + latest.lead.toFixed(2)}</span>
+                {(modelMode === "COINCIDENT" || modelMode === "COMPOSITE") && (
+                  <span><span style={{ color: C.cyan }}>━</span> COINC {latestWeiZ == null ? "—" : (latestWeiZ >= 0 ? "+" : "") + latestWeiZ.toFixed(2)}</span>
+                )}
+                {(modelMode === "LEADING" || modelMode === "COMPOSITE") && (
+                  <span><span style={{ color: leadAvail ? C.amber : C.textMute }}>━</span> LEAD {(!leadAvail || latestAvgZ == null) ? "—" : (latestAvgZ >= 0 ? "+" : "") + latestAvgZ.toFixed(2)}</span>
+                )}
               </div>
             </div>
-            <div style={{ height: 200 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={compZ} margin={{ top: 6, right: 14, left: 0, bottom: 4 }}>
-                  <CartesianGrid stroke={C.grid} vertical={false} />
-                  <XAxis
-                    dataKey="label"
-                    ticks={compZTicks}
-                    tick={{ fill: C.textDim, fontSize: 8, fontFamily: FONT_MONO }}
-                    axisLine={{ stroke: C.panelEdge }}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    domain={[-2.5, 2.5]}
-                    tick={{ fill: C.textDim, fontSize: 8, fontFamily: FONT_MONO }}
-                    axisLine={{ stroke: C.panelEdge }}
-                    tickLine={false}
-                    width={28}
-                  />
-                  <ReferenceArea y1={0.5}  y2={2.5}  fill={C.green} fillOpacity={0.04} />
-                  <ReferenceArea y1={-0.5} y2={-2.5} fill={C.red}   fillOpacity={0.04} />
-                  <ReferenceLine y={0.5}  stroke={C.green} strokeDasharray="2 4" strokeWidth={0.5} />
-                  <ReferenceLine y={-0.5} stroke={C.red}   strokeDasharray="2 4" strokeWidth={0.5} />
-                  <ReferenceLine y={0}    stroke={C.textMute} strokeWidth={0.5} />
-                  <Tooltip
-                    contentStyle={{
-                      background: "#000",
-                      border: `1px solid ${C.amber}`,
+            {modelMode !== "QUADRANT" && (
+              <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 6, marginBottom: 8 }}>
+                <span style={{ fontSize: 8, color: C.textMute, letterSpacing: 1 }}>RANGE</span>
+                {["6M", "1Y", "5Y", "10Y", "MAX"].map((r) => (
+                  <button
+                    key={r}
+                    onClick={() => setRegimeRange(r)}
+                    style={{
+                      fontSize: 8,
+                      padding: "2px 7px",
+                      color: r === regimeRange ? "#000" : C.textDim,
+                      background: r === regimeRange ? C.amber : "transparent",
+                      border: `1px solid ${r === regimeRange ? C.amber : C.panelEdgeStrong}`,
+                      letterSpacing: 1,
+                      cursor: "pointer",
+                      borderRadius: 1,
                       fontFamily: FONT_MONO,
-                      fontSize: 9,
-                      borderRadius: 2,
                     }}
-                    labelStyle={{ color: C.amber }}
-                  />
-                  <Line type="monotone" dataKey="coinc" stroke={C.cyan}  strokeWidth={1.4} dot={false} isAnimationActive={false} />
-                  <Line type="monotone" dataKey="lead"  stroke={C.amber} strokeWidth={1.4} dot={false} isAnimationActive={false} />
-                </ComposedChart>
-              </ResponsiveContainer>
-            </div>
+                  >
+                    {r}
+                  </button>
+                ))}
+              </div>
+            )}
+            {modelMode === "QUADRANT" ? (
+              <div style={{ height: 200, display: "flex", alignItems: "center", justifyContent: "center", color: C.textMute, fontSize: 9, letterSpacing: 1.2 }}>
+                QUADRANT VIEW — coming in Step 13c
+              </div>
+            ) : (
+              <div style={{ height: 200 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <ComposedChart data={regimePanelData} margin={{ top: 6, right: 14, left: 0, bottom: 4 }}>
+                    <CartesianGrid stroke={C.grid} vertical={false} />
+                    <XAxis
+                      dataKey="label"
+                      ticks={regimePanelTicks}
+                      tick={{ fill: C.textDim, fontSize: 8, fontFamily: FONT_MONO }}
+                      axisLine={{ stroke: C.panelEdge }}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      domain={[-2.5, 2.5]}
+                      tick={{ fill: C.textDim, fontSize: 8, fontFamily: FONT_MONO }}
+                      axisLine={{ stroke: C.panelEdge }}
+                      tickLine={false}
+                      width={28}
+                    />
+                    <ReferenceArea y1={0.5}  y2={2.5}  fill={C.green} fillOpacity={0.04} />
+                    <ReferenceArea y1={-0.5} y2={-2.5} fill={C.red}   fillOpacity={0.04} />
+                    <ReferenceLine y={0.5}  stroke={C.green} strokeDasharray="2 4" strokeWidth={0.5} />
+                    <ReferenceLine y={-0.5} stroke={C.red}   strokeDasharray="2 4" strokeWidth={0.5} />
+                    <ReferenceLine y={0}    stroke={C.textMute} strokeWidth={0.5} />
+                    <Tooltip
+                      contentStyle={{
+                        background: "#000",
+                        border: `1px solid ${C.amber}`,
+                        fontFamily: FONT_MONO,
+                        fontSize: 9,
+                        borderRadius: 2,
+                      }}
+                      labelStyle={{ color: C.amber }}
+                    />
+                    {(modelMode === "COINCIDENT" || modelMode === "COMPOSITE") && (
+                      <Line
+                        type="monotone"
+                        dataKey="wei_z"
+                        stroke={C.cyan}
+                        strokeWidth={1.6}
+                        dot={false}
+                        connectNulls
+                        isAnimationActive={false}
+                      />
+                    )}
+                    {(modelMode === "LEADING" || modelMode === "COMPOSITE") && (
+                      <Line
+                        type="monotone"
+                        dataKey="avg_z"
+                        stroke={C.amber}
+                        strokeWidth={1.6}
+                        strokeDasharray={modelMode === "COMPOSITE" ? "2 3" : undefined}
+                        dot={false}
+                        connectNulls
+                        isAnimationActive={false}
+                      />
+                    )}
+                  </ComposedChart>
+                </ResponsiveContainer>
+              </div>
+            )}
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: 8, color: C.textMute, letterSpacing: 0.8 }}>
               <span>HIGH +0.5</span>
               <span>NORMAL band</span>

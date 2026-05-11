@@ -905,6 +905,7 @@ def preserve_from_prior(new_payload: dict) -> tuple[dict, list[str]]:
     ra_scalar_fields = [
         "wla", "usmlei", "global_lei", "global_lei_8m",
         "pct_g20_rising", "cb_net_cutters",
+        "avg_z",  # depends on RA weekly AVG; preserved when xlsx absent
     ]
     for field in ra_scalar_fields:
         new_val = new_payload.get("current", {}).get(field)
@@ -914,7 +915,7 @@ def preserve_from_prior(new_payload: dict) -> tuple[dict, list[str]]:
             preserved.append(f"current.{field}")
 
     # ---- Group 2: RecessionAlert time series arrays ----
-    array_fields = ["ra_leading_series", "ra_weekly_avg_series"]
+    array_fields = ["ra_leading_series", "ra_weekly_avg_series", "avg_z_series"]
     for field in array_fields:
         new_arr = new_payload.get(field, [])
         prior_arr = prior.get(field, [])
@@ -1044,6 +1045,28 @@ def build_growth_payload(gdpnow, wei, unctad, ra, ny_fed, gdp_yoy, ra_weekly) ->
         wei_with_ma = wei.copy()
         wei_with_ma["wei_ma13"] = None
 
+    # ---- Per-indicator 5Y rolling z-scores for REGIME MODEL panel ----
+    # COINCIDENT pill: WEI z-score (5Y rolling on weekly cadence).
+    # LEADING pill:    RecessionAlert weekly AVG z-score (5Y rolling, weekly).
+    # COMPOSITE pill:  both overlaid (frontend handles merge).
+    # Reuses the existing rolling_zscore() helper (window_obs only; min_periods
+    # auto = max(20, window//4) = 65 for window=260).
+    wei_z_df = pd.DataFrame(columns=["date", "wei_z"])
+    if len(wei) > 0 and "wei" in wei.columns:
+        wei_z_series = wei.copy()
+        wei_z_series["wei_z"] = rolling_zscore(wei_z_series["wei"], 260)
+        wei_z_df = wei_z_series[["date", "wei_z"]].dropna(subset=["wei_z"])
+        if len(wei_z_df):
+            log(f"  computed WEI z-score (5Y rolling): {len(wei_z_df)} obs · latest = {wei_z_df['wei_z'].iloc[-1]:.3f}")
+
+    avg_z_df = pd.DataFrame(columns=["date", "avg_z"])
+    if len(ra_weekly) > 0 and "avg" in ra_weekly.columns:
+        avg_z_series = ra_weekly.copy()
+        avg_z_series["avg_z"] = rolling_zscore(avg_z_series["avg"], 260)
+        avg_z_df = avg_z_series[["date", "avg_z"]].dropna(subset=["avg_z"])
+        if len(avg_z_df):
+            log(f"  computed AVG z-score (5Y rolling): {len(avg_z_df)} obs · latest = {avg_z_df['avg_z'].iloc[-1]:.3f}")
+
     payload = {
         "meta": {
             "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -1079,6 +1102,8 @@ def build_growth_payload(gdpnow, wei, unctad, ra, ny_fed, gdp_yoy, ra_weekly) ->
             "cb_net_cutters": _f(ra["cb_net_cutters"].dropna().iloc[-1]) if "cb_net_cutters" in ra.columns and ra["cb_net_cutters"].notna().any() else None,
             "coinc_z":        _f(coinc_z),
             "lead_z":         _f(lead_z),
+            "wei_z":          _f(wei_z_df["wei_z"].iloc[-1]) if len(wei_z_df) else None,
+            "avg_z":          _f(avg_z_df["avg_z"].iloc[-1]) if len(avg_z_df) else None,
         },
         "gdpnow_components": _df_to_records(
             gdpnow,  # full ~1830-row history; frontend RANGE selector handles slicing
@@ -1115,6 +1140,12 @@ def build_growth_payload(gdpnow, wei, unctad, ra, ny_fed, gdp_yoy, ra_weekly) ->
             if len(ra_weekly) and "avg" in ra_weekly.columns
             else pd.DataFrame(columns=["date", "avg"]),
             cols=["date", "avg"],
+        ),
+        "wei_z_series": _df_to_records(
+            wei_z_df, cols=["date", "wei_z"],
+        ),
+        "avg_z_series": _df_to_records(
+            avg_z_df, cols=["date", "avg_z"],
         ),
     }
 
