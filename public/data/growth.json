@@ -1,11 +1,11 @@
 {
   "meta": {
-    "generated_at": "2026-05-14T23:44:52.315054+00:00",
+    "generated_at": "2026-05-15T23:44:10.653655+00:00",
     "z_window_years": 10,
     "direction_lookback_weeks": 8,
     "sources": {
       "atlanta_fed": "fetched \u00b7 latest obs 2026-05-14",
-      "ny_fed": "fetched \u00b7 latest obs 2026-05-08",
+      "ny_fed": "fetched \u00b7 latest obs 2026-05-15",
       "fred_wei": "fetched \u00b7 latest obs 2026-05-09",
       "fred_gdp_yoy": "fetched \u00b7 latest obs 2026-01-01",
       "unctad": "manual \u00b7 latest obs 2026-04-22",
@@ -44,7 +44,7 @@
     "hedge_ratio": 45,
     "hedge_posture": "Insufficient leading data \u2014 direction unknown",
     "gdpnow": 3.9912,
-    "ny_nowcast": 2.59,
+    "ny_nowcast": 2.61,
     "ny_target_qtr": "2026:Q2",
     "wei": 2.71,
     "unctad_world": 2.61,
@@ -54,7 +54,7 @@
     "global_lei_8m": 0.8714,
     "pct_g20_rising": 88.2353,
     "cb_net_cutters": 38.2353,
-    "coinc_z": 0.1387,
+    "coinc_z": 0.175,
     "lead_z": 0.0,
     "wei_z": -0.1465,
     "avg_z": 0.2598,
@@ -21739,6 +21739,11 @@
       "date": "2026-05-08",
       "coinc_z": 0.1387,
       "lead_z": "<NA>"
+    },
+    {
+      "date": "2026-05-15",
+      "coinc_z": 0.175,
+      "lead_z": "<NA>"
     }
   ],
   "ny_fed_nowcast": [
@@ -22963,6 +22968,13 @@
     {
       "date": "2026-05-08",
       "ny_nowcast": 2.59,
+      "ny_backcast": null,
+      "ny_next_q": null,
+      "target_quarter": "2026:Q2"
+    },
+    {
+      "date": "2026-05-15",
+      "ny_nowcast": 2.61,
       "ny_backcast": null,
       "ny_next_q": null,
       "target_quarter": "2026:Q2"
