@@ -1,12 +1,12 @@
 {
   "meta": {
-    "generated_at": "2026-05-21T00:00:35.536358+00:00",
+    "generated_at": "2026-05-21T23:50:33.561483+00:00",
     "z_window_years": 10,
     "direction_lookback_weeks": 8,
     "sources": {
-      "atlanta_fed": "fetched \u00b7 latest obs 2026-05-14",
+      "atlanta_fed": "fetched \u00b7 latest obs 2026-05-21",
       "ny_fed": "fetched \u00b7 latest obs 2026-05-15",
-      "fred_wei": "fetched \u00b7 latest obs 2026-05-09",
+      "fred_wei": "fetched \u00b7 latest obs 2026-05-16",
       "fred_gdp_yoy": "fetched \u00b7 latest obs 2026-01-01",
       "unctad": "manual \u00b7 latest obs 2026-04-22",
       "recessionalert": "missing"
@@ -43,10 +43,10 @@
     },
     "hedge_ratio": 45,
     "hedge_posture": "Insufficient leading data \u2014 direction unknown",
-    "gdpnow": 3.9912,
+    "gdpnow": 4.2573,
     "ny_nowcast": 2.61,
     "ny_target_qtr": "2026:Q2",
-    "wei": 2.71,
+    "wei": 2.99,
     "unctad_world": 2.61,
     "wla": 24.2688,
     "usmlei": 0.8041,
@@ -54,9 +54,9 @@
     "global_lei_8m": 0.8714,
     "pct_g20_rising": 88.2353,
     "cb_net_cutters": 38.2353,
-    "coinc_z": 0.175,
+    "coinc_z": 0.1974,
     "lead_z": 0.0,
-    "wei_z": -0.1465,
+    "wei_z": 0.0247,
     "avg_z": 0.2598,
     "lead_z_quadrant": 0.2598,
     "coinc_z_quadrant": -0.0466,
@@ -18472,6 +18472,26 @@
       "govt": 0.2712,
       "netExports": 0.0863,
       "inventories": 0.8969
+    },
+    {
+      "date": "2026-05-15",
+      "total": 4.3002,
+      "pceGoods": 0.6542,
+      "pceServices": 1.2967,
+      "fixedInv": 0.9456,
+      "govt": 0.2756,
+      "netExports": 0.0693,
+      "inventories": 1.0589
+    },
+    {
+      "date": "2026-05-21",
+      "total": 4.2573,
+      "pceGoods": 0.6535,
+      "pceServices": 1.2962,
+      "fixedInv": 0.9041,
+      "govt": 0.2756,
+      "netExports": 0.0692,
+      "inventories": 1.0588
     }
   ],
   "composite_z": [
@@ -21737,7 +21757,7 @@
     },
     {
       "date": "2026-05-15",
-      "coinc_z": 0.175,
+      "coinc_z": 0.1974,
       "lead_z": "<NA>"
     }
   ],
@@ -27763,8 +27783,13 @@
     },
     {
       "date": "2026-05-09",
-      "wei": 2.71,
-      "wei_ma13": 2.7062
+      "wei": 2.73,
+      "wei_ma13": 2.7077
+    },
+    {
+      "date": "2026-05-16",
+      "wei": 2.99,
+      "wei_ma13": 2.7146
     }
   ],
   "gdp_yoy_series": [
@@ -48152,7 +48177,11 @@
     },
     {
       "date": "2026-05-09",
-      "wei_z": -0.1465
+      "wei_z": -0.1354
+    },
+    {
+      "date": "2026-05-16",
+      "wei_z": 0.0247
     }
   ],
   "avg_z_series": [
