@@ -764,25 +764,30 @@ export default function MacroRegimeGrowth() {
     // Sort by date
     const sortedData = Array.from(merged.values()).sort((a, b) => a.date - b.date);
 
-    // Extend the most recent GDP YoY value through the end of the current
-    // calendar quarter. Quarterly GDP applies until the next print, so the
-    // stepAfter bar should reach quarter-end — matches Dallas Fed / FRED.
+    // Extend the most recent GDP YoY value forward by one quarter (~3 months).
+    // A quarterly print applies until the next one is released, so the stepAfter
+    // bar should reach exactly one quarter past the latest point — not the current
+    // calendar quarter-end, which can span two quarters for a stale print.
     const lastGdp = gdpYoySeries.length ? gdpYoySeries[gdpYoySeries.length - 1] : null;
-    if (lastGdp && lastGdp.gdp_yoy != null && sortedData.length) {
-      const today = new Date();
-      const qEndMonth = Math.floor(today.getMonth() / 3) * 3 + 2; // 2,5,8,11 (Mar Jun Sep Dec, 0-indexed)
-      const currentQuarterEnd = new Date(today.getFullYear(), qEndMonth + 1, 0); // day 0 of next month = last day of quarter
-      // Only append when quarter-end is past both the latest GDP date and the
-      // latest charted date, so a late quarterly print (published after
-      // quarter-end) never produces a backwards-pointing segment.
-      if (currentQuarterEnd > lastGdp.date && currentQuarterEnd > sortedData[sortedData.length - 1].date) {
+    if (lastGdp && lastGdp.gdp_yoy != null) {
+      // UTC math to stay consistent with how dates are parsed/keyed elsewhere.
+      const extendTo = new Date(lastGdp.date);
+      extendTo.setUTCMonth(extendTo.getUTCMonth() + 3);
+      const extendKey = extendTo.toISOString().slice(0, 10);
+      const existing = merged.get(extendKey);
+      if (existing) {
+        // A charted row already lands on that date — carry the GDP value onto it.
+        if (existing.gdp_yoy == null) existing.gdp_yoy = lastGdp.gdp_yoy;
+      } else {
+        // +3 months can fall before the latest (weekly WEI) date, so insert then re-sort.
         sortedData.push({
-          date: currentQuarterEnd,
-          label: labelFmt(currentQuarterEnd),
+          date: extendTo,
+          label: labelFmt(extendTo),
           wei: null,
           wei_ma13: null,
           gdp_yoy: lastGdp.gdp_yoy,
         });
+        sortedData.sort((a, b) => a.date - b.date);
       }
     }
 
