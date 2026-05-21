@@ -420,12 +420,11 @@ function useGrowthData() {
 // MAIN
 // ========================================================================
 export default function MacroRegimeGrowth() {
-  const [primaryTab, setPrimaryTab] = useState("MACRO_REGIME");
   const [subTab, setSubTab] = useState("GROWTH");
   const [chartMode, setChartMode] = useState("COINCIDENT");
   const [modelMode, setModelMode] = useState("COMPOSITE");
   const [chartRange, setChartRange] = useState("1Y");  // 6M | 1Y | 2Y | MAX
-  const [leadingRange, setLeadingRange] = useState("5Y");      // 1Y | 5Y | MAX — drives COINCIDENT chart
+  const [leadingRange, setLeadingRange] = useState("MAX");     // 1Y | 5Y | MAX — drives COINCIDENT chart
   const [leadingTabRange, setLeadingTabRange] = useState("10Y"); // 5Y | 10Y | MAX — drives LEADING chart
   const [regimeRange, setRegimeRange] = useState("10Y"); // 6M | 1Y | 5Y | 10Y | MAX — drives REGIME MODEL chart
   const [quadrantRange, setQuadrantRange] = useState("FULL"); // FULL | TIGHT | AUTO — drives QUADRANT axis domain
@@ -762,8 +761,32 @@ export default function MacroRegimeGrowth() {
       }
     }
 
-    // Sort by date and return as array
-    return Array.from(merged.values()).sort((a, b) => a.date - b.date);
+    // Sort by date
+    const sortedData = Array.from(merged.values()).sort((a, b) => a.date - b.date);
+
+    // Extend the most recent GDP YoY value through the end of the current
+    // calendar quarter. Quarterly GDP applies until the next print, so the
+    // stepAfter bar should reach quarter-end — matches Dallas Fed / FRED.
+    const lastGdp = gdpYoySeries.length ? gdpYoySeries[gdpYoySeries.length - 1] : null;
+    if (lastGdp && lastGdp.gdp_yoy != null && sortedData.length) {
+      const today = new Date();
+      const qEndMonth = Math.floor(today.getMonth() / 3) * 3 + 2; // 2,5,8,11 (Mar Jun Sep Dec, 0-indexed)
+      const currentQuarterEnd = new Date(today.getFullYear(), qEndMonth + 1, 0); // day 0 of next month = last day of quarter
+      // Only append when quarter-end is past both the latest GDP date and the
+      // latest charted date, so a late quarterly print (published after
+      // quarter-end) never produces a backwards-pointing segment.
+      if (currentQuarterEnd > lastGdp.date && currentQuarterEnd > sortedData[sortedData.length - 1].date) {
+        sortedData.push({
+          date: currentQuarterEnd,
+          label: labelFmt(currentQuarterEnd),
+          wei: null,
+          wei_ma13: null,
+          gdp_yoy: lastGdp.gdp_yoy,
+        });
+      }
+    }
+
+    return sortedData;
   })();
 
   // Compute y-axis domain for LEADING chart with padding
@@ -1149,16 +1172,6 @@ export default function MacroRegimeGrowth() {
             REFRESH
           </button>
         </div>
-      </div>
-
-      {/* ============================================================ */}
-      {/* PRIMARY TAB ROW                                               */}
-      {/* ============================================================ */}
-      <div style={{ display: "flex", padding: "0 16px", borderBottom: `1px solid ${C.panelEdge}` }}>
-        <Tab active={primaryTab === "RATES_REGIME"}  onClick={() => setPrimaryTab("RATES_REGIME")}>RATES REGIME</Tab>
-        <Tab active={primaryTab === "BUY_THE_DIP"}   onClick={() => setPrimaryTab("BUY_THE_DIP")}>BUY THE DIP</Tab>
-        <Tab active={primaryTab === "MARKET_RISK"}   onClick={() => setPrimaryTab("MARKET_RISK")}>MARKET RISK</Tab>
-        <Tab active={primaryTab === "MACRO_REGIME"}  onClick={() => setPrimaryTab("MACRO_REGIME")}>MACRO REGIME</Tab>
       </div>
 
       {/* ============================================================ */}
