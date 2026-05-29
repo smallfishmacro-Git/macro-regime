@@ -19,13 +19,20 @@ import { C, FONT_MONO, Panel, Pill, StatTile, Legend } from "../design-system";
 // ========================================================================
 // Producer (market-dashboard/equity_regime_updater.py) was patched 2026-05-29
 // to emit valid JSON (null instead of NaN), so a plain .json() works now.
+// Local dev uses public/data/equity_regime.json (fast, gitignored copy).
+// Production fetches directly from the market-dashboard repo's raw URL —
+// single source of truth, always reflects the daily pipeline output.
+const EQUITY_REGIME_URL = import.meta.env.DEV
+  ? "/data/equity_regime.json"
+  : "https://raw.githubusercontent.com/smallfishmacro-Git/market-dashboard/main/data/datasets/equity_regime.json";
+
 function useEquityRegimeData() {
   const [state, setState] = useState({ loading: true, error: null, data: null });
   useEffect(() => {
     let cancelled = false;
-    fetch("/data/equity_regime.json", { cache: "no-store" })
+    fetch(EQUITY_REGIME_URL, { cache: "no-store" })
       .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status} fetching /data/equity_regime.json`);
+        if (!r.ok) throw new Error(`HTTP ${r.status} fetching ${EQUITY_REGIME_URL}`);
         return r.json();
       })
       .then((raw) => {
