@@ -155,11 +155,19 @@ usrec  = monthly(fetch("USREC"), "last").fillna(0)
 
 # ------------------------------------------------- recession probability ----
 def recession_within(usrec_m, horizon=8):
-    """1 if a recession month occurs within the next `horizon` months."""
+    """1 if a recession month occurs within the next `horizon` months.
+    Tail months whose forward window isn't fully observed are left NaN
+    (unknowable) so the logistic fit never trains on future data we
+    don't have. dropna() downstream removes them from the fit."""
     arr = usrec_m.values.astype(float)
-    out = np.zeros(len(arr))
+    out = np.full(len(arr), np.nan)
     for i in range(len(arr)):
-        out[i] = 1.0 if arr[i+1:i+1+horizon].max() == 1 else 0.0
+        seg = arr[i+1:i+1+horizon]
+        if seg.size and seg.max() == 1:
+            out[i] = 1.0            # recession seen in window -> definitive
+        elif seg.size == horizon:
+            out[i] = 0.0            # full window observed, no recession
+        # else: partial window, no recession seen -> leave NaN (unknown)
     return pd.Series(out, index=usrec_m.index)
 
 def fit_logistic(x, y, iters=50):
