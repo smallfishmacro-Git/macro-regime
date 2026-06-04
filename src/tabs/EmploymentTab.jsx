@@ -180,8 +180,8 @@ const Panel = ({title, right, children, pad=true}) => (
 /* ===================================================================== */
 export default function EmploymentTab(){
   const [data, setData] = useState(DEMO);
-  const [bench, setBench] = useState("u");
-  const [rangeI, setRangeI] = useState(2);   // default 5Y
+  const [bench, setBench] = useState("n");
+  const [rangeI, setRangeI] = useState(4);   // default MAX
   const isDemo = data.meta && data.meta.source === "DEMO_SCAFFOLD";
 
   useEffect(()=>{
