@@ -55,7 +55,7 @@ const DEMO = { meta:DEMO_META, series:parseSeries(SERIES_CSV), components:COMPON
 */
 const DATA_URL = import.meta.env.DEV
   ? "/employment.json"
-  : "https://raw.githubusercontent.com/smallfishmacro-Git/market-dashboard/main/data/employment.json";
+  : "https://raw.githubusercontent.com/smallfishmacro-Git/macro-regime/main/data/employment.json";
 
 /* ---- helpers -------------------------------------------------------- */
 const SP = v => (v>0?"+":"") + v.toFixed(2);                 // signed 2dp
