@@ -53,12 +53,20 @@ const DEMO = { meta:DEMO_META, series:parseSeries(SERIES_CSV), components:COMPON
         ? "/employment.json"
         : "https://raw.githubusercontent.com/<you>/market-dashboard/main/data/employment.json";
 */
-const DATA_URL = import.meta.env.DEV
-  ? "/employment.json"
-  : "https://raw.githubusercontent.com/smallfishmacro-Git/macro-regime/main/data/employment.json";
+const DATA_URL = "";
 
 /* ---- helpers -------------------------------------------------------- */
-const SP = v => (v>0?"+":"") + v.toFixed(2);                 // signed 2dp
+const NN = v => v!=null && !Number.isNaN(v);                 // is real number
+const SP = v => NN(v) ? (v>0?"+":"") + v.toFixed(2) : "n/a"; // signed 2dp, null-safe
+const PCT = (v,dp=1) => NN(v) ? v.toFixed(dp)+"%" : "n/a";   // null-safe percent
+/* latest non-null value of `key` (+ the prior non-null + its date) */
+function lastValid(rows, key){
+  let vi=-1, pi=-1;
+  for(let i=rows.length-1;i>=0;i--){
+    if(NN(rows[i][key])){ if(vi<0) vi=i; else { pi=i; break; } }
+  }
+  return { v: vi>=0?rows[vi][key]:null, d: vi>=0?rows[vi].d:null, p: pi>=0?rows[pi][key]:null };
+}
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const fmtMon = d => { const [y,m]=d.split("-"); return MONTHS[+m-1]+"-"+y.slice(2); };
 
@@ -66,13 +74,13 @@ const RANGES = [["1Y",12],["3Y",36],["5Y",60],["10Y",120],["MAX",9999]];
 
 const BENCH = {
   u : { key:"u",  name:"Unemployment Rate",  axis:"UNEMPLOYMENT RATE %", color:T.amber, reversed:true,
-        fmt:v=>v.toFixed(1)+"%", dom:(mn,mx)=>[+(mn-0.3).toFixed(1), +(mx+0.3).toFixed(1)] },
+        fmt:v=>PCT(v,1), dom:(mn,mx)=>[+(mn-0.3).toFixed(1), +(mx+0.3).toFixed(1)] },
   n : { key:"n",  name:"Payrolls YoY",       axis:"NON-FARM PAYROLLS YoY %", color:T.amber, reversed:false,
-        fmt:v=>v.toFixed(1)+"%", dom:(mn,mx)=>[Math.min(Math.floor(mn-1),-2), Math.max(Math.ceil(mx+1),3)] },
+        fmt:v=>PCT(v,1), dom:(mn,mx)=>[Math.min(Math.floor(mn-1),-2), Math.max(Math.ceil(mx+1),3)] },
   df: { key:"df", name:"Diffusion",          axis:"% OF COMPONENTS CONTRACTING", color:T.red, reversed:false,
-        fmt:v=>v.toFixed(0)+"%", dom:()=>[0,100] },
+        fmt:v=>PCT(v,0), dom:()=>[0,100] },
   p : { key:"p",  name:"Recession Prob.",    axis:"RECESSION PROBABILITY 8M %", color:T.red, reversed:false,
-        fmt:v=>v.toFixed(0)+"%", dom:()=>[0,100] },
+        fmt:v=>PCT(v,0), dom:()=>[0,100] },
 };
 
 function recRuns(rows){
@@ -105,10 +113,14 @@ function narrative(data){
   let lead = recentlyCrossed
     ? `, its first positive territory after a prolonged deceleration`
     : (last.c<0 ? `, still below the zero line` : ``);
+  const uLast = lastValid(s,"u");
+  const uClause = NN(uLast.v)
+    ? ` Unemployment sits at ${uLast.v.toFixed(1)}%${uLast.d!==last.d ? ` (as of ${fmtMon(uLast.d)})` : ``}.`
+    : ``;
   return `CSLMI ${dir} ${SP(last.c)} in ${fmtMon(last.d)}${lead}. `
        + `${contracting} of 8 components are contracting (diffusion ${last.df.toFixed(0)}%), and the `
        + `model-implied probability of recession within 8 months is ${last.p.toFixed(0)}% `
-       + `(blended ${last.pa.toFixed(0)}%). Unemployment sits at ${last.u.toFixed(1)}%.`;
+       + `(blended ${last.pa.toFixed(0)}%).${uClause}`;
 }
 
 /* ---- tiny UI atoms -------------------------------------------------- */
@@ -195,8 +207,8 @@ export default function EmploymentTab(){
   let lo=Math.min(...cs,0)-3, hi=Math.max(...cs,0)+3;
   const leftDom=[Math.floor(lo), Math.ceil(hi)];
   const b=BENCH[bench];
-  const bs=view.map(r=>r[b.key]);
-  const rightDom=b.dom(Math.min(...bs), Math.max(...bs));
+  const bs=view.map(r=>r[b.key]).filter(NN);
+  const rightDom= bs.length ? b.dom(Math.min(...bs), Math.max(...bs)) : [0,1];
 
   /* ticks: year labels at a sensible cadence */
   const span=view.length;
@@ -206,9 +218,11 @@ export default function EmploymentTab(){
   const runs=recRuns(view);
   const contracting=Math.round(last.df/12.5);
 
-  /* deltas */
-  const dC=last.c-prev.c, dU=last.u-prev.u, dDf=last.df-prev.df, dP=last.p-prev.p;
-  const dCol = (x, good="up") => x===0?T.dim : (good==="up"? (x>0?T.green:T.red) : (x>0?T.red:T.green));
+  /* deltas — unemployment uses latest available (BLS lags ~1 month) */
+  const U = lastValid(S,"u");
+  const dC=last.c-prev.c, dDf=last.df-prev.df, dP=last.p-prev.p;
+  const dU=(NN(U.v)&&NN(U.p))?U.v-U.p:NaN;
+  const dCol = (x, good="up") => !NN(x)||x===0?T.dim : (good==="up"? (x>0?T.green:T.red) : (x>0?T.red:T.green));
 
   return (
     <div style={{background:T.bg, color:T.text, fontFamily:T.mono, padding:"16px 18px",
@@ -252,8 +266,9 @@ export default function EmploymentTab(){
               sub={contracting+" of 8 components contracting"} deltaTxt={(dDf>0?"+":"")+dDf.toFixed(1)+" pp"} deltaColor={dCol(dDf,"down")}/>
         <Stat label="Recession Prob · 8m" value={last.p.toFixed(0)+"%"} color={last.p>=50?T.red:last.p>=33?T.amber:T.green}
               sub={"blended "+last.pa.toFixed(0)+"% with diffusion"} deltaTxt={(dP>0?"+":"")+dP.toFixed(0)+" pp"} deltaColor={dCol(dP,"down")}/>
-        <Stat label="Unemployment" value={last.u.toFixed(1)+"%"} color={T.amber}
-              sub="benchmark · BLS / FRED" deltaTxt={(dU>0?"+":"")+dU.toFixed(1)+" pp"} deltaColor={dCol(dU,"down")}/>
+        <Stat label="Unemployment" value={NN(U.v)?U.v.toFixed(1)+"%":"n/a"} color={T.amber}
+              sub={U.d&&U.d!==last.d?`benchmark · as of ${fmtMon(U.d)}`:"benchmark · BLS / FRED"}
+              deltaTxt={NN(dU)?((dU>0?"+":"")+dU.toFixed(1)+" pp"):"—"} deltaColor={dCol(dU,"down")}/>
         <Stat label="Summation Index" value={last.s.toFixed(0)} color={T.cyan}
               sub="cumulative CSLMI prints"/>
       </div>
@@ -314,8 +329,10 @@ export default function EmploymentTab(){
 
               <ReferenceDot yAxisId="left" x={view[view.length-1].d} y={view[view.length-1].c} r={3} fill={T.cyan} stroke="#000"
                             label={{value:SP(view[view.length-1].c), position:"left", fill:T.cyan, fontSize:11, fontWeight:700}}/>
-              <ReferenceDot yAxisId="right" x={view[view.length-1].d} y={view[view.length-1][b.key]} r={3} fill={b.color} stroke="#000"
-                            label={{value:b.fmt(view[view.length-1][b.key]), position:"right", fill:b.color, fontSize:11, fontWeight:700}}/>
+              {(()=>{ const be=lastValid(view,b.key); return NN(be.v) && (
+                <ReferenceDot yAxisId="right" x={be.d} y={be.v} r={3} fill={b.color} stroke="#000"
+                              label={{value:b.fmt(be.v), position:"right", fill:b.color, fontSize:11, fontWeight:700}}/>
+              ); })()}
 
               <Brush dataKey="d" height={20} stroke={T.faint} fill="#070707"
                      travellerWidth={8} tickFormatter={fmtMon}/>
