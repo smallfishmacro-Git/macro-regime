@@ -47,13 +47,12 @@ function parseSeries(csv){
 const DEMO = { meta:DEMO_META, series:parseSeries(SERIES_CSV), components:COMPONENTS, thresholds:THRESH };
 
 /* ---- LIVE DATA -----------------------------------------------------
-   Set DATA_URL to the raw JSON your market-dashboard pipeline commits.
-   In the Vite app you can swap this for a DEV/PROD switch — see notes:
-     const DATA_URL = import.meta.env.DEV
-        ? "/employment.json"
-        : "https://raw.githubusercontent.com/<you>/market-dashboard/main/data/employment.json";
+   Points at the employment.json the daily-ingest workflow commits to
+   the macro-regime repo. Hard-coded (not a DEV/PROD switch) because
+   builds aren't run locally — this always serves the committed FRED
+   feed. If the fetch fails the component falls back to DEMO below.
 */
-const DATA_URL = "";
+const DATA_URL = "https://raw.githubusercontent.com/smallfishmacro-Git/macro-regime/main/data/employment.json";
 
 /* ---- helpers -------------------------------------------------------- */
 const NN = v => v!=null && !Number.isNaN(v);                 // is real number
