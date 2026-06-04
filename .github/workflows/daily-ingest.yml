@@ -49,13 +49,19 @@ jobs:
         run: |
           python cslmi_employment.py
 
+      - name: Run ushmi_housing.py
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: |
+          python ushmi_housing.py
+
       - name: Commit refreshed data (skip if no changes)
         run: |
           git config --local user.name  "macro-regime-bot"
           git config --local user.email "macro-regime-bot@users.noreply.github.com"
 
           # Stage the files the ingest may have changed
-          git add data/growth.json public/data/growth.json data/employment.json data/cache/ || true
+          git add data/growth.json public/data/growth.json data/employment.json data/housing.json data/cache/ || true
 
           if git diff --cached --quiet; then
             echo "No data changes — nothing to commit"

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import EmploymentTab from "./tabs/EmploymentTab";
+import HousingTab from "./tabs/HousingTab";
 import EquityTab from "./tabs/EquityTab";
 import { C, FONT_MONO, Tab, Pill, Panel, StatTile, KVRow, Legend } from "./design-system";
 import {
@@ -1070,6 +1071,7 @@ export default function MacroRegimeGrowth() {
         <Tab size="sm" active={subTab === "INFLATION"} onClick={() => setSubTab("INFLATION")}>INFLATION</Tab>
         <Tab size="sm" active={subTab === "LIQUIDITY"} onClick={() => setSubTab("LIQUIDITY")}>LIQUIDITY</Tab>
         <Tab size="sm" active={subTab === "EMPLOYMENT"} onClick={() => setSubTab("EMPLOYMENT")}>EMPLOYMENT</Tab>
+        <Tab size="sm" active={subTab === "HOUSING"} onClick={() => setSubTab("HOUSING")}>HOUSING</Tab>
         <Tab size="sm" active={subTab === "EQUITY"}    onClick={() => setSubTab("EQUITY")}>EQUITY</Tab>
         <Tab size="sm" active={subTab === "POLICY"}    onClick={() => setSubTab("POLICY")}>POLICY</Tab>
         <Tab size="sm" active={subTab === "NEWS"}      onClick={() => setSubTab("NEWS")}>NEWS</Tab>
@@ -2000,6 +2002,7 @@ export default function MacroRegimeGrowth() {
       </div>
       )}
       {subTab === "EMPLOYMENT" && <EmploymentTab />}
+      {subTab === "HOUSING" && <HousingTab />}
       {subTab === "EQUITY" && <EquityTab />}
 
       {/* Bottom note bar */}
