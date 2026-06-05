@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import EmploymentTab from "./tabs/EmploymentTab";
 import HousingTab from "./tabs/HousingTab";
 import EquityTab from "./tabs/EquityTab";
+import InflationTab from "./tabs/InflationTab";
 import { C, FONT_MONO, Tab, Pill, Panel, StatTile, KVRow, Legend } from "./design-system";
 import {
   ComposedChart,
@@ -2004,6 +2005,7 @@ export default function MacroRegimeGrowth() {
       {subTab === "EMPLOYMENT" && <EmploymentTab />}
       {subTab === "HOUSING" && <HousingTab />}
       {subTab === "EQUITY" && <EquityTab />}
+      {subTab === "INFLATION" && <InflationTab />}
 
       {/* Bottom note bar */}
       <div style={{ margin: "16px 16px 0", padding: "8px 0", borderTop: `1px solid ${C.panelEdge}`, fontSize: 9, color: C.textDim, letterSpacing: 1, display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
