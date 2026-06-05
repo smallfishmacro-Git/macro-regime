@@ -35,7 +35,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install fredapi pandas numpy
+          pip install fredapi pandas numpy yfinance
 
       - name: Run ingest_growth.py
         env:
@@ -55,13 +55,19 @@ jobs:
         run: |
           python ushmi_housing.py
 
+      - name: Run inflation.py
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: |
+          python inflation.py
+
       - name: Commit refreshed data (skip if no changes)
         run: |
           git config --local user.name  "macro-regime-bot"
           git config --local user.email "macro-regime-bot@users.noreply.github.com"
 
           # Stage the files the ingest may have changed
-          git add data/growth.json public/data/growth.json data/employment.json data/housing.json data/cache/ || true
+          git add data/growth.json public/data/growth.json data/employment.json data/housing.json data/inflation.json data/cache/ || true
 
           if git diff --cached --quiet; then
             echo "No data changes — nothing to commit"
