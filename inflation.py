@@ -286,9 +286,20 @@ basket    = pd.concat([
 
 # nowcast 0-100 ---------------------------------------------------------------
 imp_score   = (50.0 + composite_z * NOWCAST_IMP_K).clip(0, 100)
-level_score = (50.0 + (basket - NOWCAST_TARGET) * NOWCAST_LEVEL_K).clip(0, 100)
+# The realized-price LEVEL can lag the daily-driven composite by a month or two
+# (CPI / PCE for the latest month aren't published yet, while breakevens + oil
+# already are). Forward-fill the basket so the newest nowcast still carries a
+# level component instead of going NaN. Inflation levels don't jump month to
+# month, so a 1-2 month carry-forward is a fair nowcast assumption.
+basket_ff   = basket.reindex(imp_score.index).ffill()
+level_score = (50.0 + (basket_ff - NOWCAST_TARGET) * NOWCAST_LEVEL_K).clip(0, 100)
 nowcast     = (NOWCAST_W_IMP * imp_score
-               + (1 - NOWCAST_W_IMP) * level_score.reindex(imp_score.index))
+               + (1 - NOWCAST_W_IMP) * level_score)
+# Final guard: anywhere the level is still unknown (e.g. before the first CPI
+# print at the very start of history), fall back to the impulse-only score so
+# nc is NEVER null where the composite exists. The front-end formats nc
+# directly (last.nc.toFixed), so a null tail row blanks the whole tab.
+nowcast     = nowcast.where(nowcast.notna(), imp_score)
 
 # NBER recession flag ---------------------------------------------------------
 try:
