@@ -130,6 +130,36 @@ function regimeOf(s, b){
   return {label:"DEFLATION RISK", color:T.green, note:"Impulse deeply negative"};
 }
 
+/* ---- regime background shading ------------------------------------------
+   classify each month by the composite impulse-z, then paint the chart
+   background by regime over time (red = inflation pressure, amber = neutral,
+   green = disinflation). Mirrors how NBER recessions are shaded. */
+function regimeColorAt(c, b){
+  if(c==null || Number.isNaN(c)) return null;
+  if(c >= b.neutral_hi) return T.red;     // INFLATING / REFLATING
+  if(c >  b.neutral_lo) return T.amber;   // NEUTRAL
+  return T.green;                          // DISINFLATING / DEFLATION RISK
+}
+/* group consecutive same-regime months into [x0,x1,color] runs. runs shorter
+   than MIN_RUN months are absorbed into the previous run so the ribbon reads
+   as regimes rather than month-to-month flicker around the band edges. */
+function regimeBands(rows, b, MIN_RUN=3){
+  const raw=[]; let start=null, col=null, len=0;
+  rows.forEach((r,i)=>{
+    const cc=regimeColorAt(r.c, b);
+    if(col===null){ start=r.d; col=cc; len=1; }
+    else if(cc===col){ len++; }
+    else { raw.push({x0:start, x1:rows[i-1].d, col, len}); start=r.d; col=cc; len=1; }
+  });
+  if(col!==null && rows.length) raw.push({x0:start, x1:rows[rows.length-1].d, col, len});
+  const merged=[];
+  raw.forEach(run=>{
+    if(merged.length && run.len < MIN_RUN) merged[merged.length-1].x1 = run.x1;
+    else merged.push({...run});
+  });
+  return merged;
+}
+
 function narrative(data){
   const s=data.series, last=s[s.length-1], prev=s[s.length-2];
   const dir = last.c>prev.c ? "rose to" : last.c<prev.c ? "eased to" : "held at";
@@ -241,6 +271,7 @@ export default function InflationTab(){
   const ticks=view.filter(r=>r.d.endsWith("-01") && (+r.d.slice(0,4))%step===0).map(r=>r.d);
 
   const runs=recRuns(view);
+  const regBands=regimeBands(view, b);
   const rising = Math.round(last.df/100*13);
 
   /* deltas */
@@ -316,11 +347,15 @@ export default function InflationTab(){
             </div>
           }>
           {/* legend */}
-          <div style={{display:"flex", gap:18, padding:"2px 2px 10px", fontSize:10, color:T.dim}}>
+          <div style={{display:"flex", gap:14, padding:"2px 2px 10px", fontSize:10, color:T.dim, flexWrap:"wrap", alignItems:"center"}}>
             <Lg c={T.cyan} t="impulse z (left)"/>
             <Lg c={bm.color} t={bm.axis+" (right)"}/>
             <Lg c={T.rec} t="NBER recession" sq/>
-            <span style={{marginLeft:"auto", color:T.faint}}>neutral band ±{b.neutral_hi} shaded · hot &gt; {b.hot}</span>
+            <span style={{color:T.faint}}>regime:</span>
+            <Lg c={T.red} t="inflating" sq/>
+            <Lg c={T.amber} t="neutral" sq/>
+            <Lg c={T.green} t="disinflating" sq/>
+            <span style={{marginLeft:"auto", color:T.faint}}>hot &gt; {b.hot} · cold &lt; {b.cold}</span>
           </div>
           <ResponsiveContainer width="100%" height={380}>
             <ComposedChart data={view} margin={{top:8,right:58,left:4,bottom:4}}>
@@ -331,11 +366,14 @@ export default function InflationTab(){
                 </linearGradient>
               </defs>
               <CartesianGrid stroke={T.grid} strokeDasharray="2 4" vertical={false}/>
+              {/* regime background ribbon (red = inflation pressure, amber = neutral, green = disinflation) */}
+              {regBands.map((g,i)=> g.col &&
+                <ReferenceArea key={"reg"+i} x1={g.x0} x2={g.x1} yAxisId="left"
+                               fill={g.col} fillOpacity={g.col===T.amber?0.06:0.11} strokeOpacity={0}/>)}
+              {/* NBER recession (gray, layered on top of the regime tint) */}
               {runs.map(([x0,x1],i)=>
                 <ReferenceArea key={i} x1={x0} x2={x1} yAxisId="left" fill={T.rec} fillOpacity={1} strokeOpacity={0}/>)}
-              {/* neutral band + threshold lines */}
-              <ReferenceArea yAxisId="left" y1={b.neutral_lo} y2={b.neutral_hi}
-                             fill={T.amber} fillOpacity={0.06} strokeOpacity={0}/>
+              {/* threshold lines */}
               <ReferenceLine yAxisId="left" y={0} stroke={T.faint} strokeDasharray="3 3"/>
               <ReferenceLine yAxisId="left" y={b.hot}  stroke={T.red}   strokeOpacity={0.45} strokeDasharray="4 4"/>
               <ReferenceLine yAxisId="left" y={b.cold} stroke={T.green} strokeOpacity={0.40} strokeDasharray="4 4"/>
