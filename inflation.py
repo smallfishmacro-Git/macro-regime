@@ -43,6 +43,13 @@ EXPANDING_Z  = False          # False = full-sample z (conventional for a
 CLIP_Z       = 3.0            # winsorize per-input impulse z at +/- this many
                               # sd before aggregating (tames single-series
                               # blow-ups like a breakeven spike).
+SMOOTH_M     = int(os.environ.get("SMOOTH_M", "4"))
+                              # trailing EMA span (months) applied to the
+                              # composite impulse BEFORE standardizing. The
+                              # raw z(signal.diff(3)) momentum is jumpy; this
+                              # calms the plotted line (and stops the regime
+                              # ribbon / badge whipsawing) at the cost of ~1-2
+                              # months lag. 1 = off, 3 = light, 4-6 = smoother.
 
 # --- nowcast calibration (0-100). nowcast = blend of WHERE inflation sits
 #     (level score) and the MOMENTUM (impulse score). Tune freely. ----------
@@ -267,7 +274,14 @@ print(f"Inputs in composite: {n_inputs}")
 # the series reads as "inflation momentum vs its own history" (centers on 0,
 # ~+/-1 = a one-sigma push). df = breadth of POSITIVE per-input impulses.
 composite_raw = IMP.mean(axis=1, skipna=True)
-composite_z   = zscore(composite_raw).reindex(composite_raw.index)
+# calm the jumpy 3-month-diff momentum with a short trailing EMA, THEN
+# standardize. zscore is a linear rescale, so the output keeps unit variance
+# (still reaches the 2008/2021 extremes) but transitions gradually instead of
+# chattering across the band edges each month.
+composite_sm  = composite_raw.ewm(span=max(1, SMOOTH_M), adjust=False).mean()
+composite_z   = zscore(composite_sm).reindex(composite_sm.index)
+# diffusion stays on the RAW per-input impulses so the share matches the
+# breadth-grid bars and the "N of 13 rising" count exactly (not smoothed).
 diffusion     = (IMP > 0).sum(axis=1) / IMP.notna().sum(axis=1) * 100.0
 
 # realized-price levels for the chart benchmarks + nowcast level score -------
@@ -342,8 +356,8 @@ out = {
         "published": pd.Timestamp.now("UTC").strftime("%Y-%m-%d"),
         "n_inputs": int(n_inputs),
         "scale_note": (f"per-input impulse = z(signal.diff(3)) clipped +/-{CLIP_Z}; "
-                       f"composite = z(mean impulse); expanding_z={EXPANDING_Z}; "
-                       f"diffusion = share of positive impulses"),
+                       f"composite = z(EMA{SMOOTH_M}(mean impulse)); expanding_z={EXPANDING_Z}; "
+                       f"diffusion = share of positive (raw) impulses"),
         "fred_series": fred_used + ["USREC"],
     },
     "series": series,
