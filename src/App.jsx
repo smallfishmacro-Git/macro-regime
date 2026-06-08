@@ -854,7 +854,9 @@ export default function MacroRegimeGrowth() {
       }
     }
 
-    return Array.from(merged.values()).sort((a, b) => a.date - b.date);
+    return Array.from(merged.values())
+      .sort((a, b) => a.date - b.date)
+      .map((r) => ({ ...r, t: r.date.getTime() }));
   })();
 
   // Y-axis domains for LEADING tab chart — three axes total:
@@ -912,8 +914,17 @@ export default function MacroRegimeGrowth() {
     if (monthsSeen.length && strided[strided.length - 1] !== monthsSeen[monthsSeen.length - 1]) {
       strided.push(monthsSeen[monthsSeen.length - 1]);
     }
-    return strided.map((d) => d.label);
+    return strided.map((d) => d.date.getTime());
   })();
+
+  // Format a numeric timestamp tick back into the range-aware label.
+  const leadingTabTickFormatter = (t) => {
+    const dd = new Date(t);
+    const longLabel = leadingTabRange === "10Y" || leadingTabRange === "MAX";
+    return longLabel
+      ? dd.toLocaleDateString("en-US", { month: "short", year: "2-digit" })
+      : dd.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  };
 
   const compZTicks = (() => {
     if (!compZ || !compZ.length) return [];
@@ -1390,8 +1401,11 @@ export default function MacroRegimeGrowth() {
                     <ComposedChart data={leadingTabChartData} margin={{ top: 6, right: 76, left: 0, bottom: 6 }}>
                       <CartesianGrid stroke={C.panelEdge} strokeDasharray="2 4" vertical={false} />
                       <XAxis
-                        dataKey="label"
+                        dataKey="t"
+                        type="number"
+                        domain={['dataMin', 'dataMax']}
                         ticks={leadingTabMonthTicks}
+                        tickFormatter={leadingTabTickFormatter}
                         tick={{ fill: C.textDim, fontSize: 8, fontFamily: FONT_MONO }}
                         axisLine={{ stroke: C.panelEdge }}
                         tickLine={false}
@@ -1442,6 +1456,7 @@ export default function MacroRegimeGrowth() {
                         }}
                         labelStyle={{ color: C.amber, marginBottom: 4 }}
                         itemStyle={{ padding: "1px 0" }}
+                        labelFormatter={(t) => new Date(t).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
                       />
 
                       {/* USMLEI — white smooth (left axis) */}
