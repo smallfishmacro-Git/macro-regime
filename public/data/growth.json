@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-06-05T23:58:09.291239+00:00",
+    "generated_at": "2026-06-08T23:57:05.867363+00:00",
     "z_window_years": 10,
     "direction_lookback_weeks": 8,
     "sources": {
@@ -9,7 +9,7 @@
       "fred_wei": "fetched \u00b7 latest obs 2026-05-30",
       "fred_gdp_yoy": "fetched \u00b7 latest obs 2026-01-01",
       "unctad": "manual \u00b7 latest obs 2026-04-22",
-      "recessionalert": "manual \u00b7 latest obs 2026-04-30"
+      "recessionalert": "missing"
     },
     "signal_availability": {
       "coincident": true,
@@ -17,10 +17,16 @@
     },
     "preserved_fields": [
       "current.wla",
+      "current.usmlei",
+      "current.global_lei",
+      "current.global_lei_8m",
+      "current.pct_g20_rising",
+      "current.cb_net_cutters",
       "current.avg_z",
       "current.lead_z_quadrant",
       "current.coinc_z_quadrant",
       "current.quadrant",
+      "ra_leading_series",
       "ra_weekly_avg_series",
       "avg_z_series",
       "quadrant_trajectory",
