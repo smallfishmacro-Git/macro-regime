@@ -1,15 +1,15 @@
 {
   "meta": {
-    "generated_at": "2026-06-05T13:12:21.236931+00:00",
+    "generated_at": "2026-06-05T23:58:09.291239+00:00",
     "z_window_years": 10,
     "direction_lookback_weeks": 8,
     "sources": {
       "atlanta_fed": "fetched \u00b7 latest obs 2026-06-01",
-      "ny_fed": "fetched \u00b7 latest obs 2026-05-29",
+      "ny_fed": "fetched \u00b7 latest obs 2026-06-05",
       "fred_wei": "fetched \u00b7 latest obs 2026-05-30",
       "fred_gdp_yoy": "fetched \u00b7 latest obs 2026-01-01",
       "unctad": "manual \u00b7 latest obs 2026-04-22",
-      "recessionalert": "missing"
+      "recessionalert": "manual \u00b7 latest obs 2026-04-30"
     },
     "signal_availability": {
       "coincident": true,
@@ -17,16 +17,10 @@
     },
     "preserved_fields": [
       "current.wla",
-      "current.usmlei",
-      "current.global_lei",
-      "current.global_lei_8m",
-      "current.pct_g20_rising",
-      "current.cb_net_cutters",
       "current.avg_z",
       "current.lead_z_quadrant",
       "current.coinc_z_quadrant",
       "current.quadrant",
-      "ra_leading_series",
       "ra_weekly_avg_series",
       "avg_z_series",
       "quadrant_trajectory",
@@ -44,16 +38,16 @@
     "hedge_ratio": 45,
     "hedge_posture": "Insufficient leading data \u2014 direction unknown",
     "gdpnow": 3.0164,
-    "ny_nowcast": 2.5,
+    "ny_nowcast": 2.67,
     "ny_target_qtr": "2026:Q2",
     "wei": 3.23,
     "unctad_world": 2.61,
     "wla": 24.2688,
-    "usmlei": 0.8041,
-    "global_lei": 100.6007,
-    "global_lei_8m": 0.8714,
-    "pct_g20_rising": 88.2353,
-    "cb_net_cutters": 38.2353,
+    "usmlei": 8.0658,
+    "global_lei": 100.6478,
+    "global_lei_8m": 0.863,
+    "pct_g20_rising": 52.9412,
+    "cb_net_cutters": 36.8421,
     "coinc_z": 0.22,
     "lead_z": 0.0,
     "wei_z": 0.1983,
@@ -23040,7 +23034,14 @@
       "date": "2026-05-29",
       "ny_nowcast": 2.5,
       "ny_backcast": null,
-      "ny_next_q": null,
+      "ny_next_q": 2.36,
+      "target_quarter": "2026:Q2"
+    },
+    {
+      "date": "2026-06-05",
+      "ny_nowcast": 2.67,
+      "ny_backcast": null,
+      "ny_next_q": 2.47,
       "target_quarter": "2026:Q2"
     }
   ],
@@ -32516,73 +32517,73 @@
     },
     {
       "date": "2025-01-31",
-      "usmlei": 0.8387,
+      "usmlei": 0.7879,
       "pct_g20_rising": 64.7059,
       "cb_net_cutters": 32.0513
     },
     {
       "date": "2025-02-28",
-      "usmlei": -2.3685,
+      "usmlei": -2.3633,
       "pct_g20_rising": 64.7059,
       "cb_net_cutters": 37.1795
     },
     {
       "date": "2025-03-31",
-      "usmlei": -3.6494,
+      "usmlei": -3.5958,
       "pct_g20_rising": 70.5882,
       "cb_net_cutters": 36.8421
     },
     {
       "date": "2025-04-30",
-      "usmlei": -5.4632,
+      "usmlei": -5.4532,
       "pct_g20_rising": 76.4706,
       "cb_net_cutters": 34.2105
     },
     {
       "date": "2025-05-31",
-      "usmlei": -2.4152,
+      "usmlei": -2.3717,
       "pct_g20_rising": 76.4706,
       "cb_net_cutters": 34.2105
     },
     {
       "date": "2025-06-30",
-      "usmlei": 1.8835,
+      "usmlei": 1.916,
       "pct_g20_rising": 82.3529,
       "cb_net_cutters": 39.4737
     },
     {
       "date": "2025-07-31",
-      "usmlei": 2.0762,
+      "usmlei": 2.1915,
       "pct_g20_rising": 88.2353,
       "cb_net_cutters": 44.5946
     },
     {
       "date": "2025-08-31",
-      "usmlei": 1.1853,
+      "usmlei": 1.2485,
       "pct_g20_rising": 88.2353,
       "cb_net_cutters": 44.5946
     },
     {
       "date": "2025-09-30",
-      "usmlei": -0.5244,
+      "usmlei": -0.4622,
       "pct_g20_rising": 94.1176,
       "cb_net_cutters": 44.5946
     },
     {
       "date": "2025-10-31",
-      "usmlei": -0.2326,
+      "usmlei": -0.1197,
       "pct_g20_rising": 88.2353,
       "cb_net_cutters": 44.5946
     },
     {
       "date": "2025-11-30",
-      "usmlei": -4.4411,
+      "usmlei": -3.9275,
       "pct_g20_rising": 88.2353,
       "cb_net_cutters": 44.5946
     },
     {
       "date": "2025-12-31",
-      "usmlei": -4.2491,
+      "usmlei": -4.071,
       "pct_g20_rising": 94.1176,
       "cb_net_cutters": 44.5946
     },
@@ -32594,9 +32595,21 @@
     },
     {
       "date": "2026-02-28",
-      "usmlei": 0.8041,
-      "pct_g20_rising": 88.2353,
-      "cb_net_cutters": 38.2353
+      "usmlei": 1.2521,
+      "pct_g20_rising": 64.7059,
+      "cb_net_cutters": 39.4737
+    },
+    {
+      "date": "2026-03-31",
+      "usmlei": 5.2326,
+      "pct_g20_rising": 52.9412,
+      "cb_net_cutters": 39.4737
+    },
+    {
+      "date": "2026-04-30",
+      "usmlei": 8.0658,
+      "pct_g20_rising": 52.9412,
+      "cb_net_cutters": 36.8421
     }
   ],
   "ra_weekly_avg_series": [
