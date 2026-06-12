@@ -1,12 +1,12 @@
 {
   "meta": {
-    "generated_at": "2026-06-11T00:07:56.139589+00:00",
+    "generated_at": "2026-06-12T00:14:50.729125+00:00",
     "z_window_years": 10,
     "direction_lookback_weeks": 8,
     "sources": {
       "atlanta_fed": "fetched \u00b7 latest obs 2026-06-09",
       "ny_fed": "fetched \u00b7 latest obs 2026-06-05",
-      "fred_wei": "fetched \u00b7 latest obs 2026-05-30",
+      "fred_wei": "fetched \u00b7 latest obs 2026-06-06",
       "fred_gdp_yoy": "fetched \u00b7 latest obs 2026-01-01",
       "unctad": "manual \u00b7 latest obs 2026-04-22",
       "recessionalert": "missing"
@@ -46,7 +46,7 @@
     "gdpnow": 3.2906,
     "ny_nowcast": 2.67,
     "ny_target_qtr": "2026:Q2",
-    "wei": 3.23,
+    "wei": 2.9,
     "unctad_world": 2.61,
     "wla": 24.2688,
     "usmlei": 8.0658,
@@ -54,9 +54,9 @@
     "global_lei_8m": 0.863,
     "pct_g20_rising": 52.9412,
     "cb_net_cutters": 36.8421,
-    "coinc_z": 0.2267,
+    "coinc_z": 0.1691,
     "lead_z": 0.0,
-    "wei_z": 0.1983,
+    "wei_z": 0.0137,
     "avg_z": 0.2598,
     "lead_z_quadrant": 0.2598,
     "coinc_z_quadrant": -0.0466,
@@ -21812,12 +21812,17 @@
     },
     {
       "date": "2026-05-29",
-      "coinc_z": 0.1804,
+      "coinc_z": 0.1824,
       "lead_z": "<NA>"
     },
     {
       "date": "2026-06-05",
-      "coinc_z": 0.2267,
+      "coinc_z": 0.2247,
+      "lead_z": "<NA>"
+    },
+    {
+      "date": "2026-06-12",
+      "coinc_z": 0.1691,
       "lead_z": "<NA>"
     }
   ],
@@ -27874,13 +27879,18 @@
     },
     {
       "date": "2026-05-23",
-      "wei": 3.02,
-      "wei_ma13": 2.7477
+      "wei": 3.03,
+      "wei_ma13": 2.7485
     },
     {
       "date": "2026-05-30",
-      "wei": 3.23,
+      "wei": 3.22,
       "wei_ma13": 2.8054
+    },
+    {
+      "date": "2026-06-06",
+      "wei": 2.9,
+      "wei_ma13": 2.8231
     }
   ],
   "gdp_yoy_series": [
@@ -48288,11 +48298,15 @@
     },
     {
       "date": "2026-05-23",
-      "wei_z": 0.0587
+      "wei_z": 0.0646
     },
     {
       "date": "2026-05-30",
-      "wei_z": 0.1983
+      "wei_z": 0.1922
+    },
+    {
+      "date": "2026-06-06",
+      "wei_z": 0.0137
     }
   ],
   "avg_z_series": [
