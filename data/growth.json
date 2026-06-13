@@ -1,11 +1,11 @@
 {
   "meta": {
-    "generated_at": "2026-06-12T00:14:50.729125+00:00",
+    "generated_at": "2026-06-13T00:12:22.097089+00:00",
     "z_window_years": 10,
     "direction_lookback_weeks": 8,
     "sources": {
       "atlanta_fed": "fetched \u00b7 latest obs 2026-06-09",
-      "ny_fed": "fetched \u00b7 latest obs 2026-06-05",
+      "ny_fed": "fetched \u00b7 latest obs 2026-06-12",
       "fred_wei": "fetched \u00b7 latest obs 2026-06-06",
       "fred_gdp_yoy": "fetched \u00b7 latest obs 2026-01-01",
       "unctad": "manual \u00b7 latest obs 2026-04-22",
@@ -44,7 +44,7 @@
     "hedge_ratio": 45,
     "hedge_posture": "Insufficient leading data \u2014 direction unknown",
     "gdpnow": 3.2906,
-    "ny_nowcast": 2.67,
+    "ny_nowcast": 2.7,
     "ny_target_qtr": "2026:Q2",
     "wei": 2.9,
     "unctad_world": 2.61,
@@ -23078,6 +23078,13 @@
       "ny_nowcast": 2.67,
       "ny_backcast": null,
       "ny_next_q": 2.47,
+      "target_quarter": "2026:Q2"
+    },
+    {
+      "date": "2026-06-12",
+      "ny_nowcast": 2.7,
+      "ny_backcast": null,
+      "ny_next_q": 2.46,
       "target_quarter": "2026:Q2"
     }
   ],
