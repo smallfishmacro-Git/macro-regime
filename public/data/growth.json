@@ -1,10 +1,10 @@
 {
   "meta": {
-    "generated_at": "2026-06-16T00:22:48.783110+00:00",
+    "generated_at": "2026-06-17T00:08:23.971048+00:00",
     "z_window_years": 10,
     "direction_lookback_weeks": 8,
     "sources": {
-      "atlanta_fed": "fetched \u00b7 latest obs 2026-06-09",
+      "atlanta_fed": "fetched \u00b7 latest obs 2026-06-16",
       "ny_fed": "fetched \u00b7 latest obs 2026-06-12",
       "fred_wei": "fetched \u00b7 latest obs 2026-06-06",
       "fred_gdp_yoy": "fetched \u00b7 latest obs 2026-01-01",
@@ -43,7 +43,7 @@
     },
     "hedge_ratio": 45,
     "hedge_posture": "Insufficient leading data \u2014 direction unknown",
-    "gdpnow": 3.2906,
+    "gdpnow": 2.8314,
     "ny_nowcast": 2.7,
     "ny_target_qtr": "2026:Q2",
     "wei": 2.9,
@@ -54,7 +54,7 @@
     "global_lei_8m": 0.863,
     "pct_g20_rising": 52.9412,
     "cb_net_cutters": 36.8421,
-    "coinc_z": 0.1691,
+    "coinc_z": 0.157,
     "lead_z": 0.0,
     "wei_z": 0.0137,
     "avg_z": 0.2598,
@@ -18552,6 +18552,46 @@
       "govt": 0.323,
       "netExports": -0.5114,
       "inventories": 0.5601
+    },
+    {
+      "date": "2026-06-10",
+      "total": 3.2288,
+      "pceGoods": 0.7448,
+      "pceServices": 0.9714,
+      "fixedInv": 1.1908,
+      "govt": 0.3065,
+      "netExports": -0.5376,
+      "inventories": 0.5529
+    },
+    {
+      "date": "2026-06-11",
+      "total": 3.0877,
+      "pceGoods": 0.7442,
+      "pceServices": 0.9708,
+      "fixedInv": 1.1872,
+      "govt": 0.3078,
+      "netExports": -0.537,
+      "inventories": 0.4148
+    },
+    {
+      "date": "2026-06-15",
+      "total": 3.0248,
+      "pceGoods": 0.7448,
+      "pceServices": 0.9228,
+      "fixedInv": 1.2331,
+      "govt": 0.309,
+      "netExports": -0.5565,
+      "inventories": 0.3717
+    },
+    {
+      "date": "2026-06-16",
+      "total": 2.8314,
+      "pceGoods": 0.7341,
+      "pceServices": 0.9169,
+      "fixedInv": 1.1117,
+      "govt": 0.3084,
+      "netExports": -0.6149,
+      "inventories": 0.3752
     }
   ],
   "composite_z": [
@@ -21822,7 +21862,7 @@
     },
     {
       "date": "2026-06-12",
-      "coinc_z": 0.1691,
+      "coinc_z": 0.157,
       "lead_z": "<NA>"
     }
   ],
