@@ -1,15 +1,15 @@
 {
   "meta": {
-    "generated_at": "2026-06-05T23:58:09.291239+00:00",
+    "generated_at": "2026-06-19T00:19:25.783349+00:00",
     "z_window_years": 10,
     "direction_lookback_weeks": 8,
     "sources": {
-      "atlanta_fed": "fetched \u00b7 latest obs 2026-06-01",
-      "ny_fed": "fetched \u00b7 latest obs 2026-06-05",
-      "fred_wei": "fetched \u00b7 latest obs 2026-05-30",
+      "atlanta_fed": "fetched \u00b7 latest obs 2026-06-17",
+      "ny_fed": "fetched \u00b7 latest obs 2026-06-19",
+      "fred_wei": "fetched \u00b7 latest obs 2026-06-13",
       "fred_gdp_yoy": "fetched \u00b7 latest obs 2026-01-01",
       "unctad": "manual \u00b7 latest obs 2026-04-22",
-      "recessionalert": "manual \u00b7 latest obs 2026-04-30"
+      "recessionalert": "missing"
     },
     "signal_availability": {
       "coincident": true,
@@ -17,10 +17,16 @@
     },
     "preserved_fields": [
       "current.wla",
+      "current.usmlei",
+      "current.global_lei",
+      "current.global_lei_8m",
+      "current.pct_g20_rising",
+      "current.cb_net_cutters",
       "current.avg_z",
       "current.lead_z_quadrant",
       "current.coinc_z_quadrant",
       "current.quadrant",
+      "ra_leading_series",
       "ra_weekly_avg_series",
       "avg_z_series",
       "quadrant_trajectory",
@@ -37,10 +43,10 @@
     },
     "hedge_ratio": 45,
     "hedge_posture": "Insufficient leading data \u2014 direction unknown",
-    "gdpnow": 3.0164,
-    "ny_nowcast": 2.67,
+    "gdpnow": 3.0377,
+    "ny_nowcast": 2.68,
     "ny_target_qtr": "2026:Q2",
-    "wei": 3.23,
+    "wei": 3.1,
     "unctad_world": 2.61,
     "wla": 24.2688,
     "usmlei": 8.0658,
@@ -48,9 +54,9 @@
     "global_lei_8m": 0.863,
     "pct_g20_rising": 52.9412,
     "cb_net_cutters": 36.8421,
-    "coinc_z": 0.22,
+    "coinc_z": 0.1938,
     "lead_z": 0.0,
-    "wei_z": 0.1983,
+    "wei_z": 0.155,
     "avg_z": 0.2598,
     "lead_z_quadrant": 0.2598,
     "coinc_z_quadrant": -0.0466,
@@ -18516,247 +18522,317 @@
       "govt": 0.274,
       "netExports": -0.5269,
       "inventories": 0.54
+    },
+    {
+      "date": "2026-06-03",
+      "total": 3.1881,
+      "pceGoods": 0.7657,
+      "pceServices": 0.9975,
+      "fixedInv": 1.1461,
+      "govt": 0.2755,
+      "netExports": -0.5458,
+      "inventories": 0.549
+    },
+    {
+      "date": "2026-06-05",
+      "total": 3.129,
+      "pceGoods": 0.7417,
+      "pceServices": 0.9816,
+      "fixedInv": 1.1119,
+      "govt": 0.3227,
+      "netExports": -0.5406,
+      "inventories": 0.5117
+    },
+    {
+      "date": "2026-06-09",
+      "total": 3.2906,
+      "pceGoods": 0.7444,
+      "pceServices": 0.9713,
+      "fixedInv": 1.2033,
+      "govt": 0.323,
+      "netExports": -0.5114,
+      "inventories": 0.5601
+    },
+    {
+      "date": "2026-06-10",
+      "total": 3.2288,
+      "pceGoods": 0.7448,
+      "pceServices": 0.9714,
+      "fixedInv": 1.1908,
+      "govt": 0.3065,
+      "netExports": -0.5376,
+      "inventories": 0.5529
+    },
+    {
+      "date": "2026-06-11",
+      "total": 3.0877,
+      "pceGoods": 0.7442,
+      "pceServices": 0.9708,
+      "fixedInv": 1.1872,
+      "govt": 0.3078,
+      "netExports": -0.537,
+      "inventories": 0.4148
+    },
+    {
+      "date": "2026-06-15",
+      "total": 3.0248,
+      "pceGoods": 0.7448,
+      "pceServices": 0.9228,
+      "fixedInv": 1.2331,
+      "govt": 0.309,
+      "netExports": -0.5565,
+      "inventories": 0.3717
+    },
+    {
+      "date": "2026-06-16",
+      "total": 2.8314,
+      "pceGoods": 0.7341,
+      "pceServices": 0.9169,
+      "fixedInv": 1.1117,
+      "govt": 0.3084,
+      "netExports": -0.6149,
+      "inventories": 0.3752
+    },
+    {
+      "date": "2026-06-17",
+      "total": 3.0377,
+      "pceGoods": 0.9823,
+      "pceServices": 0.8841,
+      "fixedInv": 1.1177,
+      "govt": 0.3085,
+      "netExports": -0.6151,
+      "inventories": 0.3601
     }
   ],
   "composite_z": [
     {
-      "date": "2013-11-29",
-      "coinc_z": 4.322,
-      "lead_z": "<NA>"
-    },
-    {
-      "date": "2013-12-06",
-      "coinc_z": -0.1582,
-      "lead_z": "<NA>"
-    },
-    {
       "date": "2013-12-13",
-      "coinc_z": -0.2535,
+      "coinc_z": -0.2415,
       "lead_z": "<NA>"
     },
     {
       "date": "2013-12-20",
-      "coinc_z": 0.5498,
+      "coinc_z": 0.559,
       "lead_z": "<NA>"
     },
     {
       "date": "2013-12-27",
-      "coinc_z": 1.7198,
+      "coinc_z": 1.7242,
       "lead_z": "<NA>"
     },
     {
       "date": "2014-01-03",
-      "coinc_z": 1.0696,
+      "coinc_z": 1.0761,
       "lead_z": "<NA>"
     },
     {
       "date": "2014-01-10",
-      "coinc_z": -0.3399,
+      "coinc_z": -0.3282,
       "lead_z": "<NA>"
     },
     {
       "date": "2014-01-17",
-      "coinc_z": -1.9149,
+      "coinc_z": -1.8975,
       "lead_z": "<NA>"
     },
     {
       "date": "2014-01-24",
-      "coinc_z": -1.576,
+      "coinc_z": -1.5601,
       "lead_z": "<NA>"
     },
     {
       "date": "2014-01-31",
-      "coinc_z": 0.0391,
+      "coinc_z": 0.0495,
       "lead_z": "<NA>"
     },
     {
       "date": "2014-02-07",
-      "coinc_z": -0.3093,
+      "coinc_z": -0.2978,
       "lead_z": "<NA>"
     },
     {
       "date": "2014-02-14",
-      "coinc_z": -0.7832,
+      "coinc_z": -0.7702,
       "lead_z": "<NA>"
     },
     {
       "date": "2014-02-21",
-      "coinc_z": -0.4619,
+      "coinc_z": -0.4499,
       "lead_z": "<NA>"
     },
     {
       "date": "2014-02-28",
-      "coinc_z": -0.0135,
+      "coinc_z": -0.003,
       "lead_z": "<NA>"
     },
     {
       "date": "2014-03-07",
-      "coinc_z": 0.5624,
+      "coinc_z": 0.5711,
       "lead_z": "<NA>"
     },
     {
       "date": "2014-03-14",
-      "coinc_z": 1.6053,
+      "coinc_z": 1.6102,
       "lead_z": "<NA>"
     },
     {
       "date": "2014-03-21",
-      "coinc_z": 2.0787,
+      "coinc_z": 2.0813,
       "lead_z": "<NA>"
     },
     {
       "date": "2014-03-28",
-      "coinc_z": 1.6152,
-      "lead_z": "<NA>"
-    },
-    {
-      "date": "2014-04-04",
-      "coinc_z": 2.0202,
-      "lead_z": "<NA>"
-    },
-    {
-      "date": "2014-04-11",
-      "coinc_z": 1.8967,
-      "lead_z": "<NA>"
-    },
-    {
-      "date": "2014-04-18",
-      "coinc_z": 1.4794,
-      "lead_z": "<NA>"
-    },
-    {
-      "date": "2014-04-25",
-      "coinc_z": 0.402,
-      "lead_z": "<NA>"
-    },
-    {
-      "date": "2014-05-02",
-      "coinc_z": 1.4654,
-      "lead_z": "<NA>"
-    },
-    {
-      "date": "2014-05-09",
-      "coinc_z": 1.7488,
-      "lead_z": "<NA>"
-    },
-    {
-      "date": "2014-05-16",
-      "coinc_z": 2.0194,
-      "lead_z": "<NA>"
-    },
-    {
-      "date": "2014-05-23",
-      "coinc_z": 0.5983,
-      "lead_z": "<NA>"
-    },
-    {
-      "date": "2014-05-30",
-      "coinc_z": 1.5194,
-      "lead_z": "<NA>"
-    },
-    {
-      "date": "2014-06-06",
-      "coinc_z": 1.3564,
-      "lead_z": "<NA>"
-    },
-    {
-      "date": "2014-06-13",
-      "coinc_z": 1.0194,
-      "lead_z": "<NA>"
-    },
-    {
-      "date": "2014-06-20",
-      "coinc_z": 0.7455,
-      "lead_z": "<NA>"
-    },
-    {
-      "date": "2014-06-27",
-      "coinc_z": 0.6524,
-      "lead_z": "<NA>"
-    },
-    {
-      "date": "2014-07-04",
-      "coinc_z": -0.2505,
-      "lead_z": "<NA>"
-    },
-    {
-      "date": "2014-07-11",
-      "coinc_z": 1.9262,
-      "lead_z": "<NA>"
-    },
-    {
-      "date": "2014-07-18",
-      "coinc_z": 0.8138,
-      "lead_z": "<NA>"
-    },
-    {
-      "date": "2014-07-25",
-      "coinc_z": -0.3544,
-      "lead_z": "<NA>"
-    },
-    {
-      "date": "2014-08-01",
-      "coinc_z": 0.8438,
-      "lead_z": "<NA>"
-    },
-    {
-      "date": "2014-08-08",
-      "coinc_z": 1.842,
-      "lead_z": "<NA>"
-    },
-    {
-      "date": "2014-08-15",
-      "coinc_z": 1.1175,
-      "lead_z": "<NA>"
-    },
-    {
-      "date": "2014-08-22",
-      "coinc_z": 0.815,
-      "lead_z": "<NA>"
-    },
-    {
-      "date": "2014-08-29",
-      "coinc_z": 1.1064,
-      "lead_z": "<NA>"
-    },
-    {
-      "date": "2014-09-05",
-      "coinc_z": 1.4512,
-      "lead_z": "<NA>"
-    },
-    {
-      "date": "2014-09-12",
-      "coinc_z": 0.8812,
-      "lead_z": "<NA>"
-    },
-    {
-      "date": "2014-09-19",
-      "coinc_z": 0.5516,
-      "lead_z": "<NA>"
-    },
-    {
-      "date": "2014-09-26",
-      "coinc_z": 1.1112,
-      "lead_z": "<NA>"
-    },
-    {
-      "date": "2014-10-03",
-      "coinc_z": 1.0452,
-      "lead_z": "<NA>"
-    },
-    {
-      "date": "2014-10-10",
-      "coinc_z": 0.9801,
-      "lead_z": "<NA>"
-    },
-    {
-      "date": "2014-10-17",
       "coinc_z": 1.6189,
       "lead_z": "<NA>"
     },
     {
+      "date": "2014-04-04",
+      "coinc_z": 2.0217,
+      "lead_z": "<NA>"
+    },
+    {
+      "date": "2014-04-11",
+      "coinc_z": 1.8981,
+      "lead_z": "<NA>"
+    },
+    {
+      "date": "2014-04-18",
+      "coinc_z": 1.4821,
+      "lead_z": "<NA>"
+    },
+    {
+      "date": "2014-04-25",
+      "coinc_z": 0.4088,
+      "lead_z": "<NA>"
+    },
+    {
+      "date": "2014-05-02",
+      "coinc_z": 1.4678,
+      "lead_z": "<NA>"
+    },
+    {
+      "date": "2014-05-09",
+      "coinc_z": 1.7495,
+      "lead_z": "<NA>"
+    },
+    {
+      "date": "2014-05-16",
+      "coinc_z": 2.0185,
+      "lead_z": "<NA>"
+    },
+    {
+      "date": "2014-05-23",
+      "coinc_z": 0.6033,
+      "lead_z": "<NA>"
+    },
+    {
+      "date": "2014-05-30",
+      "coinc_z": 1.5203,
+      "lead_z": "<NA>"
+    },
+    {
+      "date": "2014-06-06",
+      "coinc_z": 1.3577,
+      "lead_z": "<NA>"
+    },
+    {
+      "date": "2014-06-13",
+      "coinc_z": 1.022,
+      "lead_z": "<NA>"
+    },
+    {
+      "date": "2014-06-20",
+      "coinc_z": 0.7492,
+      "lead_z": "<NA>"
+    },
+    {
+      "date": "2014-06-27",
+      "coinc_z": 0.6564,
+      "lead_z": "<NA>"
+    },
+    {
+      "date": "2014-07-04",
+      "coinc_z": -0.2425,
+      "lead_z": "<NA>"
+    },
+    {
+      "date": "2014-07-11",
+      "coinc_z": 1.9244,
+      "lead_z": "<NA>"
+    },
+    {
+      "date": "2014-07-18",
+      "coinc_z": 0.8167,
+      "lead_z": "<NA>"
+    },
+    {
+      "date": "2014-07-25",
+      "coinc_z": -0.3463,
+      "lead_z": "<NA>"
+    },
+    {
+      "date": "2014-08-01",
+      "coinc_z": 0.8466,
+      "lead_z": "<NA>"
+    },
+    {
+      "date": "2014-08-08",
+      "coinc_z": 1.84,
+      "lead_z": "<NA>"
+    },
+    {
+      "date": "2014-08-15",
+      "coinc_z": 1.1186,
+      "lead_z": "<NA>"
+    },
+    {
+      "date": "2014-08-22",
+      "coinc_z": 0.8174,
+      "lead_z": "<NA>"
+    },
+    {
+      "date": "2014-08-29",
+      "coinc_z": 1.1073,
+      "lead_z": "<NA>"
+    },
+    {
+      "date": "2014-09-05",
+      "coinc_z": 1.4504,
+      "lead_z": "<NA>"
+    },
+    {
+      "date": "2014-09-12",
+      "coinc_z": 0.8829,
+      "lead_z": "<NA>"
+    },
+    {
+      "date": "2014-09-19",
+      "coinc_z": 0.5547,
+      "lead_z": "<NA>"
+    },
+    {
+      "date": "2014-09-26",
+      "coinc_z": 1.1117,
+      "lead_z": "<NA>"
+    },
+    {
+      "date": "2014-10-03",
+      "coinc_z": 1.0459,
+      "lead_z": "<NA>"
+    },
+    {
+      "date": "2014-10-10",
+      "coinc_z": 0.9809,
+      "lead_z": "<NA>"
+    },
+    {
+      "date": "2014-10-17",
+      "coinc_z": 1.6167,
+      "lead_z": "<NA>"
+    },
+    {
       "date": "2014-10-24",
-      "coinc_z": 1.312,
+      "coinc_z": 1.311,
       "lead_z": "<NA>"
     },
     {
@@ -18766,942 +18842,942 @@
     },
     {
       "date": "2014-11-07",
-      "coinc_z": 0.6224,
+      "coinc_z": 0.6244,
       "lead_z": "<NA>"
     },
     {
       "date": "2014-11-14",
-      "coinc_z": 1.09,
+      "coinc_z": 1.0897,
       "lead_z": "<NA>"
     },
     {
       "date": "2014-11-21",
-      "coinc_z": 0.9369,
+      "coinc_z": 0.9373,
       "lead_z": "<NA>"
     },
     {
       "date": "2014-11-28",
-      "coinc_z": 1.6315,
+      "coinc_z": 1.6286,
       "lead_z": "<NA>"
     },
     {
       "date": "2014-12-05",
-      "coinc_z": 1.7016,
+      "coinc_z": 1.6981,
       "lead_z": "<NA>"
     },
     {
       "date": "2014-12-12",
-      "coinc_z": 2.1941,
+      "coinc_z": 2.1881,
       "lead_z": "<NA>"
     },
     {
       "date": "2014-12-19",
-      "coinc_z": 1.9084,
+      "coinc_z": 1.9034,
       "lead_z": "<NA>"
     },
     {
       "date": "2014-12-26",
-      "coinc_z": 2.5197,
+      "coinc_z": 2.5115,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-01-02",
-      "coinc_z": 2.7389,
+      "coinc_z": 2.7293,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-01-09",
-      "coinc_z": 0.5061,
+      "coinc_z": 0.5072,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-01-16",
-      "coinc_z": 2.0693,
+      "coinc_z": 2.0627,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-01-23",
-      "coinc_z": 1.7727,
+      "coinc_z": 1.7673,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-01-30",
-      "coinc_z": 0.4769,
+      "coinc_z": 0.4777,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-02-06",
-      "coinc_z": 0.7223,
+      "coinc_z": 0.722,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-02-13",
-      "coinc_z": 0.7469,
+      "coinc_z": 0.7464,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-02-20",
-      "coinc_z": 1.9128,
+      "coinc_z": 1.9066,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-02-27",
-      "coinc_z": 1.0828,
+      "coinc_z": 1.0804,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-03-06",
-      "coinc_z": -0.0153,
+      "coinc_z": -0.0124,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-03-13",
-      "coinc_z": -0.4543,
+      "coinc_z": -0.4493,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-03-20",
-      "coinc_z": -0.013,
+      "coinc_z": -0.0101,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-03-27",
-      "coinc_z": -0.2611,
+      "coinc_z": -0.2571,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-04-03",
-      "coinc_z": 0.1818,
+      "coinc_z": 0.1838,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-04-10",
-      "coinc_z": -0.1512,
+      "coinc_z": -0.1477,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-04-17",
-      "coinc_z": -0.6225,
+      "coinc_z": -0.6168,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-04-24",
-      "coinc_z": 0.1025,
+      "coinc_z": 0.1048,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-05-01",
-      "coinc_z": -0.0372,
+      "coinc_z": -0.0343,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-05-08",
-      "coinc_z": -0.3446,
+      "coinc_z": -0.3403,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-05-15",
-      "coinc_z": -0.5955,
+      "coinc_z": -0.59,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-05-22",
-      "coinc_z": -0.4535,
+      "coinc_z": -0.4486,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-05-29",
-      "coinc_z": -1.0402,
+      "coinc_z": -1.0328,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-06-05",
-      "coinc_z": -1.838,
+      "coinc_z": -1.8271,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-06-12",
-      "coinc_z": -0.5194,
+      "coinc_z": -0.5142,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-06-19",
-      "coinc_z": -0.5179,
+      "coinc_z": -0.5127,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-06-26",
-      "coinc_z": -0.7122,
+      "coinc_z": -0.7061,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-07-03",
-      "coinc_z": -0.9332,
+      "coinc_z": -0.9263,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-07-10",
-      "coinc_z": -1.18,
+      "coinc_z": -1.172,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-07-17",
-      "coinc_z": -1.5612,
+      "coinc_z": -1.5517,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-07-24",
-      "coinc_z": -0.1869,
+      "coinc_z": -0.1831,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-07-31",
-      "coinc_z": -1.2474,
+      "coinc_z": -1.2391,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-08-07",
-      "coinc_z": -0.9068,
+      "coinc_z": -0.8999,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-08-14",
-      "coinc_z": -0.8752,
+      "coinc_z": -0.8685,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-08-21",
-      "coinc_z": 0.1358,
+      "coinc_z": 0.1384,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-08-28",
-      "coinc_z": -1.1531,
+      "coinc_z": -1.1454,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-09-04",
-      "coinc_z": -2.084,
+      "coinc_z": -2.0726,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-09-11",
-      "coinc_z": -0.046,
+      "coinc_z": -0.0426,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-09-18",
-      "coinc_z": -2.145,
+      "coinc_z": -2.1334,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-09-25",
-      "coinc_z": -0.8652,
+      "coinc_z": -0.8585,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-10-02",
-      "coinc_z": -1.329,
+      "coinc_z": -1.3206,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-10-09",
-      "coinc_z": -0.827,
+      "coinc_z": -0.8205,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-10-16",
-      "coinc_z": -1.8624,
+      "coinc_z": -1.852,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-10-23",
-      "coinc_z": -1.0848,
+      "coinc_z": -1.0774,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-10-30",
-      "coinc_z": -1.5421,
+      "coinc_z": -1.533,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-11-06",
-      "coinc_z": -1.9074,
+      "coinc_z": -1.897,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-11-13",
-      "coinc_z": -2.2332,
+      "coinc_z": -2.2217,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-11-20",
-      "coinc_z": -2.75,
+      "coinc_z": -2.7366,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-11-27",
-      "coinc_z": -3.793,
+      "coinc_z": -3.7761,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-12-04",
-      "coinc_z": -2.3848,
+      "coinc_z": -2.3728,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-12-11",
-      "coinc_z": -1.979,
+      "coinc_z": -1.9685,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-12-18",
-      "coinc_z": -3.81,
+      "coinc_z": -3.7933,
       "lead_z": "<NA>"
     },
     {
       "date": "2015-12-25",
-      "coinc_z": -3.3492,
+      "coinc_z": -3.3341,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-01-01",
-      "coinc_z": -2.9485,
+      "coinc_z": -2.9348,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-01-08",
-      "coinc_z": -3.3586,
+      "coinc_z": -3.3436,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-01-15",
-      "coinc_z": -3.5985,
+      "coinc_z": -3.5828,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-01-22",
-      "coinc_z": -3.0758,
+      "coinc_z": -3.0619,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-01-29",
-      "coinc_z": -2.6519,
+      "coinc_z": -2.6395,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-02-05",
-      "coinc_z": -2.2919,
+      "coinc_z": -2.2807,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-02-12",
-      "coinc_z": -1.9243,
+      "coinc_z": -1.9143,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-02-19",
-      "coinc_z": -1.7152,
+      "coinc_z": -1.7059,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-02-26",
-      "coinc_z": -1.4682,
+      "coinc_z": -1.4597,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-03-04",
-      "coinc_z": -1.9866,
+      "coinc_z": -1.9765,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-03-11",
-      "coinc_z": -1.4211,
+      "coinc_z": -1.4128,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-03-18",
-      "coinc_z": -2.2481,
+      "coinc_z": -2.2373,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-03-25",
-      "coinc_z": -2.2828,
+      "coinc_z": -2.272,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-04-01",
-      "coinc_z": -2.5989,
+      "coinc_z": -2.5872,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-04-08",
-      "coinc_z": -2.1388,
+      "coinc_z": -2.1285,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-04-15",
-      "coinc_z": -1.3274,
+      "coinc_z": -1.3195,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-04-22",
-      "coinc_z": -1.4624,
+      "coinc_z": -1.4541,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-04-29",
-      "coinc_z": -1.8167,
+      "coinc_z": -1.8074,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-05-06",
-      "coinc_z": -1.1368,
+      "coinc_z": -1.1295,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-05-13",
-      "coinc_z": -1.7362,
+      "coinc_z": -1.7272,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-05-20",
-      "coinc_z": -0.9996,
+      "coinc_z": -0.9927,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-05-27",
-      "coinc_z": -1.4789,
+      "coinc_z": -1.4707,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-06-03",
-      "coinc_z": 0.5301,
+      "coinc_z": 0.5328,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-06-10",
-      "coinc_z": -1.654,
+      "coinc_z": -1.6454,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-06-17",
-      "coinc_z": -1.0821,
+      "coinc_z": -1.075,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-06-24",
-      "coinc_z": -0.9168,
+      "coinc_z": -0.9102,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-07-01",
-      "coinc_z": -0.8331,
+      "coinc_z": -0.8267,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-07-08",
-      "coinc_z": 0.3827,
+      "coinc_z": 0.3859,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-07-15",
-      "coinc_z": -1.7963,
+      "coinc_z": -1.7875,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-07-22",
-      "coinc_z": -1.064,
+      "coinc_z": -1.0571,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-07-29",
-      "coinc_z": -0.396,
+      "coinc_z": -0.3907,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-08-05",
-      "coinc_z": -0.6373,
+      "coinc_z": -0.6315,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-08-12",
-      "coinc_z": -0.3528,
+      "coinc_z": -0.3476,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-08-19",
-      "coinc_z": -1.0391,
+      "coinc_z": -1.0323,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-08-26",
-      "coinc_z": -0.7729,
+      "coinc_z": -0.7668,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-09-02",
-      "coinc_z": -0.6696,
+      "coinc_z": -0.6637,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-09-09",
-      "coinc_z": -0.8499,
+      "coinc_z": -0.8436,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-09-16",
-      "coinc_z": -1.0292,
+      "coinc_z": -1.0225,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-09-23",
-      "coinc_z": -0.985,
+      "coinc_z": -0.9784,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-09-30",
-      "coinc_z": -1.0421,
+      "coinc_z": -1.0354,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-10-07",
-      "coinc_z": -0.4917,
+      "coinc_z": -0.4863,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-10-14",
-      "coinc_z": -0.45,
+      "coinc_z": -0.4447,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-10-21",
-      "coinc_z": -0.9162,
+      "coinc_z": -0.9098,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-10-28",
-      "coinc_z": -0.4139,
+      "coinc_z": -0.4108,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-11-04",
-      "coinc_z": 0.3317,
+      "coinc_z": 0.3342,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-11-11",
-      "coinc_z": 0.4848,
+      "coinc_z": 0.4869,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-11-18",
-      "coinc_z": 0.5915,
+      "coinc_z": 0.594,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-11-25",
-      "coinc_z": 0.7209,
+      "coinc_z": 0.7226,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-12-02",
-      "coinc_z": 0.3117,
+      "coinc_z": 0.3137,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-12-09",
-      "coinc_z": 0.1205,
+      "coinc_z": 0.1229,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-12-16",
-      "coinc_z": 0.3186,
+      "coinc_z": 0.3205,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-12-23",
-      "coinc_z": 0.6102,
+      "coinc_z": 0.6115,
       "lead_z": "<NA>"
     },
     {
       "date": "2016-12-30",
-      "coinc_z": 1.4196,
+      "coinc_z": 1.4189,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-01-06",
-      "coinc_z": 0.5225,
+      "coinc_z": 0.5242,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-01-13",
-      "coinc_z": 0.064,
+      "coinc_z": 0.0666,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-01-20",
-      "coinc_z": 0.3201,
+      "coinc_z": 0.3222,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-01-27",
-      "coinc_z": -0.2957,
+      "coinc_z": -0.2922,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-02-03",
-      "coinc_z": 0.5848,
+      "coinc_z": 0.5862,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-02-10",
-      "coinc_z": 0.9346,
+      "coinc_z": 0.9352,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-02-17",
-      "coinc_z": -0.1719,
+      "coinc_z": -0.1693,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-02-24",
-      "coinc_z": 0.3094,
+      "coinc_z": 0.3111,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-03-03",
-      "coinc_z": -0.1294,
+      "coinc_z": -0.1279,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-03-10",
-      "coinc_z": -0.265,
+      "coinc_z": -0.2639,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-03-17",
-      "coinc_z": 0.1428,
+      "coinc_z": 0.1431,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-03-24",
-      "coinc_z": -0.0287,
+      "coinc_z": -0.028,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-03-31",
-      "coinc_z": 0.1325,
+      "coinc_z": 0.1327,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-04-07",
-      "coinc_z": -0.1049,
+      "coinc_z": -0.1045,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-04-14",
-      "coinc_z": -0.4041,
+      "coinc_z": -0.4033,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-04-21",
-      "coinc_z": -0.452,
+      "coinc_z": -0.451,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-04-28",
-      "coinc_z": -0.7418,
+      "coinc_z": -0.7405,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-05-05",
-      "coinc_z": 1.4324,
+      "coinc_z": 1.4329,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-05-12",
-      "coinc_z": 1.3086,
+      "coinc_z": 1.3092,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-05-19",
-      "coinc_z": 1.285,
+      "coinc_z": 1.286,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-05-26",
-      "coinc_z": 1.4717,
+      "coinc_z": 1.4719,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-06-02",
-      "coinc_z": 0.6835,
+      "coinc_z": 0.6852,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-06-09",
-      "coinc_z": 0.5548,
+      "coinc_z": 0.5562,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-06-16",
-      "coinc_z": 0.4463,
+      "coinc_z": 0.4479,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-06-23",
-      "coinc_z": 0.9981,
+      "coinc_z": 0.9985,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-06-30",
-      "coinc_z": 0.4117,
+      "coinc_z": 0.4131,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-07-07",
-      "coinc_z": 0.5167,
+      "coinc_z": 0.5177,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-07-14",
-      "coinc_z": 0.6185,
+      "coinc_z": 0.6191,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-07-21",
-      "coinc_z": 0.5233,
+      "coinc_z": 0.5242,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-07-28",
-      "coinc_z": 0.5605,
+      "coinc_z": 0.5617,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-08-04",
-      "coinc_z": 1.1091,
+      "coinc_z": 1.11,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-08-11",
-      "coinc_z": 1.0594,
+      "coinc_z": 1.0603,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-08-18",
-      "coinc_z": 0.7625,
+      "coinc_z": 0.7639,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-08-25",
-      "coinc_z": 1.0548,
+      "coinc_z": 1.0555,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-09-01",
-      "coinc_z": 0.979,
+      "coinc_z": 0.9795,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-09-08",
-      "coinc_z": 0.3504,
+      "coinc_z": 0.3522,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-09-15",
-      "coinc_z": 0.2008,
+      "coinc_z": 0.202,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-09-22",
-      "coinc_z": 0.1802,
+      "coinc_z": 0.1813,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-09-29",
-      "coinc_z": 0.6866,
+      "coinc_z": 0.6868,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-10-06",
-      "coinc_z": 0.6349,
+      "coinc_z": 0.6354,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-10-13",
-      "coinc_z": 0.7565,
+      "coinc_z": 0.7569,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-10-20",
-      "coinc_z": 0.8597,
+      "coinc_z": 0.8599,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-10-27",
-      "coinc_z": 0.6501,
+      "coinc_z": 0.6506,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-11-03",
-      "coinc_z": 0.895,
+      "coinc_z": 0.8958,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-11-10",
-      "coinc_z": 0.9517,
+      "coinc_z": 0.9524,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-11-17",
-      "coinc_z": 1.0898,
+      "coinc_z": 1.0903,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-11-24",
-      "coinc_z": 1.1662,
+      "coinc_z": 1.1665,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-12-01",
-      "coinc_z": 0.9507,
+      "coinc_z": 0.9515,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-12-08",
-      "coinc_z": 0.7597,
+      "coinc_z": 0.7602,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-12-15",
-      "coinc_z": 0.7383,
+      "coinc_z": 0.7392,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-12-22",
-      "coinc_z": 0.5994,
+      "coinc_z": 0.6001,
       "lead_z": "<NA>"
     },
     {
       "date": "2017-12-29",
-      "coinc_z": 1.0678,
+      "coinc_z": 1.0674,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-01-05",
-      "coinc_z": 0.9179,
+      "coinc_z": 0.9177,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-01-12",
-      "coinc_z": 0.9533,
+      "coinc_z": 0.9537,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-01-19",
-      "coinc_z": 1.2979,
+      "coinc_z": 1.2977,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-01-26",
-      "coinc_z": 1.4776,
+      "coinc_z": 1.477,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-02-02",
-      "coinc_z": 1.408,
+      "coinc_z": 1.4082,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-02-09",
-      "coinc_z": 1.0053,
+      "coinc_z": 1.0063,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-02-16",
-      "coinc_z": 0.9585,
+      "coinc_z": 0.9587,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-02-23",
-      "coinc_z": 0.7771,
+      "coinc_z": 0.7776,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-03-02",
-      "coinc_z": 0.8168,
+      "coinc_z": 0.8173,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-03-09",
-      "coinc_z": 0.4796,
+      "coinc_z": 0.48,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-03-16",
-      "coinc_z": -0.1267,
+      "coinc_z": -0.1257,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-03-23",
-      "coinc_z": 0.0754,
+      "coinc_z": 0.0759,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-03-30",
-      "coinc_z": 0.3012,
+      "coinc_z": 0.3019,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-04-06",
-      "coinc_z": 0.1046,
+      "coinc_z": 0.1052,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-04-13",
-      "coinc_z": 0.043,
+      "coinc_z": 0.0438,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-04-20",
-      "coinc_z": 0.3521,
+      "coinc_z": 0.3522,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-04-27",
-      "coinc_z": 0.1625,
+      "coinc_z": 0.1631,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-05-04",
-      "coinc_z": 0.8467,
+      "coinc_z": 0.848,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-05-11",
-      "coinc_z": 1.3296,
+      "coinc_z": 1.3299,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-05-18",
-      "coinc_z": 1.3619,
+      "coinc_z": 1.3623,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-05-25",
-      "coinc_z": 0.8091,
+      "coinc_z": 0.8104,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-06-01",
-      "coinc_z": 1.8674,
+      "coinc_z": 1.8673,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-06-08",
-      "coinc_z": 1.529,
+      "coinc_z": 1.5293,
       "lead_z": "<NA>"
     },
     {
@@ -19711,12 +19787,12 @@
     },
     {
       "date": "2018-06-22",
-      "coinc_z": 1.0652,
+      "coinc_z": 1.0665,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-06-29",
-      "coinc_z": 0.8133,
+      "coinc_z": 0.8143,
       "lead_z": "<NA>"
     },
     {
@@ -19726,27 +19802,27 @@
     },
     {
       "date": "2018-07-13",
-      "coinc_z": 1.2828,
+      "coinc_z": 1.283,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-07-20",
-      "coinc_z": 1.305,
+      "coinc_z": 1.3056,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-07-27",
-      "coinc_z": 0.9566,
+      "coinc_z": 0.9571,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-08-03",
-      "coinc_z": 1.0848,
+      "coinc_z": 1.0857,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-08-10",
-      "coinc_z": 1.2307,
+      "coinc_z": 1.2312,
       "lead_z": "<NA>"
     },
     {
@@ -19756,92 +19832,92 @@
     },
     {
       "date": "2018-08-24",
-      "coinc_z": 1.4428,
+      "coinc_z": 1.4429,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-08-31",
-      "coinc_z": 1.3937,
+      "coinc_z": 1.3934,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-09-07",
-      "coinc_z": 2.1309,
+      "coinc_z": 2.1287,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-09-14",
-      "coinc_z": 1.7772,
+      "coinc_z": 1.7764,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-09-21",
-      "coinc_z": 1.6155,
+      "coinc_z": 1.6149,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-09-28",
-      "coinc_z": 1.2446,
+      "coinc_z": 1.2441,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-10-05",
-      "coinc_z": 1.3358,
+      "coinc_z": 1.3355,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-10-12",
-      "coinc_z": 1.6273,
+      "coinc_z": 1.6264,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-10-19",
-      "coinc_z": 1.1132,
+      "coinc_z": 1.113,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-10-26",
-      "coinc_z": 0.7552,
+      "coinc_z": 0.7555,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-11-02",
-      "coinc_z": 0.8733,
+      "coinc_z": 0.8728,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-11-09",
-      "coinc_z": 0.644,
+      "coinc_z": 0.6439,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-11-16",
-      "coinc_z": 0.5643,
+      "coinc_z": 0.5641,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-11-23",
-      "coinc_z": 0.3095,
+      "coinc_z": 0.3097,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-11-30",
-      "coinc_z": 0.7694,
+      "coinc_z": 0.7688,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-12-07",
-      "coinc_z": 0.4612,
+      "coinc_z": 0.461,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-12-14",
-      "coinc_z": 0.7557,
+      "coinc_z": 0.7554,
       "lead_z": "<NA>"
     },
     {
       "date": "2018-12-21",
-      "coinc_z": 0.7147,
+      "coinc_z": 0.7142,
       "lead_z": "<NA>"
     },
     {
@@ -19851,632 +19927,632 @@
     },
     {
       "date": "2019-01-04",
-      "coinc_z": 0.1943,
+      "coinc_z": 0.195,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-01-11",
-      "coinc_z": -0.0411,
+      "coinc_z": -0.0399,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-01-18",
-      "coinc_z": 0.0407,
+      "coinc_z": 0.0418,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-01-25",
-      "coinc_z": 0.4188,
+      "coinc_z": 0.4189,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-02-01",
-      "coinc_z": 0.1745,
+      "coinc_z": 0.175,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-02-08",
-      "coinc_z": 0.0408,
+      "coinc_z": 0.0419,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-02-15",
-      "coinc_z": -0.9435,
+      "coinc_z": -0.9416,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-02-22",
-      "coinc_z": -0.8055,
+      "coinc_z": -0.804,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-03-01",
-      "coinc_z": -0.8579,
+      "coinc_z": -0.8574,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-03-08",
-      "coinc_z": -1.0459,
+      "coinc_z": -1.0448,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-03-15",
-      "coinc_z": -1.032,
+      "coinc_z": -1.0309,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-03-22",
-      "coinc_z": -0.716,
+      "coinc_z": -0.7149,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-03-29",
-      "coinc_z": -0.6882,
+      "coinc_z": -0.6867,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-04-05",
-      "coinc_z": -0.1869,
+      "coinc_z": -0.1859,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-04-12",
-      "coinc_z": -0.0474,
+      "coinc_z": -0.0467,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-04-19",
-      "coinc_z": -0.0259,
+      "coinc_z": -0.0247,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-04-26",
-      "coinc_z": 0.3261,
+      "coinc_z": 0.3265,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-05-03",
-      "coinc_z": -0.4373,
+      "coinc_z": -0.4363,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-05-10",
-      "coinc_z": -0.4864,
+      "coinc_z": -0.4854,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-05-17",
-      "coinc_z": -0.816,
+      "coinc_z": -0.8147,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-05-24",
-      "coinc_z": -0.9462,
+      "coinc_z": -0.9446,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-05-31",
-      "coinc_z": -0.9351,
+      "coinc_z": -0.9336,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-06-07",
-      "coinc_z": -0.692,
+      "coinc_z": -0.6907,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-06-14",
-      "coinc_z": -0.4849,
+      "coinc_z": -0.4835,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-06-21",
-      "coinc_z": -0.4053,
+      "coinc_z": -0.4039,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-06-28",
-      "coinc_z": -0.5647,
+      "coinc_z": -0.5636,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-07-05",
-      "coinc_z": -0.7702,
+      "coinc_z": -0.7688,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-07-12",
-      "coinc_z": -0.5681,
+      "coinc_z": -0.5672,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-07-19",
-      "coinc_z": -0.8665,
+      "coinc_z": -0.8647,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-07-26",
-      "coinc_z": -0.7062,
+      "coinc_z": -0.7049,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-08-02",
-      "coinc_z": -0.6211,
+      "coinc_z": -0.6194,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-08-09",
-      "coinc_z": -0.4192,
+      "coinc_z": -0.4179,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-08-16",
-      "coinc_z": -0.5257,
+      "coinc_z": -0.524,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-08-23",
-      "coinc_z": -0.5686,
+      "coinc_z": -0.5667,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-08-30",
-      "coinc_z": -0.6113,
+      "coinc_z": -0.6096,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-09-06",
-      "coinc_z": -0.9413,
+      "coinc_z": -0.9391,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-09-13",
-      "coinc_z": -0.6776,
+      "coinc_z": -0.6759,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-09-20",
-      "coinc_z": -0.7431,
+      "coinc_z": -0.7411,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-09-27",
-      "coinc_z": -0.8898,
+      "coinc_z": -0.8874,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-10-04",
-      "coinc_z": -0.7983,
+      "coinc_z": -0.7964,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-10-11",
-      "coinc_z": -0.8742,
+      "coinc_z": -0.8722,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-10-18",
-      "coinc_z": -0.9316,
+      "coinc_z": -0.9294,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-10-25",
-      "coinc_z": -0.8655,
+      "coinc_z": -0.8635,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-11-01",
-      "coinc_z": -1.2239,
+      "coinc_z": -1.2219,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-11-08",
-      "coinc_z": -1.1624,
+      "coinc_z": -1.1605,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-11-15",
-      "coinc_z": -1.5398,
+      "coinc_z": -1.5378,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-11-22",
-      "coinc_z": -1.5475,
+      "coinc_z": -1.5453,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-11-29",
-      "coinc_z": 0.0675,
+      "coinc_z": 0.0677,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-12-06",
-      "coinc_z": -1.271,
+      "coinc_z": -1.2681,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-12-13",
-      "coinc_z": -1.25,
+      "coinc_z": -1.2471,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-12-20",
-      "coinc_z": -0.7572,
+      "coinc_z": -0.755,
       "lead_z": "<NA>"
     },
     {
       "date": "2019-12-27",
-      "coinc_z": -0.2307,
+      "coinc_z": -0.2294,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-01-03",
-      "coinc_z": -0.1953,
+      "coinc_z": -0.194,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-01-10",
-      "coinc_z": -0.5373,
+      "coinc_z": -0.5355,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-01-17",
-      "coinc_z": -1.2258,
+      "coinc_z": -1.2231,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-01-24",
-      "coinc_z": -0.9043,
+      "coinc_z": -0.9022,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-01-31",
-      "coinc_z": -0.389,
+      "coinc_z": -0.387,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-02-07",
-      "coinc_z": -0.0639,
+      "coinc_z": -0.0626,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-02-14",
-      "coinc_z": -0.3018,
+      "coinc_z": -0.3003,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-02-21",
-      "coinc_z": -0.4971,
+      "coinc_z": -0.4951,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-02-28",
-      "coinc_z": -0.541,
+      "coinc_z": -0.5388,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-03-06",
-      "coinc_z": -0.3071,
+      "coinc_z": -0.305,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-03-13",
-      "coinc_z": -0.5387,
+      "coinc_z": -0.5362,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-03-20",
-      "coinc_z": -0.5588,
+      "coinc_z": -0.5561,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-03-27",
-      "coinc_z": -2.9553,
+      "coinc_z": -2.949,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-04-03",
-      "coinc_z": -5.7993,
+      "coinc_z": -5.7893,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-04-10",
-      "coinc_z": -6.3916,
+      "coinc_z": -6.3802,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-04-17",
-      "coinc_z": -7.2469,
+      "coinc_z": -7.2348,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-04-24",
-      "coinc_z": -6.6431,
+      "coinc_z": -6.632,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-05-01",
-      "coinc_z": -11.1756,
+      "coinc_z": -11.1654,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-05-08",
-      "coinc_z": -11.6169,
+      "coinc_z": -11.6076,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-05-15",
-      "coinc_z": -10.0145,
+      "coinc_z": -10.0064,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-05-22",
-      "coinc_z": -8.5716,
+      "coinc_z": -8.564,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-05-29",
-      "coinc_z": -8.2727,
+      "coinc_z": -8.2657,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-06-05",
-      "coinc_z": -7.2833,
+      "coinc_z": -7.2767,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-06-12",
-      "coinc_z": -6.5977,
+      "coinc_z": -6.5916,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-06-19",
-      "coinc_z": -5.8107,
+      "coinc_z": -5.8052,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-06-26",
-      "coinc_z": -5.0001,
+      "coinc_z": -4.9951,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-07-03",
-      "coinc_z": -4.5154,
+      "coinc_z": -4.5106,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-07-10",
-      "coinc_z": -4.2642,
+      "coinc_z": -4.2598,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-07-17",
-      "coinc_z": -4.0492,
+      "coinc_z": -4.0449,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-07-24",
-      "coinc_z": -4.157,
+      "coinc_z": -4.1525,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-07-31",
-      "coinc_z": -1.1807,
+      "coinc_z": -1.1765,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-08-07",
-      "coinc_z": -0.5782,
+      "coinc_z": -0.5742,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-08-14",
-      "coinc_z": -0.1178,
+      "coinc_z": -0.1142,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-08-21",
-      "coinc_z": -0.1617,
+      "coinc_z": -0.1581,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-08-28",
-      "coinc_z": 0.2329,
+      "coinc_z": 0.2361,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-09-04",
-      "coinc_z": 0.506,
+      "coinc_z": 0.5089,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-09-11",
-      "coinc_z": 0.4416,
+      "coinc_z": 0.4445,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-09-18",
-      "coinc_z": 0.186,
+      "coinc_z": 0.1894,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-09-25",
-      "coinc_z": 0.4398,
+      "coinc_z": 0.4427,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-10-02",
-      "coinc_z": 0.5862,
+      "coinc_z": 0.5891,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-10-09",
-      "coinc_z": 0.645,
+      "coinc_z": 0.6477,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-10-16",
-      "coinc_z": 0.7125,
+      "coinc_z": 0.715,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-10-23",
-      "coinc_z": 0.6772,
+      "coinc_z": 0.6797,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-10-30",
-      "coinc_z": -0.8474,
+      "coinc_z": -0.8451,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-11-06",
-      "coinc_z": -0.7228,
+      "coinc_z": -0.7206,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-11-13",
-      "coinc_z": -0.7008,
+      "coinc_z": -0.6987,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-11-20",
-      "coinc_z": -0.5964,
+      "coinc_z": -0.5942,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-11-27",
-      "coinc_z": -0.3229,
+      "coinc_z": -0.3207,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-12-04",
-      "coinc_z": -0.1299,
+      "coinc_z": -0.1281,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-12-11",
-      "coinc_z": -0.2187,
+      "coinc_z": -0.2168,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-12-18",
-      "coinc_z": -0.2651,
+      "coinc_z": -0.2631,
       "lead_z": "<NA>"
     },
     {
       "date": "2020-12-25",
-      "coinc_z": -0.1301,
+      "coinc_z": -0.1284,
       "lead_z": "<NA>"
     },
     {
       "date": "2021-01-01",
-      "coinc_z": 0.1118,
+      "coinc_z": 0.113,
       "lead_z": "<NA>"
     },
     {
       "date": "2021-01-08",
-      "coinc_z": -0.2156,
+      "coinc_z": -0.2139,
       "lead_z": "<NA>"
     },
     {
       "date": "2021-01-15",
-      "coinc_z": -0.1114,
+      "coinc_z": -0.11,
       "lead_z": "<NA>"
     },
     {
       "date": "2021-01-22",
-      "coinc_z": -0.1021,
+      "coinc_z": -0.1007,
       "lead_z": "<NA>"
     },
     {
       "date": "2021-01-29",
-      "coinc_z": -0.2019,
+      "coinc_z": -0.2005,
       "lead_z": "<NA>"
     },
     {
       "date": "2021-02-05",
-      "coinc_z": -0.3483,
+      "coinc_z": -0.3467,
       "lead_z": "<NA>"
     },
     {
       "date": "2021-02-12",
-      "coinc_z": -0.351,
+      "coinc_z": -0.3494,
       "lead_z": "<NA>"
     },
     {
       "date": "2021-02-19",
-      "coinc_z": 0.0544,
+      "coinc_z": 0.0557,
       "lead_z": "<NA>"
     },
     {
       "date": "2021-02-26",
-      "coinc_z": -0.3816,
+      "coinc_z": -0.3796,
       "lead_z": "<NA>"
     },
     {
       "date": "2021-03-05",
-      "coinc_z": -0.1124,
+      "coinc_z": -0.1109,
       "lead_z": "<NA>"
     },
     {
       "date": "2021-03-12",
-      "coinc_z": 0.1271,
+      "coinc_z": 0.1282,
       "lead_z": "<NA>"
     },
     {
       "date": "2021-03-19",
-      "coinc_z": 0.0497,
+      "coinc_z": 0.0507,
       "lead_z": "<NA>"
     },
     {
       "date": "2021-03-26",
-      "coinc_z": 0.7256,
+      "coinc_z": 0.7254,
       "lead_z": "<NA>"
     },
     {
       "date": "2021-04-02",
-      "coinc_z": 1.5547,
+      "coinc_z": 1.5532,
       "lead_z": "<NA>"
     },
     {
       "date": "2021-04-09",
-      "coinc_z": 1.9763,
+      "coinc_z": 1.9741,
       "lead_z": "<NA>"
     },
     {
       "date": "2021-04-16",
-      "coinc_z": 2.5854,
+      "coinc_z": 2.5823,
       "lead_z": "<NA>"
     },
     {
       "date": "2021-04-23",
-      "coinc_z": 2.5232,
+      "coinc_z": 2.5201,
       "lead_z": "<NA>"
     },
     {
       "date": "2021-04-30",
-      "coinc_z": 2.6691,
+      "coinc_z": 2.6658,
       "lead_z": "<NA>"
     },
     {
       "date": "2021-05-07",
-      "coinc_z": 2.6593,
+      "coinc_z": 2.6561,
       "lead_z": "<NA>"
     },
     {
       "date": "2021-05-14",
-      "coinc_z": 2.4176,
+      "coinc_z": 2.4147,
       "lead_z": "<NA>"
     },
     {
       "date": "2021-05-21",
-      "coinc_z": 2.3443,
+      "coinc_z": 2.3414,
       "lead_z": "<NA>"
     },
     {
       "date": "2021-05-28",
-      "coinc_z": 2.2731,
+      "coinc_z": 2.2716,
       "lead_z": "<NA>"
     },
     {
@@ -21781,12 +21857,22 @@
     },
     {
       "date": "2026-05-29",
-      "coinc_z": 0.1804,
+      "coinc_z": 0.1824,
       "lead_z": "<NA>"
     },
     {
       "date": "2026-06-05",
-      "coinc_z": 0.22,
+      "coinc_z": 0.2247,
+      "lead_z": "<NA>"
+    },
+    {
+      "date": "2026-06-12",
+      "coinc_z": 0.157,
+      "lead_z": "<NA>"
+    },
+    {
+      "date": "2026-06-19",
+      "coinc_z": 0.1938,
       "lead_z": "<NA>"
     }
   ],
@@ -23042,6 +23128,20 @@
       "ny_nowcast": 2.67,
       "ny_backcast": null,
       "ny_next_q": 2.47,
+      "target_quarter": "2026:Q2"
+    },
+    {
+      "date": "2026-06-12",
+      "ny_nowcast": 2.7,
+      "ny_backcast": null,
+      "ny_next_q": 2.46,
+      "target_quarter": "2026:Q2"
+    },
+    {
+      "date": "2026-06-19",
+      "ny_nowcast": 2.68,
+      "ny_backcast": null,
+      "ny_next_q": 2.45,
       "target_quarter": "2026:Q2"
     }
   ],
@@ -27843,13 +27943,23 @@
     },
     {
       "date": "2026-05-23",
-      "wei": 3.02,
-      "wei_ma13": 2.7477
+      "wei": 3.03,
+      "wei_ma13": 2.7485
     },
     {
       "date": "2026-05-30",
-      "wei": 3.23,
+      "wei": 3.22,
       "wei_ma13": 2.8054
+    },
+    {
+      "date": "2026-06-06",
+      "wei": 2.9,
+      "wei_ma13": 2.8231
+    },
+    {
+      "date": "2026-06-13",
+      "wei": 3.1,
+      "wei_ma13": 2.8592
     }
   ],
   "gdp_yoy_series": [
@@ -48257,11 +48367,19 @@
     },
     {
       "date": "2026-05-23",
-      "wei_z": 0.0587
+      "wei_z": 0.0646
     },
     {
       "date": "2026-05-30",
-      "wei_z": 0.1983
+      "wei_z": 0.1922
+    },
+    {
+      "date": "2026-06-06",
+      "wei_z": 0.0137
+    },
+    {
+      "date": "2026-06-13",
+      "wei_z": 0.155
     }
   ],
   "avg_z_series": [
