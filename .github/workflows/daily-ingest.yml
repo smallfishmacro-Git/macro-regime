@@ -61,13 +61,18 @@ jobs:
         run: |
           python inflation.py
 
+      - name: Run oecd_cli.py
+        continue-on-error: true
+        run: |
+          python oecd_cli.py
+
       - name: Commit refreshed data (skip if no changes)
         run: |
           git config --local user.name  "macro-regime-bot"
           git config --local user.email "macro-regime-bot@users.noreply.github.com"
 
           # Stage the files the ingest may have changed
-          git add data/growth.json public/data/growth.json data/employment.json data/housing.json data/inflation.json data/cache/ || true
+          git add data/growth.json public/data/growth.json data/employment.json data/housing.json data/inflation.json data/oecd.json data/cache/ || true
 
           if git diff --cached --quiet; then
             echo "No data changes — nothing to commit"

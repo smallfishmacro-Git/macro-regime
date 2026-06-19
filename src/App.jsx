@@ -3,6 +3,7 @@ import EmploymentTab from "./tabs/EmploymentTab";
 import HousingTab from "./tabs/HousingTab";
 import EquityTab from "./tabs/EquityTab";
 import InflationTab from "./tabs/InflationTab";
+import OecdGrowthChart from "./tabs/OecdGrowthChart";
 import { C, FONT_MONO, Tab, Pill, Panel, StatTile, KVRow, Legend } from "./design-system";
 import {
   ComposedChart,
@@ -1178,6 +1179,7 @@ export default function MacroRegimeGrowth() {
               <Pill active={chartMode === "NOWCAST"}    onClick={() => setChartMode("NOWCAST")}>NOWCAST</Pill>
               <Pill active={chartMode === "COINCIDENT"} onClick={() => setChartMode("COINCIDENT")}>COINCIDENT</Pill>
               <Pill active={chartMode === "LEADING"}    onClick={() => setChartMode("LEADING")}>LEADING</Pill>
+              <Pill active={chartMode === "OECD"}      onClick={() => setChartMode("OECD")}>OECD</Pill>
             </div>
           </div>
 
@@ -1223,6 +1225,11 @@ export default function MacroRegimeGrowth() {
                   <>
                     US LEADING INDICATORS <span style={{ color: C.amber }}>—</span>
                     <span style={{ color: C.textMute, marginLeft: 8, fontSize: 8 }}>· RecessionAlert composite</span>
+                  </>
+                ) : chartMode === "OECD" ? (
+                  <>
+                    OECD G20 CLI <span style={{ color: C.amber }}>—</span>
+                    <span style={{ color: C.textMute, marginLeft: 8, fontSize: 8 }}>· composite leading + breadth</span>
                   </>
                 ) : (
                   <>
@@ -1512,6 +1519,8 @@ export default function MacroRegimeGrowth() {
                   SOURCE · RecessionAlert · <span style={{ color: C.white }}>USMLEI</span> · <span style={{ color: C.cyan }}>weekly AVG</span> · OECD <span style={{ color: C.amber }}>%G20 (+8mo lead)</span> · <span style={{ color: C.magenta }}>%CBANK (+12mo lead)</span> · monthly + weekly
                 </div>
               </>
+            ) : chartMode === "OECD" ? (
+              <OecdGrowthChart />
             ) : (
               <>
                 {/* Component legend */}
