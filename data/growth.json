@@ -1,12 +1,12 @@
 {
   "meta": {
-    "generated_at": "2026-06-18T00:06:24.649725+00:00",
+    "generated_at": "2026-06-19T00:19:25.783349+00:00",
     "z_window_years": 10,
     "direction_lookback_weeks": 8,
     "sources": {
       "atlanta_fed": "fetched \u00b7 latest obs 2026-06-17",
-      "ny_fed": "fetched \u00b7 latest obs 2026-06-12",
-      "fred_wei": "fetched \u00b7 latest obs 2026-06-06",
+      "ny_fed": "fetched \u00b7 latest obs 2026-06-19",
+      "fred_wei": "fetched \u00b7 latest obs 2026-06-13",
       "fred_gdp_yoy": "fetched \u00b7 latest obs 2026-01-01",
       "unctad": "manual \u00b7 latest obs 2026-04-22",
       "recessionalert": "missing"
@@ -44,9 +44,9 @@
     "hedge_ratio": 45,
     "hedge_posture": "Insufficient leading data \u2014 direction unknown",
     "gdpnow": 3.0377,
-    "ny_nowcast": 2.7,
+    "ny_nowcast": 2.68,
     "ny_target_qtr": "2026:Q2",
-    "wei": 2.9,
+    "wei": 3.1,
     "unctad_world": 2.61,
     "wla": 24.2688,
     "usmlei": 8.0658,
@@ -54,9 +54,9 @@
     "global_lei_8m": 0.863,
     "pct_g20_rising": 52.9412,
     "cb_net_cutters": 36.8421,
-    "coinc_z": 0.157,
+    "coinc_z": 0.1938,
     "lead_z": 0.0,
-    "wei_z": 0.0137,
+    "wei_z": 0.155,
     "avg_z": 0.2598,
     "lead_z_quadrant": 0.2598,
     "coinc_z_quadrant": -0.0466,
@@ -21869,6 +21869,11 @@
       "date": "2026-06-12",
       "coinc_z": 0.157,
       "lead_z": "<NA>"
+    },
+    {
+      "date": "2026-06-19",
+      "coinc_z": 0.1938,
+      "lead_z": "<NA>"
     }
   ],
   "ny_fed_nowcast": [
@@ -23130,6 +23135,13 @@
       "ny_nowcast": 2.7,
       "ny_backcast": null,
       "ny_next_q": 2.46,
+      "target_quarter": "2026:Q2"
+    },
+    {
+      "date": "2026-06-19",
+      "ny_nowcast": 2.68,
+      "ny_backcast": null,
+      "ny_next_q": 2.45,
       "target_quarter": "2026:Q2"
     }
   ],
@@ -27943,6 +27955,11 @@
       "date": "2026-06-06",
       "wei": 2.9,
       "wei_ma13": 2.8231
+    },
+    {
+      "date": "2026-06-13",
+      "wei": 3.1,
+      "wei_ma13": 2.8592
     }
   ],
   "gdp_yoy_series": [
@@ -48359,6 +48376,10 @@
     {
       "date": "2026-06-06",
       "wei_z": 0.0137
+    },
+    {
+      "date": "2026-06-13",
+      "wei_z": 0.155
     }
   ],
   "avg_z_series": [
