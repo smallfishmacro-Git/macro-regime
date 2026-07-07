@@ -1,10 +1,10 @@
 {
   "meta": {
-    "generated_at": "2026-07-06T23:57:36.890237+00:00",
+    "generated_at": "2026-07-07T23:45:19.135266+00:00",
     "z_window_years": 10,
     "direction_lookback_weeks": 8,
     "sources": {
-      "atlanta_fed": "fetched \u00b7 latest obs 2026-07-01",
+      "atlanta_fed": "fetched \u00b7 latest obs 2026-07-07",
       "ny_fed": "fetched \u00b7 latest obs 2026-07-03",
       "fred_wei": "fetched \u00b7 latest obs 2026-06-27",
       "fred_gdp_yoy": "fetched \u00b7 latest obs 2026-01-01",
@@ -43,7 +43,7 @@
     },
     "hedge_ratio": 45,
     "hedge_posture": "Insufficient leading data \u2014 direction unknown",
-    "gdpnow": 1.1889,
+    "gdpnow": 1.3565,
     "ny_nowcast": 2.74,
     "ny_target_qtr": "2026:Q2",
     "wei": 2.57,
@@ -54,7 +54,7 @@
     "global_lei_8m": 0.863,
     "pct_g20_rising": 52.9412,
     "cb_net_cutters": 36.8421,
-    "coinc_z": -0.0242,
+    "coinc_z": -0.0273,
     "lead_z": 0.0,
     "wei_z": -0.1616,
     "avg_z": 0.2598,
@@ -18642,6 +18642,36 @@
       "govt": 0.3065,
       "netExports": -1.6238,
       "inventories": -0.1134
+    },
+    {
+      "date": "2026-07-02",
+      "total": 1.1361,
+      "pceGoods": 0.731,
+      "pceServices": 0.6505,
+      "fixedInv": 1.2147,
+      "govt": 0.287,
+      "netExports": -1.6177,
+      "inventories": -0.1295
+    },
+    {
+      "date": "2026-07-06",
+      "total": 1.1353,
+      "pceGoods": 0.7307,
+      "pceServices": 0.6503,
+      "fixedInv": 1.2145,
+      "govt": 0.287,
+      "netExports": -1.6177,
+      "inventories": -0.1295
+    },
+    {
+      "date": "2026-07-07",
+      "total": 1.3565,
+      "pceGoods": 0.7312,
+      "pceServices": 0.5939,
+      "fixedInv": 1.1786,
+      "govt": 0.2872,
+      "netExports": -1.3048,
+      "inventories": -0.1296
     }
   ],
   "composite_z": [
@@ -21912,7 +21942,7 @@
     },
     {
       "date": "2026-07-03",
-      "coinc_z": -0.0242,
+      "coinc_z": -0.0273,
       "lead_z": "<NA>"
     }
   ],
