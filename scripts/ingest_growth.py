@@ -672,10 +672,13 @@ def fetch_spx_weekly_yoy() -> pd.DataFrame:
     """S&P 500 weekly close (week ending Saturday, matching FRED WEI's
     weekly convention) and its 52-week YoY % change.
 
-    Returns DataFrame with cols: date, spx_yoy. Output starts 2008-01
-    to match wei_series. Empty DataFrame on any failure — the series
-    is covered by preserve_from_prior, so a yfinance hiccup carries
-    the prior data forward instead of clobbering it.
+    Returns (actuals, forecast):
+      actuals  — cols date, spx_yoy; starts 2008-01 to match wei_series.
+      forecast — cols date, spx_yoy_fcst; 53 weekly rows from the last
+                 actual date (anchor) to +52w, assuming the price stays
+                 flat (YoY mechanically converges to 0%).
+    Both empty on any failure — covered by preserve_from_prior, so a
+    yfinance hiccup carries the prior data forward instead of clobbering.
     """
     log("Fetching S&P 500 weekly YoY from yfinance ...")
     try:
@@ -684,7 +687,7 @@ def fetch_spx_weekly_yoy() -> pd.DataFrame:
                          auto_adjust=False, progress=False)
         if px is None or px.empty:
             log("  yfinance returned no data for ^GSPC — skipping (preserve prior)")
-            return pd.DataFrame(columns=["date", "spx_yoy"])
+            return pd.DataFrame(columns=["date", "spx_yoy"]), pd.DataFrame(columns=["date", "spx_yoy_fcst"])
         close = px["Close"]
         if isinstance(close, pd.DataFrame):  # yfinance MultiIndex columns
             close = close.iloc[:, 0]
@@ -695,10 +698,30 @@ def fetch_spx_weekly_yoy() -> pd.DataFrame:
         df = df[df["date"] >= pd.Timestamp("2008-01-01")].reset_index(drop=True)
         df.to_csv(CACHE / "spx_weekly_yoy.csv", index=False)
         log(f"  parsed {len(df)} rows · latest {df['date'].iloc[-1].date()} · SPX YoY={df['spx_yoy'].iloc[-1]:.2f}%")
-        return df
+
+        # Flat-price 12M forecast: freeze the price at the last weekly
+        # close; the YoY at +h weeks is last_close / close((52-h) weeks
+        # ago) - 1, converging to exactly 0% at +52 weeks. Row h=0
+        # repeats the last actual YoY so the dashed line anchors to the
+        # solid line's endpoint.
+        fcst = pd.DataFrame(columns=["date", "spx_yoy_fcst"])
+        n = len(weekly)
+        if n >= 53:
+            last_close = float(weekly.iloc[-1])
+            last_date = weekly.index[-1]
+            rows = []
+            for h in range(0, 53):
+                base = float(weekly.iloc[n - 53 + h])
+                rows.append({
+                    "date": last_date + pd.Timedelta(weeks=h),
+                    "spx_yoy_fcst": (last_close / base - 1.0) * 100.0,
+                })
+            fcst = pd.DataFrame(rows)
+            log(f"  forecast: 52 wks flat-price · {fcst['spx_yoy_fcst'].iloc[0]:.2f}% -> {fcst['spx_yoy_fcst'].iloc[-1]:.2f}% at {fcst['date'].iloc[-1].date()}")
+        return df, fcst
     except Exception as e:
         log(f"  SPX YoY fetch failed ({e}) — skipping (preserve prior)")
-        return pd.DataFrame(columns=["date", "spx_yoy"])
+        return pd.DataFrame(columns=["date", "spx_yoy"]), pd.DataFrame(columns=["date", "spx_yoy_fcst"])
 
 
 # ======================================================================
@@ -976,7 +999,7 @@ def preserve_from_prior(new_payload: dict) -> tuple[dict, list[str]]:
             preserved.append(f"current.{field}")
 
     # ---- Group 2: RecessionAlert time series arrays ----
-    array_fields = ["ra_leading_series", "ra_weekly_avg_series", "avg_z_series", "quadrant_trajectory", "spx_yoy_series"]
+    array_fields = ["ra_leading_series", "ra_weekly_avg_series", "avg_z_series", "quadrant_trajectory", "spx_yoy_series", "spx_yoy_forecast_series"]
     for field in array_fields:
         new_arr = new_payload.get(field, [])
         prior_arr = prior.get(field, [])
@@ -1020,7 +1043,7 @@ def preserve_from_prior(new_payload: dict) -> tuple[dict, list[str]]:
 # ======================================================================
 # 5. Compose regime
 # ======================================================================
-def build_growth_payload(gdpnow, wei, unctad, ra, ny_fed, gdp_yoy, ra_weekly, spx_yoy) -> dict:
+def build_growth_payload(gdpnow, wei, unctad, ra, ny_fed, gdp_yoy, ra_weekly, spx_yoy, spx_yoy_fcst) -> dict:
     log("Building weekly composite ...")
     end_date = pd.Timestamp.today().normalize()
     start_date = end_date - pd.DateOffset(years=Z_WINDOW_YEARS + 5)
@@ -1248,6 +1271,11 @@ def build_growth_payload(gdpnow, wei, unctad, ra, ny_fed, gdp_yoy, ra_weekly, sp
             if len(spx_yoy) else pd.DataFrame(columns=["date", "spx_yoy"]),
             cols=["date", "spx_yoy"],
         ),
+        "spx_yoy_forecast_series": _df_to_records(
+            spx_yoy_fcst.dropna(subset=["spx_yoy_fcst"])
+            if len(spx_yoy_fcst) else pd.DataFrame(columns=["date", "spx_yoy_fcst"]),
+            cols=["date", "spx_yoy_fcst"],
+        ),
         "ra_leading_series": _df_to_records(
             ra[["date", "usmlei", "pct_g20_rising", "cb_net_cutters"]].dropna(how="all", subset=["usmlei", "pct_g20_rising", "cb_net_cutters"])
             if all(c in ra.columns for c in ["usmlei", "pct_g20_rising", "cb_net_cutters"]) and len(ra)
@@ -1321,10 +1349,10 @@ def main() -> None:
     ny_fed = fetch_ny_fed()
     wei = fetch_fred_wei()
     gdp_yoy = fetch_fred_gdp()
-    spx_yoy = fetch_spx_weekly_yoy()
+    spx_yoy, spx_yoy_fcst = fetch_spx_weekly_yoy()
     unctad = read_unctad_manual()
     ra, ra_weekly = read_recessionalert()
-    payload = build_growth_payload(gdpnow, wei, unctad, ra, ny_fed, gdp_yoy, ra_weekly, spx_yoy)
+    payload = build_growth_payload(gdpnow, wei, unctad, ra, ny_fed, gdp_yoy, ra_weekly, spx_yoy, spx_yoy_fcst)
     OUTPUT_JSON.write_text(json.dumps(payload, indent=2, allow_nan=False, default=str))
     log(f"WROTE {OUTPUT_JSON.relative_to(ROOT)} ({OUTPUT_JSON.stat().st_size // 1024} KB)")
     # Pattern A dual-write: also drop into public/data/ so Vite serves it as a

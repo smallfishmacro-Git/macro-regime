@@ -198,6 +198,13 @@ function normalizeGrowthPayload(raw) {
       spx_yoy: r.spx_yoy,
     };
   }).filter((r) => r.spx_yoy != null);
+  const spxYoyFcstSeries = (raw.spx_yoy_forecast_series || []).map((r) => {
+    const d = new Date(r.date);
+    return {
+      date: d,
+      spx_yoy_fcst: r.spx_yoy_fcst,
+    };
+  }).filter((r) => r.spx_yoy_fcst != null);
 
   // RecessionAlert leading composite — monthly cadence: USMLEI, %G20, %CBANK.
   const raLeadingSeries = (raw.ra_leading_series || []).map((r) => {
@@ -280,6 +287,7 @@ function normalizeGrowthPayload(raw) {
     weiSeries,
     gdpYoySeries,
     spxYoySeries,
+    spxYoyFcstSeries,
     raLeadingSeries,
     raWeeklyAvgSeries,
     weiZSeries,
@@ -354,6 +362,7 @@ export default function MacroRegimeGrowth() {
   const weiSeries = data.weiSeries || [];
   const gdpYoySeries = data.gdpYoySeries || [];
   const spxYoySeries = data.spxYoySeries || [];
+  const spxYoyFcstSeries = data.spxYoyFcstSeries || [];
   const raLeadingSeries = data.raLeadingSeries || [];
   const raWeeklyAvgSeries = data.raWeeklyAvgSeries || [];
   const weiZSeries = data.weiZSeries || [];
@@ -751,6 +760,7 @@ export default function MacroRegimeGrowth() {
 
     const weiInRange = weiSeries.filter((r) => r.date >= cutoff);
     const spxInRange = spxYoySeries.filter((r) => r.date >= cutoff);
+    const fcstInRange = spxYoyFcstSeries.filter((r) => r.date >= cutoff);
 
     const longLabel = leadingRange === "5Y" || leadingRange === "MAX";
     const labelFmt = longLabel
@@ -772,10 +782,22 @@ export default function MacroRegimeGrowth() {
       }
     }
 
+    for (const r of fcstInRange) {
+      const k = r.date.toISOString().slice(0, 10);
+      const existing = merged.get(k);
+      if (existing) {
+        existing.spx_yoy_fcst = r.spx_yoy_fcst;
+      } else {
+        merged.set(k, { date: r.date, label: labelFmt(r.date), wei: null, wei_ma13: null, spx_yoy: null, spx_yoy_fcst: r.spx_yoy_fcst });
+      }
+    }
+
     return Array.from(merged.values()).sort((a, b) => a.date - b.date);
   })();
 
-  // Dual y-axis domains — WEI (left) and SPX YoY (right)
+  // Dual y-axis domains — WEI (left) and SPX YoY (right), zero-aligned.
+  // The SPX domain is the WEI domain scaled by one factor k, so 0 sits
+  // at the same pixel on both axes and every gridline coincides.
   const coincSpxWeiDomain = (() => {
     let yMin = Infinity, yMax = -Infinity;
     for (const r of coincSpxChartData) {
@@ -785,17 +807,30 @@ export default function MacroRegimeGrowth() {
     }
     if (yMin === Infinity) return [-2, 5];
     const pad = Math.max(0.5, (yMax - yMin) * 0.1);
-    return [Math.floor((yMin - pad) * 2) / 2, Math.ceil((yMax + pad) * 2) / 2];
+    let lo = Math.floor((yMin - pad) * 2) / 2;
+    let hi = Math.ceil((yMax + pad) * 2) / 2;
+    // Force the domain to span zero so alignment is well-defined
+    if (lo > -0.5) lo = -0.5;
+    if (hi < 0.5) hi = 0.5;
+    return [lo, hi];
   })();
   const coincSpxDomain = (() => {
     let yMin = Infinity, yMax = -Infinity;
     for (const r of coincSpxChartData) {
-      const v = r.spx_yoy;
-      if (v != null) { if (v < yMin) yMin = v; if (v > yMax) yMax = v; }
+      for (const v of [r.spx_yoy, r.spx_yoy_fcst]) {
+        if (v != null) { if (v < yMin) yMin = v; if (v > yMax) yMax = v; }
+      }
     }
     if (yMin === Infinity) return [-20, 40];
     const pad = Math.max(2, (yMax - yMin) * 0.1);
-    return [Math.floor(yMin - pad), Math.ceil(yMax + pad)];
+    let sLo = yMin - pad;
+    let sHi = yMax + pad;
+    if (sLo > -1) sLo = -1;
+    if (sHi < 1) sHi = 1;
+    // Smallest scale factor that still contains the SPX data on both sides
+    const [wLo, wHi] = coincSpxWeiDomain;
+    const k = Math.max(sHi / wHi, sLo / wLo);
+    return [k * wLo, k * wHi];
   })();
 
   // Month ticks — same stride logic as the chart above
@@ -1466,6 +1501,7 @@ export default function MacroRegimeGrowth() {
                   <Legend color={C.cyan}  label="WEI (RAW)"  value={latestWeiRow?.wei != null ? latestWeiRow.wei.toFixed(2) : "—"} />
                   <Legend color={C.white} label="WEI 13W MA" value={latestWeiRow?.wei_ma13 != null ? latestWeiRow.wei_ma13.toFixed(2) : "—"} bold />
                   <Legend color={C.amber} label="S&P 500 YOY (W)" value={latestSpxRow?.spx_yoy != null ? `${latestSpxRow.spx_yoy.toFixed(2)}%` : "—"} bold />
+                  <Legend color={C.amber} label="FCST · PX FLAT 12M" value="→ 0%" />
                 </div>
                 <div style={{ width: "100%", height: 460 }}>
                   <ResponsiveContainer width="100%" height="100%">
@@ -1495,7 +1531,7 @@ export default function MacroRegimeGrowth() {
                         axisLine={{ stroke: C.panelEdge }}
                         tickLine={false}
                         width={40}
-                        tickFormatter={(v) => `${v}%`}
+                        tickFormatter={(v) => `${Math.round(v)}%`}
                       />
                       <ReferenceLine yAxisId="wei" y={0} stroke={C.textMute} strokeWidth={0.5} />
                       <Tooltip
@@ -1512,6 +1548,7 @@ export default function MacroRegimeGrowth() {
                       <Line yAxisId="wei" type="monotone" dataKey="wei" stroke={C.cyan} strokeWidth={1.0} dot={false} connectNulls isAnimationActive={false} />
                       <Line yAxisId="wei" type="monotone" dataKey="wei_ma13" stroke={C.white} strokeWidth={1.8} dot={false} connectNulls isAnimationActive={false} />
                       <Line yAxisId="spx" type="monotone" dataKey="spx_yoy" stroke={C.amber} strokeWidth={2.0} dot={false} connectNulls isAnimationActive={false} />
+                      <Line yAxisId="spx" type="monotone" dataKey="spx_yoy_fcst" stroke={C.amber} strokeWidth={1.4} strokeDasharray="5 4" dot={false} connectNulls isAnimationActive={false} />
                     </ComposedChart>
                   </ResponsiveContainer>
                 </div>
