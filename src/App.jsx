@@ -191,6 +191,13 @@ function normalizeGrowthPayload(raw) {
       gdp_yoy: r.gdp_yoy,
     };
   }).filter((r) => r.gdp_yoy != null);
+  const spxYoySeries = (raw.spx_yoy_series || []).map((r) => {
+    const d = new Date(r.date);
+    return {
+      date: d,
+      spx_yoy: r.spx_yoy,
+    };
+  }).filter((r) => r.spx_yoy != null);
 
   // RecessionAlert leading composite — monthly cadence: USMLEI, %G20, %CBANK.
   const raLeadingSeries = (raw.ra_leading_series || []).map((r) => {
@@ -272,6 +279,7 @@ function normalizeGrowthPayload(raw) {
     nyFed,
     weiSeries,
     gdpYoySeries,
+    spxYoySeries,
     raLeadingSeries,
     raWeeklyAvgSeries,
     weiZSeries,
@@ -345,6 +353,7 @@ export default function MacroRegimeGrowth() {
   const nyFed  = data.nyFed || [];
   const weiSeries = data.weiSeries || [];
   const gdpYoySeries = data.gdpYoySeries || [];
+  const spxYoySeries = data.spxYoySeries || [];
   const raLeadingSeries = data.raLeadingSeries || [];
   const raWeeklyAvgSeries = data.raWeeklyAvgSeries || [];
   const weiZSeries = data.weiZSeries || [];
@@ -618,9 +627,10 @@ export default function MacroRegimeGrowth() {
       ? (latestWei > latestGdp ? latestWei : latestGdp)
       : (latestWei || latestGdp);
 
+    const WEI_START = new Date("2008-01-01"); // WEI history starts Jan 2008 — clip everything before
     const cutoff = leadingRangeDays === Infinity
-      ? new Date(0)
-      : new Date(latestDate.getTime() - leadingRangeDays * 86400000);
+      ? WEI_START
+      : new Date(Math.max(latestDate.getTime() - leadingRangeDays * 86400000, WEI_START.getTime()));
 
     const weiInRange = weiSeries.filter((r) => r.date >= cutoff);
     const gdpInRange = gdpYoySeries.filter((r) => r.date >= cutoff);
@@ -700,6 +710,7 @@ export default function MacroRegimeGrowth() {
   // Latest values for legend/tile display
   const latestWeiRow = weiSeries.length ? weiSeries[weiSeries.length - 1] : null;
   const latestGdpRow = gdpYoySeries.length ? gdpYoySeries[gdpYoySeries.length - 1] : null;
+  const latestSpxRow = spxYoySeries.length ? spxYoySeries[spxYoySeries.length - 1] : null;
 
   // Adaptive x-axis tick stride for LEADING chart
   const leadingTickStride = leadingRange === "MAX" ? 24 : leadingRange === "5Y" ? 6 : 2;
@@ -713,6 +724,88 @@ export default function MacroRegimeGrowth() {
         seen.add(k);
         monthsSeen.push(d);
       }
+    }
+    const strided = monthsSeen.filter((_, i) => i % leadingTickStride === 0);
+    if (monthsSeen.length && strided[strided.length - 1] !== monthsSeen[monthsSeen.length - 1]) {
+      strided.push(monthsSeen[monthsSeen.length - 1]);
+    }
+    return strided.map((d) => d.label);
+  })();
+
+  // ---- COINCIDENT second chart: WEI vs S&P 500 weekly YoY ----
+  // Mirrors leadingChartData: same range selector, same Jan-2008 floor.
+  // spx_yoy_series rows are week-ending-Saturday, matching WEI dates 1:1.
+  const coincSpxChartData = (() => {
+    if (!weiSeries.length && !spxYoySeries.length) return [];
+
+    const latestWei = weiSeries.length ? weiSeries[weiSeries.length - 1].date : null;
+    const latestSpx = spxYoySeries.length ? spxYoySeries[spxYoySeries.length - 1].date : null;
+    const latestDate = (latestWei && latestSpx)
+      ? (latestWei > latestSpx ? latestWei : latestSpx)
+      : (latestWei || latestSpx);
+
+    const WEI_START = new Date("2008-01-01");
+    const cutoff = leadingRangeDays === Infinity
+      ? WEI_START
+      : new Date(Math.max(latestDate.getTime() - leadingRangeDays * 86400000, WEI_START.getTime()));
+
+    const weiInRange = weiSeries.filter((r) => r.date >= cutoff);
+    const spxInRange = spxYoySeries.filter((r) => r.date >= cutoff);
+
+    const longLabel = leadingRange === "5Y" || leadingRange === "MAX";
+    const labelFmt = longLabel
+      ? (d) => d.toLocaleDateString("en-US", { month: "short", year: "2-digit" })
+      : (d) => d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+    const merged = new Map();
+    for (const r of weiInRange) {
+      const k = r.date.toISOString().slice(0, 10);
+      merged.set(k, { date: r.date, label: labelFmt(r.date), wei: r.wei, wei_ma13: r.wei_ma13, spx_yoy: null });
+    }
+    for (const r of spxInRange) {
+      const k = r.date.toISOString().slice(0, 10);
+      const existing = merged.get(k);
+      if (existing) {
+        existing.spx_yoy = r.spx_yoy;
+      } else {
+        merged.set(k, { date: r.date, label: labelFmt(r.date), wei: null, wei_ma13: null, spx_yoy: r.spx_yoy });
+      }
+    }
+
+    return Array.from(merged.values()).sort((a, b) => a.date - b.date);
+  })();
+
+  // Dual y-axis domains — WEI (left) and SPX YoY (right)
+  const coincSpxWeiDomain = (() => {
+    let yMin = Infinity, yMax = -Infinity;
+    for (const r of coincSpxChartData) {
+      for (const v of [r.wei, r.wei_ma13]) {
+        if (v != null) { if (v < yMin) yMin = v; if (v > yMax) yMax = v; }
+      }
+    }
+    if (yMin === Infinity) return [-2, 5];
+    const pad = Math.max(0.5, (yMax - yMin) * 0.1);
+    return [Math.floor((yMin - pad) * 2) / 2, Math.ceil((yMax + pad) * 2) / 2];
+  })();
+  const coincSpxDomain = (() => {
+    let yMin = Infinity, yMax = -Infinity;
+    for (const r of coincSpxChartData) {
+      const v = r.spx_yoy;
+      if (v != null) { if (v < yMin) yMin = v; if (v > yMax) yMax = v; }
+    }
+    if (yMin === Infinity) return [-20, 40];
+    const pad = Math.max(2, (yMax - yMin) * 0.1);
+    return [Math.floor(yMin - pad), Math.ceil(yMax + pad)];
+  })();
+
+  // Month ticks — same stride logic as the chart above
+  const coincSpxMonthTicks = (() => {
+    if (!coincSpxChartData.length) return [];
+    const seen = new Set();
+    const monthsSeen = [];
+    for (const d of coincSpxChartData) {
+      const k = `${d.date.getFullYear()}-${d.date.getMonth()}`;
+      if (!seen.has(k)) { seen.add(k); monthsSeen.push(d); }
     }
     const strided = monthsSeen.filter((_, i) => i % leadingTickStride === 0);
     if (monthsSeen.length && strided[strided.length - 1] !== monthsSeen[monthsSeen.length - 1]) {
@@ -1366,6 +1459,64 @@ export default function MacroRegimeGrowth() {
                 {/* Source footer */}
                 <div style={{ marginTop: 8, fontSize: 8, color: C.textMute, letterSpacing: 0.8 }}>
                   SOURCE · Dallas Fed · <span style={{ color: C.cyan }}>WEI</span> · weekly · BEA · <span style={{ color: C.amber }}>Real GDP YoY</span> · quarterly · via FRED
+                </div>
+
+                {/* ---- Second chart: WEI vs S&P 500 weekly YoY ---- */}
+                <div style={{ marginTop: 18, paddingTop: 10, borderTop: `1px solid ${C.panelEdge}`, display: "flex", flexWrap: "wrap", gap: 14, fontSize: 8, letterSpacing: 1, marginBottom: 8 }}>
+                  <Legend color={C.cyan}  label="WEI (RAW)"  value={latestWeiRow?.wei != null ? latestWeiRow.wei.toFixed(2) : "—"} />
+                  <Legend color={C.white} label="WEI 13W MA" value={latestWeiRow?.wei_ma13 != null ? latestWeiRow.wei_ma13.toFixed(2) : "—"} bold />
+                  <Legend color={C.amber} label="S&P 500 YOY (W)" value={latestSpxRow?.spx_yoy != null ? `${latestSpxRow.spx_yoy.toFixed(2)}%` : "—"} bold />
+                </div>
+                <div style={{ width: "100%", height: 460 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <ComposedChart data={coincSpxChartData} margin={{ top: 6, right: 30, left: 0, bottom: 6 }}>
+                      <CartesianGrid stroke={C.panelEdge} strokeDasharray="2 4" vertical={false} />
+                      <XAxis
+                        dataKey="label"
+                        ticks={coincSpxMonthTicks}
+                        tick={{ fill: C.textDim, fontSize: 8, fontFamily: FONT_MONO }}
+                        axisLine={{ stroke: C.panelEdge }}
+                        tickLine={false}
+                      />
+                      <YAxis
+                        yAxisId="wei"
+                        domain={coincSpxWeiDomain}
+                        tick={{ fill: C.textDim, fontSize: 8, fontFamily: FONT_MONO }}
+                        axisLine={{ stroke: C.panelEdge }}
+                        tickLine={false}
+                        width={36}
+                        tickFormatter={(v) => `${v}%`}
+                      />
+                      <YAxis
+                        yAxisId="spx"
+                        orientation="right"
+                        domain={coincSpxDomain}
+                        tick={{ fill: C.amber, fontSize: 8, fontFamily: FONT_MONO }}
+                        axisLine={{ stroke: C.panelEdge }}
+                        tickLine={false}
+                        width={40}
+                        tickFormatter={(v) => `${v}%`}
+                      />
+                      <ReferenceLine yAxisId="wei" y={0} stroke={C.textMute} strokeWidth={0.5} />
+                      <Tooltip
+                        contentStyle={{
+                          background: "#000",
+                          border: `1px solid ${C.amber}`,
+                          fontFamily: FONT_MONO,
+                          fontSize: 9,
+                          borderRadius: 2,
+                        }}
+                        labelStyle={{ color: C.amber, marginBottom: 4 }}
+                        itemStyle={{ padding: "1px 0" }}
+                      />
+                      <Line yAxisId="wei" type="monotone" dataKey="wei" stroke={C.cyan} strokeWidth={1.0} dot={false} connectNulls isAnimationActive={false} />
+                      <Line yAxisId="wei" type="monotone" dataKey="wei_ma13" stroke={C.white} strokeWidth={1.8} dot={false} connectNulls isAnimationActive={false} />
+                      <Line yAxisId="spx" type="monotone" dataKey="spx_yoy" stroke={C.amber} strokeWidth={2.0} dot={false} connectNulls isAnimationActive={false} />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                </div>
+                <div style={{ marginTop: 8, fontSize: 8, color: C.textMute, letterSpacing: 0.8 }}>
+                  SOURCE · Dallas Fed · <span style={{ color: C.cyan }}>WEI</span> · weekly · Yahoo Finance · <span style={{ color: C.amber }}>S&P 500 YoY</span> · weekly · right axis
                 </div>
               </>
             ) : chartMode === "LEADING" ? (

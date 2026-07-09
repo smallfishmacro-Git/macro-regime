@@ -666,6 +666,42 @@ def fetch_fred_gdp() -> pd.DataFrame:
 
 
 # ======================================================================
+# 2b. S&P 500 weekly YoY (yfinance — COINCIDENT tab second chart)
+# ======================================================================
+def fetch_spx_weekly_yoy() -> pd.DataFrame:
+    """S&P 500 weekly close (week ending Saturday, matching FRED WEI's
+    weekly convention) and its 52-week YoY % change.
+
+    Returns DataFrame with cols: date, spx_yoy. Output starts 2008-01
+    to match wei_series. Empty DataFrame on any failure — the series
+    is covered by preserve_from_prior, so a yfinance hiccup carries
+    the prior data forward instead of clobbering it.
+    """
+    log("Fetching S&P 500 weekly YoY from yfinance ...")
+    try:
+        import yfinance as yf
+        px = yf.download("^GSPC", start="2006-12-01", interval="1d",
+                         auto_adjust=False, progress=False)
+        if px is None or px.empty:
+            log("  yfinance returned no data for ^GSPC — skipping (preserve prior)")
+            return pd.DataFrame(columns=["date", "spx_yoy"])
+        close = px["Close"]
+        if isinstance(close, pd.DataFrame):  # yfinance MultiIndex columns
+            close = close.iloc[:, 0]
+        weekly = close.resample("W-SAT").last().dropna()
+        yoy = weekly.pct_change(52) * 100.0
+        df = pd.DataFrame({"date": yoy.index, "spx_yoy": yoy.values})
+        df = df.dropna(subset=["spx_yoy"])
+        df = df[df["date"] >= pd.Timestamp("2008-01-01")].reset_index(drop=True)
+        df.to_csv(CACHE / "spx_weekly_yoy.csv", index=False)
+        log(f"  parsed {len(df)} rows · latest {df['date'].iloc[-1].date()} · SPX YoY={df['spx_yoy'].iloc[-1]:.2f}%")
+        return df
+    except Exception as e:
+        log(f"  SPX YoY fetch failed ({e}) — skipping (preserve prior)")
+        return pd.DataFrame(columns=["date", "spx_yoy"])
+
+
+# ======================================================================
 # 3. UNCTAD manual
 # ======================================================================
 def read_unctad_manual() -> pd.DataFrame:
@@ -940,7 +976,7 @@ def preserve_from_prior(new_payload: dict) -> tuple[dict, list[str]]:
             preserved.append(f"current.{field}")
 
     # ---- Group 2: RecessionAlert time series arrays ----
-    array_fields = ["ra_leading_series", "ra_weekly_avg_series", "avg_z_series", "quadrant_trajectory"]
+    array_fields = ["ra_leading_series", "ra_weekly_avg_series", "avg_z_series", "quadrant_trajectory", "spx_yoy_series"]
     for field in array_fields:
         new_arr = new_payload.get(field, [])
         prior_arr = prior.get(field, [])
@@ -984,7 +1020,7 @@ def preserve_from_prior(new_payload: dict) -> tuple[dict, list[str]]:
 # ======================================================================
 # 5. Compose regime
 # ======================================================================
-def build_growth_payload(gdpnow, wei, unctad, ra, ny_fed, gdp_yoy, ra_weekly) -> dict:
+def build_growth_payload(gdpnow, wei, unctad, ra, ny_fed, gdp_yoy, ra_weekly, spx_yoy) -> dict:
     log("Building weekly composite ...")
     end_date = pd.Timestamp.today().normalize()
     start_date = end_date - pd.DateOffset(years=Z_WINDOW_YEARS + 5)
@@ -1207,6 +1243,11 @@ def build_growth_payload(gdpnow, wei, unctad, ra, ny_fed, gdp_yoy, ra_weekly) ->
             if len(gdp_yoy) else pd.DataFrame(columns=["date", "gdp_yoy"]),
             cols=["date", "gdp_yoy"],
         ),
+        "spx_yoy_series": _df_to_records(
+            spx_yoy.dropna(subset=["spx_yoy"])
+            if len(spx_yoy) else pd.DataFrame(columns=["date", "spx_yoy"]),
+            cols=["date", "spx_yoy"],
+        ),
         "ra_leading_series": _df_to_records(
             ra[["date", "usmlei", "pct_g20_rising", "cb_net_cutters"]].dropna(how="all", subset=["usmlei", "pct_g20_rising", "cb_net_cutters"])
             if all(c in ra.columns for c in ["usmlei", "pct_g20_rising", "cb_net_cutters"]) and len(ra)
@@ -1280,9 +1321,10 @@ def main() -> None:
     ny_fed = fetch_ny_fed()
     wei = fetch_fred_wei()
     gdp_yoy = fetch_fred_gdp()
+    spx_yoy = fetch_spx_weekly_yoy()
     unctad = read_unctad_manual()
     ra, ra_weekly = read_recessionalert()
-    payload = build_growth_payload(gdpnow, wei, unctad, ra, ny_fed, gdp_yoy, ra_weekly)
+    payload = build_growth_payload(gdpnow, wei, unctad, ra, ny_fed, gdp_yoy, ra_weekly, spx_yoy)
     OUTPUT_JSON.write_text(json.dumps(payload, indent=2, allow_nan=False, default=str))
     log(f"WROTE {OUTPUT_JSON.relative_to(ROOT)} ({OUTPUT_JSON.stat().st_size // 1024} KB)")
     # Pattern A dual-write: also drop into public/data/ so Vite serves it as a
