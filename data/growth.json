@@ -1,11 +1,11 @@
 {
   "meta": {
-    "generated_at": "2026-08-07T01:39:42.866921+00:00",
+    "generated_at": "2026-08-07T23:23:52.739683+00:00",
     "z_window_years": 10,
     "direction_lookback_weeks": 8,
     "sources": {
       "atlanta_fed": "fetched \u00b7 latest obs 2026-08-06",
-      "ny_fed": "fetched \u00b7 latest obs 2026-07-31",
+      "ny_fed": "fetched \u00b7 latest obs 2026-08-07",
       "fred_wei": "fetched \u00b7 latest obs 2026-08-01",
       "fred_gdp_yoy": "fetched \u00b7 latest obs 2026-04-01",
       "unctad": "manual \u00b7 latest obs 2026-04-22",
@@ -44,7 +44,7 @@
     "hedge_ratio": 45,
     "hedge_posture": "Insufficient leading data \u2014 direction unknown",
     "gdpnow": 5.8334,
-    "ny_nowcast": 2.52,
+    "ny_nowcast": 2.24,
     "ny_target_qtr": "2026:Q3",
     "wei": 2.68,
     "unctad_world": 2.61,
@@ -23405,6 +23405,13 @@
       "ny_backcast": 2.85,
       "ny_next_q": null,
       "target_quarter": "2026:Q3"
+    },
+    {
+      "date": "2026-08-07",
+      "ny_nowcast": 2.24,
+      "ny_backcast": null,
+      "ny_next_q": null,
+      "target_quarter": "2026:Q3"
     }
   ],
   "wei_series": [
@@ -32728,217 +32735,217 @@
     },
     {
       "date": "2026-08-08",
-      "spx_yoy": 20.667
+      "spx_yoy": 21.4133
     }
   ],
   "spx_yoy_forecast_series": [
     {
       "date": "2026-08-08",
-      "spx_yoy_fcst": 20.667
+      "spx_yoy_fcst": 21.4133
     },
     {
       "date": "2026-08-15",
-      "spx_yoy_fcst": 19.538
+      "spx_yoy_fcst": 20.2772
     },
     {
       "date": "2026-08-22",
-      "spx_yoy_fcst": 19.2217
+      "spx_yoy_fcst": 19.959
     },
     {
       "date": "2026-08-29",
-      "spx_yoy_fcst": 19.3444
+      "spx_yoy_fcst": 20.0825
     },
     {
       "date": "2026-09-05",
-      "spx_yoy_fcst": 18.9533
+      "spx_yoy_fcst": 19.689
     },
     {
       "date": "2026-09-12",
-      "spx_yoy_fcst": 17.0963
+      "spx_yoy_fcst": 17.8204
     },
     {
       "date": "2026-09-19",
-      "spx_yoy_fcst": 15.6894
+      "spx_yoy_fcst": 16.4049
     },
     {
       "date": "2026-09-26",
-      "spx_yoy_fcst": 16.0492
+      "spx_yoy_fcst": 16.7669
     },
     {
       "date": "2026-10-03",
-      "spx_yoy_fcst": 14.8035
+      "spx_yoy_fcst": 15.5134
     },
     {
       "date": "2026-10-10",
-      "spx_yoy_fcst": 17.6642
+      "spx_yoy_fcst": 18.3919
     },
     {
       "date": "2026-10-17",
-      "spx_yoy_fcst": 15.6955
+      "spx_yoy_fcst": 16.411
     },
     {
       "date": "2026-10-24",
-      "spx_yoy_fcst": 13.5205
+      "spx_yoy_fcst": 14.2225
     },
     {
       "date": "2026-10-31",
-      "spx_yoy_fcst": 12.7154
+      "spx_yoy_fcst": 13.4125
     },
     {
       "date": "2026-11-07",
-      "spx_yoy_fcst": 14.5815
+      "spx_yoy_fcst": 15.2901
     },
     {
       "date": "2026-11-14",
-      "spx_yoy_fcst": 14.4912
+      "spx_yoy_fcst": 15.1992
     },
     {
       "date": "2026-11-21",
-      "spx_yoy_fcst": 16.7647
+      "spx_yoy_fcst": 17.4868
     },
     {
       "date": "2026-11-28",
-      "spx_yoy_fcst": 12.5691
+      "spx_yoy_fcst": 13.2653
     },
     {
       "date": "2026-12-05",
-      "spx_yoy_fcst": 12.22
+      "spx_yoy_fcst": 12.914
     },
     {
       "date": "2026-12-12",
-      "spx_yoy_fcst": 12.9266
+      "spx_yoy_fcst": 13.6249
     },
     {
       "date": "2026-12-19",
-      "spx_yoy_fcst": 12.8094
+      "spx_yoy_fcst": 13.5071
     },
     {
       "date": "2026-12-26",
-      "spx_yoy_fcst": 11.2558
+      "spx_yoy_fcst": 11.9438
     },
     {
       "date": "2027-01-02",
-      "spx_yoy_fcst": 12.4152
+      "spx_yoy_fcst": 13.1104
     },
     {
       "date": "2027-01-09",
-      "spx_yoy_fcst": 10.6754
+      "spx_yoy_fcst": 11.3599
     },
     {
       "date": "2027-01-16",
-      "spx_yoy_fcst": 11.0944
+      "spx_yoy_fcst": 11.7814
     },
     {
       "date": "2027-01-23",
-      "spx_yoy_fcst": 11.4863
+      "spx_yoy_fcst": 12.1758
     },
     {
       "date": "2027-01-30",
-      "spx_yoy_fcst": 11.1101
+      "spx_yoy_fcst": 11.7972
     },
     {
       "date": "2027-02-06",
-      "spx_yoy_fcst": 11.2179
+      "spx_yoy_fcst": 11.9057
     },
     {
       "date": "2027-02-13",
-      "spx_yoy_fcst": 12.7819
+      "spx_yoy_fcst": 13.4793
     },
     {
       "date": "2027-02-20",
-      "spx_yoy_fcst": 11.5848
+      "spx_yoy_fcst": 12.2748
     },
     {
       "date": "2027-02-27",
-      "spx_yoy_fcst": 12.0816
+      "spx_yoy_fcst": 12.7748
     },
     {
       "date": "2027-03-06",
-      "spx_yoy_fcst": 14.3908
+      "spx_yoy_fcst": 15.0982
     },
     {
       "date": "2027-03-13",
-      "spx_yoy_fcst": 16.2506
+      "spx_yoy_fcst": 16.9695
     },
     {
       "date": "2027-03-20",
-      "spx_yoy_fcst": 18.4966
+      "spx_yoy_fcst": 19.2294
     },
     {
       "date": "2027-03-27",
-      "spx_yoy_fcst": 21.0573
+      "spx_yoy_fcst": 21.806
     },
     {
       "date": "2027-04-03",
-      "spx_yoy_fcst": 17.1248
+      "spx_yoy_fcst": 17.8491
     },
     {
       "date": "2027-04-10",
-      "spx_yoy_fcst": 13.1008
+      "spx_yoy_fcst": 13.8003
     },
     {
       "date": "2027-04-17",
-      "spx_yoy_fcst": 8.1939
+      "spx_yoy_fcst": 8.863
     },
     {
       "date": "2027-04-24",
-      "spx_yoy_fcst": 7.6047
+      "spx_yoy_fcst": 8.2701
     },
     {
       "date": "2027-05-01",
-      "spx_yoy_fcst": 6.6367
+      "spx_yoy_fcst": 7.2961
     },
     {
       "date": "2027-05-08",
-      "spx_yoy_fcst": 4.2037
+      "spx_yoy_fcst": 4.8481
     },
     {
       "date": "2027-05-15",
-      "spx_yoy_fcst": 4.0691
+      "spx_yoy_fcst": 4.7127
     },
     {
       "date": "2027-05-22",
-      "spx_yoy_fcst": 3.1644
+      "spx_yoy_fcst": 3.8024
     },
     {
       "date": "2027-05-29",
-      "spx_yoy_fcst": 1.7137
+      "spx_yoy_fcst": 2.3427
     },
     {
       "date": "2027-06-05",
-      "spx_yoy_fcst": 4.4181
+      "spx_yoy_fcst": 5.0638
     },
     {
       "date": "2027-06-12",
-      "spx_yoy_fcst": 3.7476
+      "spx_yoy_fcst": 4.3892
     },
     {
       "date": "2027-06-19",
-      "spx_yoy_fcst": 2.7915
+      "spx_yoy_fcst": 3.4272
     },
     {
       "date": "2027-06-26",
-      "spx_yoy_fcst": 4.8401
+      "spx_yoy_fcst": 5.4884
     },
     {
       "date": "2027-07-03",
-      "spx_yoy_fcst": 3.0297
+      "spx_yoy_fcst": 3.6669
     },
     {
       "date": "2027-07-10",
-      "spx_yoy_fcst": 1.7764
+      "spx_yoy_fcst": 2.4058
     },
     {
       "date": "2027-07-17",
-      "spx_yoy_fcst": 3.3827
+      "spx_yoy_fcst": 4.022
     },
     {
       "date": "2027-07-24",
-      "spx_yoy_fcst": 4.0202
+      "spx_yoy_fcst": 4.6635
     },
     {
       "date": "2027-07-31",
-      "spx_yoy_fcst": 2.9406
+      "spx_yoy_fcst": 3.5772
     },
     {
       "date": "2027-08-07",
