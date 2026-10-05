@@ -83,7 +83,7 @@ if _env_path.exists():
 # ----------------------------------------------------------------------
 ATLANTA_FED_URL = (
     "https://www.atlantafed.org/-/media/Project/Atlanta/FRBA/Documents/"
-    "cqer/researchcq/gdpnow/GDPTrackingModelDataAndForecasts.xlsx"
+    "research-and-data/data/gdpnow/GDPTrackingModelDataAndForecasts.xlsx"
 )
 NY_FED_URL = (
     "https://www.newyorkfed.org/medialibrary/Research/Interactives/Data/"

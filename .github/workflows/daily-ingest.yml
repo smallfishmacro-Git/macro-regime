@@ -44,29 +44,34 @@ jobs:
           python scripts/ingest_growth.py
 
       - name: Run cslmi_employment.py
+        if: ${{ !cancelled() }}
         env:
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
         run: |
           python cslmi_employment.py
 
       - name: Run ushmi_housing.py
+        if: ${{ !cancelled() }}
         env:
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
         run: |
           python ushmi_housing.py
 
       - name: Run inflation.py
+        if: ${{ !cancelled() }}
         env:
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
         run: |
           python inflation.py
 
       - name: Run oecd_cli.py
+        if: ${{ !cancelled() }}
         continue-on-error: true
         run: |
           python oecd_cli.py
 
       - name: Commit refreshed data (skip if no changes)
+        if: ${{ !cancelled() }}
         run: |
           git config --local user.name  "macro-regime-bot"
           git config --local user.email "macro-regime-bot@users.noreply.github.com"
