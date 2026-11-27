@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-11-26T04:34:46.463155+00:00",
+    "generated_at": "2026-11-27T04:38:48.165621+00:00",
     "z_window_years": 10,
     "direction_lookback_weeks": 8,
     "sources": {
@@ -54,7 +54,7 @@
     "global_lei_8m": 0.863,
     "pct_g20_rising": 52.9412,
     "cb_net_cutters": 36.8421,
-    "coinc_z": 0.2145,
+    "coinc_z": 0.2217,
     "lead_z": 0.0,
     "wei_z": 0.8111,
     "avg_z": 0.2598,
@@ -22538,6 +22538,11 @@
     {
       "date": "2026-11-20",
       "coinc_z": 0.2145,
+      "lead_z": "<NA>"
+    },
+    {
+      "date": "2026-11-27",
+      "coinc_z": 0.2217,
       "lead_z": "<NA>"
     }
   ],
